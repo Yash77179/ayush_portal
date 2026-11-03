@@ -3,6 +3,7 @@ Django settings for CareerBridge — Academia–Industry Collaboration Portal
 SIH26044 | Ministry of Ayush
 """
 
+import os
 from pathlib import Path
 from decouple import config, Csv
 from datetime import timedelta
@@ -65,28 +66,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "ayush_portal.wsgi.application"
 
-# Database — use PostgreSQL in production (via DATABASE_URL or DB_* params), SQLite for development
-DATABASE_URL = config("DATABASE_URL", default=None)
+# Database — PostgreSQL if DATABASE_URL is set (production), SQLite otherwise (local development)
+DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL:
     try:
         import dj_database_url
         DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
     except ImportError:
+        import urllib.parse as urlparse
+        url = urlparse.urlparse(DATABASE_URL)
         DATABASES = {
             "default": {
-                "ENGINE": config("DB_ENGINE", default="django.db.backends.sqlite3"),
-                "NAME": config("DB_NAME", default=str(BASE_DIR / "db.sqlite3")),
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": url.path.lstrip("/"),
+                "USER": url.username,
+                "PASSWORD": url.password,
+                "HOST": url.hostname,
+                "PORT": url.port or 5432,
             }
         }
 else:
     DATABASES = {
         "default": {
-            "ENGINE": config("DB_ENGINE", default="django.db.backends.sqlite3"),
-            "NAME": config("DB_NAME", default=str(BASE_DIR / "db.sqlite3")),
-            "USER": config("DB_USER", default=""),
-            "PASSWORD": config("DB_PASSWORD", default=""),
-            "HOST": config("DB_HOST", default=""),
-            "PORT": config("DB_PORT", default=""),
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
