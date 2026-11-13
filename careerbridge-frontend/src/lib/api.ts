@@ -317,6 +317,22 @@ export async function getUniversityStats() {
   return apiFetch("/analytics/university/");
 }
 
+export interface AdminStats {
+  total_users: number;
+  total_students: number;
+  total_companies: number;
+  verified_companies: number;
+  total_internships: number;
+  published_internships: number;
+  total_applications: number;
+  total_selected: number;
+  total_skills: number;
+}
+
+export async function getAdminStats() {
+  return apiFetch<AdminStats>("/analytics/admin/");
+}
+
 // ── Institutions ──────────────────────────────────────────────────────────
 export async function getUniversities() {
   return apiFetch("/institutions/universities/", { auth: false });
