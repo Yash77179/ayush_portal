@@ -7,10 +7,14 @@ from .views import (
     CertificationDetailView,
     CertificationListView,
     CompanyListView,
+    CompanyPublicView,
     ExperienceDetailView,
     ExperienceListView,
+    MyCompanyView,
     ResumeUploadView,
     StudentProfileView,
+    TeamMemberView,
+    TeamView,
     UniversityListView,
 )
 
@@ -25,4 +29,8 @@ urlpatterns = [
     path("student-profile/achievements/", AchievementListView.as_view(), name="achievement-list"),
     path("student-profile/achievements/<int:pk>/", AchievementDetailView.as_view(), name="achievement-detail"),
     path("companies/", CompanyListView.as_view(), name="company-list"),
+    path("companies/<int:pk>/", CompanyPublicView.as_view(), name="company-public"),
+    path("my-company/", MyCompanyView.as_view(), name="my-company"),
+    path("my-company/team/", TeamView.as_view(), name="company-team"),
+    path("my-company/team/<int:pk>/", TeamMemberView.as_view(), name="company-team-member"),
 ]

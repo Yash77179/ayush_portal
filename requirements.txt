@@ -9,3 +9,6 @@ gunicorn>=21.2
 whitenoise>=6.6
 dj-database-url>=2.1
 pypdf>=5.0
+google-genai>=2.34
+openai>=1.0
+edge-tts>=7.0

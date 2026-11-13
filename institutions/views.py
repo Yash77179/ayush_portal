@@ -155,3 +155,154 @@ class ResumeUploadView(APIView):
             return "\n".join(chunks)
         except Exception:
             return ""
+
+
+# ── Company: set-up, profile and team ─────────────────────────────────────
+
+from django.contrib.auth import get_user_model
+from django.db import transaction
+from rest_framework.parsers import FormParser, JSONParser
+
+from accounts.permissions import role_required
+from .access import company_membership, require_membership
+from .models import CompanyMembership
+from .serializers import CompanyMembershipSerializer, TeamMemberSerializer
+
+
+def _company_payload(membership):
+    data = CompanyMembershipSerializer(membership).data
+    data["member_count"] = membership.company.memberships.filter(is_active=True).count()
+    return data
+
+
+class MyCompanyView(APIView):
+    """GET your company (404 until you set one up) · POST create it (you become its admin) · PATCH edit it (admins)."""
+
+    permission_classes = [role_required("company")]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
+
+    def get(self, request):
+        m = company_membership(request.user)
+        if m is None:
+            return Response({"detail": "no_company"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(_company_payload(m))
+
+    def post(self, request):
+        if company_membership(request.user):
+            return Response({"detail": "You already belong to a company."}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = CompanySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            company = serializer.save()
+            m = CompanyMembership.objects.create(user=request.user, company=company, role=CompanyMembership.Role.ADMIN)
+        return Response(_company_payload(m), status=status.HTTP_201_CREATED)
+
+    def patch(self, request):
+        m = require_membership(request.user, admin=True)
+        serializer = CompanySerializer(m.company, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        m.refresh_from_db()
+        return Response(_company_payload(m))
+
+
+class TeamView(APIView):
+    """GET the team · POST {email, role} add a recruiter who already has a CareerBridge recruiter account (admins)."""
+
+    permission_classes = [role_required("company")]
+
+    def get(self, request):
+        m = require_membership(request.user)
+        members = m.company.memberships.select_related("user").order_by("-is_active", "joined_at")
+        return Response({"my_role": m.role, "results": TeamMemberSerializer(members, many=True).data})
+
+    def post(self, request):
+        m = require_membership(request.user, admin=True)
+        email = str(request.data.get("email", "")).strip().lower()
+        role = request.data.get("role", CompanyMembership.Role.RECRUITER)
+        if role not in CompanyMembership.Role.values:
+            return Response({"role": "Pick admin, recruiter or interviewer."}, status=status.HTTP_400_BAD_REQUEST)
+        User = get_user_model()
+        user = User.objects.filter(email__iexact=email).first() if email else None
+        if user is None:
+            return Response(
+                {"email": "No CareerBridge account uses this email. Ask them to sign up as a Company recruiter first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if user.role != "company":
+            return Response({"email": "That account isn't a recruiter account."}, status=status.HTTP_400_BAD_REQUEST)
+        other = company_membership(user)
+        if other and other.company_id != m.company_id:
+            return Response({"email": f"They already work with {other.company.name} on CareerBridge."}, status=status.HTTP_400_BAD_REQUEST)
+        member, created = CompanyMembership.objects.get_or_create(user=user, company=m.company, defaults={"role": role})
+        if not created:
+            if member.is_active:
+                return Response({"email": "They're already on your team."}, status=status.HTTP_400_BAD_REQUEST)
+            member.is_active, member.role = True, role
+            member.save(update_fields=["is_active", "role"])
+
+        from notifications.service import notify
+
+        notify(
+            user, "team", f"You've been added to {m.company.name}",
+            f"{request.user.get_full_name() or request.user.username} added you as {member.get_role_display().lower()}.",
+            "/dashboard/company", email=True,
+        )
+        return Response(TeamMemberSerializer(member).data, status=status.HTTP_201_CREATED)
+
+
+class TeamMemberView(APIView):
+    """PATCH {role, is_active} · DELETE remove (admins). The last active admin can't be demoted or removed."""
+
+    permission_classes = [role_required("company")]
+
+    def _member(self, request, pk):
+        m = require_membership(request.user, admin=True)
+        member = CompanyMembership.objects.filter(company=m.company, pk=pk).select_related("user").first()
+        if member is None:
+            from django.http import Http404
+
+            raise Http404
+        return m, member
+
+    def _last_admin(self, member):
+        admins = CompanyMembership.objects.filter(company=member.company, role="admin", is_active=True)
+        return member.role == "admin" and member.is_active and admins.count() == 1
+
+    def patch(self, request, pk):
+        _, member = self._member(request, pk)
+        role = request.data.get("role", member.role)
+        active = request.data.get("is_active", member.is_active)
+        if role not in CompanyMembership.Role.values:
+            return Response({"role": "Pick admin, recruiter or interviewer."}, status=status.HTTP_400_BAD_REQUEST)
+        if self._last_admin(member) and (role != "admin" or not active):
+            return Response({"detail": "Your company needs at least one admin."}, status=status.HTTP_400_BAD_REQUEST)
+        member.role, member.is_active = role, bool(active)
+        member.save(update_fields=["role", "is_active"])
+        return Response(TeamMemberSerializer(member).data)
+
+    def delete(self, request, pk):
+        _, member = self._member(request, pk)
+        if self._last_admin(member):
+            return Response({"detail": "Your company needs at least one admin."}, status=status.HTTP_400_BAD_REQUEST)
+        member.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CompanyPublicView(APIView):
+    """Public company page: about, culture and open roles."""
+
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk):
+        from internships.models import Internship
+        from internships.serializers import InternshipListSerializer
+
+        company = Company.objects.filter(pk=pk).first()
+        if company is None:
+            return Response({"detail": "Company not found."}, status=status.HTTP_404_NOT_FOUND)
+        roles = Internship.objects.filter(company=company, status=Internship.Status.PUBLISHED).select_related("company")
+        data = CompanySerializer(company, context={"request": request}).data
+        data["open_roles"] = InternshipListSerializer(roles, many=True, context={"request": request}).data
+        data["team_size"] = company.memberships.filter(is_active=True).count()
+        return Response(data)

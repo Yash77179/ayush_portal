@@ -26,7 +26,20 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             "degree", "branch", "graduation_year", "cgpa",
             "resume_url", "resume_file", "linkedin_url", "github_url",
             "bio", "is_available", "profile_completion",
+            "enrollment_number", "verification_status", "verification_note", "verified_at",
         ]
+        read_only_fields = ["verification_status", "verification_note", "verified_at"]
+
+    VERIFIED_FACTS = ("university", "degree", "branch", "graduation_year", "cgpa", "enrollment_number")
+
+    def update(self, instance, validated_data):
+        changed = any(k in validated_data and validated_data[k] != getattr(instance, k) for k in self.VERIFIED_FACTS)
+        if changed and instance.verification_status != StudentProfile.Verification.UNVERIFIED:
+            # The university confirmed the old details, not these — ask them to look again.
+            instance.verification_status = StudentProfile.Verification.UNVERIFIED
+            instance.verified_at = None
+            instance.verification_note = ""
+        return super().update(instance, validated_data)
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -35,7 +48,27 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = [
             "id", "name", "website", "description", "industry",
             "size", "location", "logo", "is_verified",
+            "culture", "founded_year", "linkedin_url",
         ]
+        read_only_fields = ["id", "is_verified"]
+
+    def validate_name(self, value):
+        value = " ".join(value.split())
+        if len(value) < 2:
+            raise serializers.ValidationError("Enter your company's name.")
+        clash = Company.objects.filter(name__iexact=value)
+        if self.instance:
+            clash = clash.exclude(pk=self.instance.pk)
+        if clash.exists():
+            raise serializers.ValidationError(
+                "This company is already on CareerBridge. Ask one of its admins to add you to the team."
+            )
+        return value
+
+    def validate_logo(self, value):
+        if value and value.size > MAX_UPLOAD:
+            raise serializers.ValidationError("Logo must be 5 MB or smaller.")
+        return value
 
 
 class CompanyMembershipSerializer(serializers.ModelSerializer):
@@ -43,7 +76,22 @@ class CompanyMembershipSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CompanyMembership
-        fields = ["id", "company", "is_active", "joined_at"]
+        fields = ["id", "company", "role", "is_active", "joined_at"]
+
+
+class TeamMemberSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
+    name = serializers.SerializerMethodField()
+    email = serializers.EmailField(source="user.email", read_only=True)
+    photo = serializers.ImageField(source="user.profile_photo", read_only=True)
+
+    class Meta:
+        model = CompanyMembership
+        fields = ["id", "user_id", "name", "email", "photo", "role", "is_active", "joined_at"]
+        read_only_fields = ["id", "joined_at"]
+
+    def get_name(self, obj):
+        return obj.user.get_full_name() or obj.user.username
 
 
 MAX_UPLOAD = 5 * 1024 * 1024

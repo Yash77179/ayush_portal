@@ -43,6 +43,21 @@ class StudentProfile(models.Model):
     github_url = models.URLField(blank=True)
     bio = models.TextField(blank=True)
     is_available = models.BooleanField(default=True)
+
+    # Set by the university's placement cell: confirms the student is enrolled and the CGPA is right.
+    class Verification(models.TextChoices):
+        UNVERIFIED = "unverified", "Not verified"
+        VERIFIED = "verified", "Verified"
+        REJECTED = "rejected", "Rejected"
+
+    enrollment_number = models.CharField(max_length=50, blank=True)
+    verification_status = models.CharField(max_length=20, choices=Verification.choices, default=Verification.UNVERIFIED)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    verified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    verification_note = models.CharField(max_length=300, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -129,6 +144,9 @@ class Company(models.Model):
     )
     location = models.CharField(max_length=200, blank=True)
     logo = models.ImageField(upload_to="company_logos/", null=True, blank=True)
+    culture = models.TextField(blank=True, help_text="What it's like to work here — shown on the public company page.")
+    founded_year = models.PositiveIntegerField(null=True, blank=True)
+    linkedin_url = models.URLField(blank=True)
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -141,6 +159,11 @@ class Company(models.Model):
 
 
 class CompanyMembership(models.Model):
+    class Role(models.TextChoices):
+        ADMIN = "admin", "Company admin"  # edits the company page and team, plus everything a recruiter does
+        RECRUITER = "recruiter", "Recruiter"  # posts internships, moves candidates, schedules interviews, sends offers
+        INTERVIEWER = "interviewer", "Interviewer"  # sees candidates, leaves notes, ratings and scorecards
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -151,6 +174,7 @@ class CompanyMembership(models.Model):
         on_delete=models.CASCADE,
         related_name="memberships",
     )
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.ADMIN)
     is_active = models.BooleanField(default=True)
     joined_at = models.DateTimeField(auto_now_add=True)
 
@@ -164,3 +188,23 @@ class CompanyMembership(models.Model):
 
     def __str__(self):
         return f"{self.user} @ {self.company}"
+
+    @property
+    def can_manage_pipeline(self):
+        return self.role in (self.Role.ADMIN, self.Role.RECRUITER)
+
+
+class UniversityStaff(models.Model):
+    """A placement-cell member: links a university-role user to the university they manage."""
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="university_staff")
+    university = models.ForeignKey(University, on_delete=models.CASCADE, related_name="staff")
+    is_admin = models.BooleanField(default=False)
+    title = models.CharField(max_length=100, blank=True, help_text="e.g. Training & Placement Officer")
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "University staff"
+
+    def __str__(self):
+        return f"{self.user} @ {self.university}"

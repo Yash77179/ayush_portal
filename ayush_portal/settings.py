@@ -32,6 +32,9 @@ INSTALLED_APPS = [
     "internships",
     "applications",
     "analytics",
+    "assistant",
+    "notifications",
+    "campus",
 ]
 
 MIDDLEWARE = [
@@ -169,3 +172,21 @@ try:
     }
 except ImportError:
     pass
+
+# Google sign-in: the OAuth "Web application" client ID (no secret needed — the browser popup does the OAuth part)
+GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")
+
+# Bridge, the AI assistant. NVIDIA answers first, then OpenRouter, then Google Gemini — each one a backup for the last.
+# Without any key the chat explains that it is not set up yet.
+NVIDIA_API_KEY = config("NVIDIA_API_KEY", default="")
+NVIDIA_MODEL = config("NVIDIA_MODEL", default="nvidia/nemotron-3.5-super-vl-120b-a12b")
+NVIDIA_THINKING = config("NVIDIA_THINKING", default=True, cast=bool)  # let the model reason before answering (not shown)
+# second in line: OpenRouter (openrouter.ai). Models ending in ":free" cost nothing.
+OPENROUTER_API_KEY = config("OPENROUTER_API_KEY", default="")
+OPENROUTER_MODEL = config("OPENROUTER_MODEL", default="google/gemma-4-31b-it:free")
+GEMINI_API_KEY = config("GEMINI_API_KEY", default="")
+# tried in order: if one is overloaded (503) before answering, the next one takes over
+GEMINI_MODELS = config("GEMINI_MODELS", default="gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest", cast=Csv())
+# Bridge's spoken voice: Speechify (simba-3.5) first, Microsoft Edge neural voices (free, no key) as the backup
+SPEECHIFY_API_KEY = config("SPEECHIFY_API_KEY", default="")
+SPEECHIFY_MODEL = config("SPEECHIFY_MODEL", default="simba-3.5")

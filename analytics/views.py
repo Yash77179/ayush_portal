@@ -83,8 +83,11 @@ def company_dashboard_stats(request):
         "published_internships": internships.filter(status="published").count(),
         "total_applicants": apps.count(),
         "shortlisted": status_map.get("shortlisted", 0),
+        "interview": status_map.get("interview", 0),
+        "offered": status_map.get("offered", 0),
         "selected": status_map.get("selected", 0),
         "rejected": status_map.get("rejected", 0),
+        "new": status_map.get("applied", 0),
         "recent_applications": recent_data,
         "status_breakdown": list(status_counts),
     })
@@ -93,30 +96,50 @@ def company_dashboard_stats(request):
 @api_view(["GET"])
 @permission_classes([role_required("university")])
 def university_dashboard_stats(request):
-    """KPI stats for a university dashboard."""
-    # For MVP: allow university role users to see platform-wide stats
-    total_students = StudentProfile.objects.count()
-    total_internships = Internship.objects.filter(status="published").count()
-    total_applications = Application.objects.count()
-    total_selected = Application.objects.filter(status="selected").count()
-    total_companies = Company.objects.filter(is_verified=True).count()
+    """KPI stats for a university dashboard — scoped to the officer's own university once they've linked it."""
+    from institutions.access import university_staff
 
-    # Skill popularity
+    staff = university_staff(request.user)
+    students = StudentProfile.objects.all()
+    apps = Application.objects.all()
+    if staff:
+        students = students.filter(university=staff.university)
+        apps = apps.filter(student__university=staff.university)
+    total_students = students.count()
+    placed = apps.filter(status="selected").values("student").distinct().count()
     top_skills = (
-        StudentSkill.objects
+        StudentSkill.objects.filter(student__in=students)
         .values("skill__name")
         .annotate(count=Count("skill"))
         .order_by("-count")[:10]
     )
+    recent = apps.select_related("student__user", "internship__company").order_by("-updated_at")[:6]
 
     return Response({
+        "university": staff.university.name if staff else None,
+        "linked": bool(staff),
         "total_students": total_students,
-        "total_published_internships": total_internships,
-        "total_applications": total_applications,
-        "total_placements": total_selected,
-        "verified_companies": total_companies,
-        "placement_rate": round(total_selected / total_applications * 100, 1) if total_applications else 0,
+        "verified_students": students.filter(verification_status="verified").count(),
+        "pending_verification": students.filter(verification_status="unverified").count(),
+        "total_published_internships": Internship.objects.filter(status="published").count(),
+        "total_applications": apps.count(),
+        "total_placements": placed,
+        "in_interviews": apps.filter(status="interview").count(),
+        "offers_pending": apps.filter(status="offered").count(),
+        "verified_companies": Company.objects.filter(is_verified=True).count(),
+        "placement_rate": round(placed / total_students * 100, 1) if total_students else 0,
         "top_skills": list(top_skills),
+        "recent_activity": [
+            {
+                "id": a.id,
+                "student_name": a.student.user.get_full_name() or a.student.user.username,
+                "internship_title": a.internship.title,
+                "company": a.internship.company.name,
+                "status": a.status,
+                "updated_at": a.updated_at,
+            }
+            for a in recent
+        ],
     })
 
 

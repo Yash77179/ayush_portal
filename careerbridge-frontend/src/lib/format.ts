@@ -1,3 +1,4 @@
+import { resolveApiUrl } from "@/lib/api"
 /** "aarav  SHARMA" -> "Aarav Sharma" (display only). */
 export function titleCase(value?: string | null) {
   return (value ?? "")
@@ -8,7 +9,7 @@ export function titleCase(value?: string | null) {
     .join(" ")
 }
 
-const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api").replace(/\/api\/?$/, "")
+const API_ORIGIN = resolveApiUrl(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api").replace(/\/api\/?$/, "")
 
 /** Uploaded photos come back as "/media/…": point them at the API host. */
 export function mediaUrl(path?: string | null) {

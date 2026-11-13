@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { mediaUrl, titleCase } from "@/lib/format";
-import { getMe, login as apiLogin, register as apiRegister, clearTokens } from "@/lib/api";
+import { getMe, googleLogin, login as apiLogin, register as apiRegister, clearTokens } from "@/lib/api";
 
 interface User {
   id: number;
@@ -14,12 +14,16 @@ interface User {
   role: "student" | "company" | "university" | "admin";
   profile_photo: string | null;
   gender?: "male" | "female" | "other" | "";
+  /** false for a Google sign-up that hasn't picked its role, gender, name and username yet */
+  profile_completed?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
+  /** sign in with an access token from Google's popup */
+  loginWithGoogle: (accessToken: string, role?: string) => Promise<{ created: boolean; profileCompleted: boolean }>;
   register: (data: Parameters<typeof apiRegister>[0]) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -57,6 +61,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await fetchUser();
   };
 
+  const loginWithGoogle = async (accessToken: string, role?: string) => {
+    const { created, user } = await googleLogin(accessToken, role);
+    await fetchUser();
+    return { created, profileCompleted: user.profile_completed !== false };
+  };
+
   const register = async (data: Parameters<typeof apiRegister>[0]) => {
     await apiRegister(data);
   };
@@ -67,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser: fetchUser }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, register, logout, refreshUser: fetchUser }}>
       {children}
     </AuthContext.Provider>
   );

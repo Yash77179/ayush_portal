@@ -24,6 +24,7 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ArrowRightUpIcon,
   GlobalIcon,
   LogoutIcon,
   MonitorIcon,
@@ -35,7 +36,7 @@ import {
   SunIcon,
 } from "@/components/icons"
 import { BrandMark } from "@/components/brand-mark"
-import { openNotifications } from "@/components/notifications"
+import { openNotifications, useUnreadNotifications } from "@/components/notifications"
 import { CommandMenu } from "@/components/command-menu"
 import { OrgAvatar, STATUS_DOT } from "@/components/kit"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -145,6 +146,7 @@ function SidebarView() {
   const links = ROLE_NAV[user?.role ?? "student"]
   const collapsed = state === "collapsed" && !isMobile
   const [cmdOpen, setCmdOpen] = React.useState(false)
+  const unread = useUnreadNotifications()
 
   return (
     <>
@@ -194,9 +196,10 @@ function SidebarView() {
               onClick={openNotifications}
             >
               <Tile Icon={BellIcon} active={false}>
-                <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-destructive ring-2 ring-sidebar" />
+                {unread > 0 && <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-destructive ring-2 ring-sidebar" />}
               </Tile>
               <span className={TEXT}>Notifications</span>
+              {unread > 0 && <Meta tone="alert">{unread}</Meta>}
             </button>
           </nav>
 
@@ -318,21 +321,78 @@ function RecentList({ collapsed }: { collapsed: boolean }) {
 }
 
 /* ── User card: avatar + name open your profile; the chevron opens the menu ── */
+const MENU_ROW =
+  "h-10 rounded-[10px] px-3 py-0 text-[14px] text-foreground/85 transition-[background-color,color] duration-200 ease-out focus:bg-foreground/[0.05] focus:text-foreground dark:focus:bg-foreground/[0.07] [&_svg]:text-muted-foreground [&_svg]:transition-colors [&_svg]:duration-200 focus:[&_svg]:text-foreground"
+const ROLE_CHIP: Record<string, { label: string; tone: string }> = {
+  student: { label: "Student", tone: "tone-violet" },
+  company: { label: "Recruiter", tone: "tone-blue" },
+  university: { label: "University", tone: "tone-mint" },
+  admin: { label: "Admin", tone: "tone-peach" },
+}
+const THEME_EASE = "cubic-bezier(0.32,0.72,0,1)"
+/* ── Light / Dark / System: one thumb that glides between the options ── */
+function ThemeSwitch() {
+  const { theme, setTheme } = useThemeRipple()
+  const themes = [
+    { v: "light", label: "Light", Icon: SunIcon },
+    { v: "dark", label: "Dark", Icon: MoonIcon },
+    { v: "system", label: "System", Icon: MonitorIcon },
+  ]
+  const themeIndex = themes.findIndex((t) => t.v === theme)
+  const thumbAt = (i: number) => `translateX(calc(${Math.max(i, 0)} * (100% + 0.25rem)))`
+  // the thumb glides to the new option. Web Animations, not a CSS transition: the theme provider switches every
+  // transition off for the instant the theme changes, which would make it jump.
+  const thumb = React.useRef<HTMLSpanElement>(null)
+  const lastIndex = React.useRef(themeIndex)
+  React.useLayoutEffect(() => {
+    const from = lastIndex.current
+    lastIndex.current = themeIndex
+    const el = thumb.current
+    if (!el || from === themeIndex || from < 0 || themeIndex < 0) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    el.animate([{ transform: thumbAt(from) }, { transform: thumbAt(themeIndex) }], { duration: 420, easing: THEME_EASE })
+  }, [themeIndex])
+
+  return (
+    <div role="radiogroup" aria-label="Theme" className="dbl relative grid grid-cols-3 gap-1 rounded-[14px] bg-secondary p-1 [--r:14px]">
+      <span
+        ref={thumb}
+        aria-hidden
+        className="absolute top-1 bottom-1 left-1 w-[calc((100%-1rem)/3)] rounded-[10px] bg-card shadow-[0_1px_2px_oklch(0_0_0/0.08),0_2px_8px_-2px_oklch(0_0_0/0.1),0_0_0_1px_var(--hairline)]"
+        style={{ transform: thumbAt(themeIndex), opacity: themeIndex < 0 ? 0 : 1 }}
+      />
+      {themes.map(({ v, label, Icon }) => {
+        const on = theme === v
+        return (
+          <button
+            key={v}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            onClick={() => setTheme(v)}
+            className={cn(
+              "relative z-10 flex h-9 items-center justify-center gap-1.5 rounded-[10px] text-[13px] font-medium outline-none transition-[color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96]",
+              on ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Icon className="size-4" />
+            {label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 function UserCard({ collapsed }: { collapsed: boolean }) {
   const { isMobile } = useSidebar()
   const { user, logout } = useAuth()
-  const { theme, setTheme } = useThemeRipple()
   const router = useRouter()
   if (!user) return null
 
   const name = user.full_name || user.username
   const initials = ((user.first_name?.[0] ?? "") + (user.last_name?.[0] ?? user.username?.[0] ?? "")).toUpperCase()
   const profileHref = user.role === "student" ? "/dashboard/student/profile" : "/dashboard/account"
-  const themes = [
-    { v: "light", label: "Light", Icon: SunIcon },
-    { v: "dark", label: "Dark", Icon: MoonIcon },
-    { v: "system", label: "System", Icon: MonitorIcon },
-  ]
 
   return (
     <div className="flex items-center gap-1 rounded-[26px] border border-(--hairline) bg-card p-2 group-data-[collapsible=icon]:relative group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-full">
@@ -358,33 +418,57 @@ function UserCard({ collapsed }: { collapsed: boolean }) {
         >
           <ChevronDownIcon className="size-4" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-64" side={isMobile || !collapsed ? "top" : "right"} align={collapsed && !isMobile ? "end" : "start"} sideOffset={12}>
+        <DropdownMenuContent
+          className="dbl w-[min(20rem,calc(100vw-2rem))] rounded-[24px] p-2.5 [--r:24px]"
+          side={isMobile || !collapsed ? "top" : "right"}
+          align={collapsed && !isMobile ? "end" : "start"}
+          sideOffset={12}
+        >
+          {/* who you are */}
           <DropdownMenuGroup>
-            <DropdownMenuLabel className="px-3.5 py-2.5 font-normal">
-              <span className="block truncate text-[14px] font-semibold">{name}</span>
-              <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
+            <DropdownMenuLabel className="flex items-center gap-3 px-2 pt-1.5 pb-2.5 font-normal text-foreground">
+              <Avatar className="size-10 shrink-0 rounded-[14px] after:rounded-[14px]">
+                <AvatarImage src={user.profile_photo ?? ""} alt="" className="rounded-[14px]" />
+                <AvatarFallback className="tone-lime rounded-[14px] bg-(--t-bg) text-[13px] font-semibold text-(--t-fg)">{initials}</AvatarFallback>
+              </Avatar>
+              <span className="grid min-w-0 flex-1 leading-tight">
+                <span className="truncate text-[14.5px] font-semibold">{name}</span>
+                <span className="mt-0.5 truncate text-[12.5px] text-muted-foreground">{user.email}</span>
+              </span>
+              <span
+                className={cn(
+                  ROLE_CHIP[user.role]?.tone ?? "tone-mist",
+                  "mt-px shrink-0 self-start rounded-full border border-[color-mix(in_oklab,var(--t-fg)_14%,transparent)] bg-(--t-bg) px-2.5 py-[3px] text-[11px] font-semibold tracking-[0.01em] text-(--t-fg) shadow-[inset_0_0_0_1.5px_var(--t-bg),inset_0_0_0_2.5px_var(--keyline-tint)]"
+                )}
+              >
+                {ROLE_CHIP[user.role]?.label ?? user.role}
+              </span>
             </DropdownMenuLabel>
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem render={<Link href={profileHref} />}>
-            <ProfileIcon /> {user.role === "student" ? "My profile" : "Account"}
-          </DropdownMenuItem>
-          <DropdownMenuItem render={<Link href="/dashboard/account" />}>
-            <SettingsIcon /> Settings
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {themes.map(({ v, label, Icon }) => (
-            <DropdownMenuItem key={v} onClick={() => setTheme(v)}>
-              <Icon />
-              {label}
-              {theme === v && <span className="ml-auto size-1.5 rounded-full bg-foreground" />}
+
+          <div className="dbl rounded-[16px] border border-(--hairline) bg-card p-1.5 [--r:16px]">
+            <DropdownMenuItem render={<Link href={profileHref} />} className={MENU_ROW}>
+              <ProfileIcon /> {user.role === "student" ? "My profile" : "Account"}
             </DropdownMenuItem>
-          ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem render={<Link href="/" />}>
-            <GlobalIcon /> Website
-          </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/dashboard/account" />} className={MENU_ROW}>
+              <SettingsIcon /> Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/" />} className={MENU_ROW}>
+              <GlobalIcon /> Website
+              <ArrowRightUpIcon className="ml-auto size-4! text-muted-foreground" />
+            </DropdownMenuItem>
+          </div>
+
+          {/* appearance: one segmented control instead of three rows */}
+          <div className="mt-2.5 px-1">
+            <p className="px-1 pb-1.5 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">Appearance</p>
+            <ThemeSwitch />
+          </div>
+
+          <DropdownMenuSeparator className="mx-2 my-2.5" />
           <DropdownMenuItem
+            variant="destructive"
+            className={cn(MENU_ROW, "text-destructive focus:bg-destructive/[0.08] focus:text-destructive [&_svg]:text-destructive! dark:focus:bg-destructive/15")}
             onClick={() => {
               logout()
               toast("Signed out")

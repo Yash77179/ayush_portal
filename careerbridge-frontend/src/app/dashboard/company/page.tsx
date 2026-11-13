@@ -168,7 +168,7 @@ export default function CompanyDashboard() {
                   <TableRow className="hover:bg-transparent">
                     <TableHead>Candidate</TableHead>
                     <TableHead className="hidden sm:table-cell">Role</TableHead>
-                    <TableHead className="hidden md:table-cell">Applied</TableHead>
+                    <TableHead className="hidden 2xl:table-cell">Applied</TableHead>
                     <TableHead className="text-right">Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -182,7 +182,7 @@ export default function CompanyDashboard() {
                         </div>
                       </TableCell>
                       <TableCell className="hidden text-muted-foreground sm:table-cell">{a.internship_title}</TableCell>
-                      <TableCell className="hidden text-muted-foreground md:table-cell">
+                      <TableCell className="hidden text-muted-foreground 2xl:table-cell">
                         {new Date(a.applied_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                       </TableCell>
                       <TableCell className="text-right">

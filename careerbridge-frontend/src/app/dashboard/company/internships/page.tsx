@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { useAuth } from "@/contexts/auth-context";
-import { getMyInternships } from "@/lib/api";
+import { errorMessage, getMyInternships } from "@/lib/api";
+import { saveInternship } from "@/lib/ats";
+import { useCompany } from "@/components/org-gate";
+import { toast } from "sonner";
 import { DEMO_ENABLED, demoInternships, type InternshipRow } from "@/lib/demo";
 import { CheckCircleIcon, CloseCircleIcon, InternshipsIcon, PenIcon } from "@/components/icons";
 import { DashboardSkeleton, HeroCard, OrgAvatar, PageHeader, Panel, SegBars, StatTile, stagger } from "@/components/kit";
@@ -20,6 +23,7 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "danger"> = {
 
 export default function CompanyInternshipsPage() {
   const { user } = useAuth();
+  const { canManage } = useCompany();
   const [items, setItems] = useState<InternshipRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
@@ -45,6 +49,16 @@ export default function CompanyInternshipsPage() {
       alive = false;
     };
   }, []);
+
+  const setStatus = async (row: InternshipRow, status: string) => {
+    try {
+      await saveInternship({ status }, row.id);
+      setItems((list) => list.map((i) => (i.id === row.id ? { ...i, status } : i)));
+      toast.success(status === "published" ? "Listing is live" : status === "closed" ? "Listing closed" : "Moved to drafts");
+    } catch (err) {
+      toast.error(errorMessage(err));
+    }
+  };
 
   if (loading) return <DashboardSkeleton />;
 
@@ -113,8 +127,9 @@ export default function CompanyInternshipsPage() {
                 <TableHead className="hidden md:table-cell">Location</TableHead>
                 <TableHead className="hidden sm:table-cell">Stipend</TableHead>
                 <TableHead className="hidden lg:table-cell">Deadline</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">Applicants</TableHead>
                 <TableHead className="text-right">Status</TableHead>
-                <TableHead className="w-28" />
+                <TableHead className="w-52" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -138,6 +153,16 @@ export default function CompanyInternshipsPage() {
                   <TableCell className="hidden text-muted-foreground lg:table-cell">
                     {new Date(i.deadline).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                   </TableCell>
+                  <TableCell className="hidden text-right tabular-nums sm:table-cell">
+                    {i.applicants !== undefined ? (
+                      <Link href={`/dashboard/company/pipeline?internship=${i.id}`} className="hover:underline">
+                        {i.applicants}
+                        {!!i.active_applicants && <span className="text-muted-foreground"> · {i.active_applicants} active</span>}
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Badge variant={STATUS_VARIANT[i.status] ?? "violet"} className="capitalize">
                       <span className="size-1.5 rounded-full bg-current" />
@@ -145,9 +170,28 @@ export default function CompanyInternshipsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" variant="outline" render={<Link href={`/internships/${i.id}`} />} nativeButton={false}>
-                      View on portal
-                    </Button>
+                    <div className="flex justify-end gap-1.5">
+                      {canManage && !isDemo && (
+                        <Button size="sm" variant="outline" render={<Link href={`/dashboard/company/internships/${i.id}/edit`} />} nativeButton={false}>
+                          Edit
+                        </Button>
+                      )}
+                      {canManage && !isDemo && i.status === "draft" && (
+                        <Button size="sm" onClick={() => setStatus(i, "published")}>
+                          Publish
+                        </Button>
+                      )}
+                      {canManage && !isDemo && i.status === "published" && (
+                        <Button size="sm" variant="ghost" onClick={() => setStatus(i, "closed")}>
+                          Close
+                        </Button>
+                      )}
+                      {i.status === "published" && (
+                        <Button size="sm" variant="ghost" render={<Link href={`/internships/${i.id}`} />} nativeButton={false}>
+                          View
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

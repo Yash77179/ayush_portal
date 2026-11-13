@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UniversityCombobox } from "@/components/university-combobox";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 interface University { id: number; name: string; location: string }
 interface Profile {
@@ -19,6 +20,7 @@ interface Profile {
   cgpa: string | null; resume_url: string; linkedin_url: string; github_url: string;
   bio: string; resume_file?: string | null; is_available: boolean; profile_completion: number;
   university: University | null; university_id?: number;
+  enrollment_number?: string; verification_status?: string; verification_note?: string;
 }
 
 export default function StudentProfilePage() {
@@ -51,6 +53,7 @@ export default function StudentProfilePage() {
         github_url: profile.github_url, bio: profile.bio,
         is_available: profile.is_available,
         university_id: profile.university?.id,
+        enrollment_number: profile.enrollment_number ?? "",
       });
       toast.success("Profile saved");
     } catch {
@@ -104,7 +107,24 @@ export default function StudentProfilePage() {
           nextHref="/dashboard/student/skills"
         />
 
-        <Panel className="z-20 overflow-visible lg:col-span-5" title="Academic details" style={stagger(1)} contentClassName="space-y-5">
+        <Panel
+          className="z-20 overflow-visible lg:col-span-5"
+          title="Academic details"
+          style={stagger(1)}
+          action={
+            profile.verification_status === "verified" ? (
+              <Badge variant="success">Verified by university</Badge>
+            ) : profile.verification_status === "rejected" ? (
+              <Badge variant="danger">Needs a fix</Badge>
+            ) : (
+              <Badge variant="warning">Not verified yet</Badge>
+            )
+          }
+          contentClassName="space-y-5"
+        >
+          {profile.verification_status === "rejected" && profile.verification_note && (
+            <p className="rounded-2xl bg-(--pink-bg) p-3 text-[13.5px] text-(--pink-fg)">Placement cell: “{profile.verification_note}”</p>
+          )}
           <Field label="University">
             <UniversityCombobox
               value={profile.university}
@@ -127,6 +147,9 @@ export default function StudentProfilePage() {
               <Input type="number" step="0.01" max="10" placeholder="e.g. 8.5" value={profile.cgpa ?? ""} onChange={(e) => set("cgpa", e.target.value || null)} />
             </Field>
           </div>
+          <Field label="Enrollment / roll number" hint="Your placement cell uses this to verify you. Changing academic details asks them to verify again.">
+            <Input value={profile.enrollment_number ?? ""} onChange={(e) => set("enrollment_number", e.target.value)} placeholder="e.g. 12115678" />
+          </Field>
         </Panel>
       </div>
 

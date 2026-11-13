@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Loader2 } from "lucide-react"
+import { ArrowRight, Calendar, Clock, Loader2, MapPin } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "cn"
 
@@ -17,6 +17,7 @@ import {
   type Experience,
 } from "@/lib/profile-extras"
 import { ApplicationsIcon, CheckCircleIcon, PlusIcon, TrashIcon, TrophyIcon } from "@/components/icons"
+import BranchedMenu from "@/components/BranchedMenu"
 import { VerifiedBadge } from "@/components/verified-badge"
 import { Field, OrgAvatar, Panel, stagger } from "@/components/kit"
 import { Button } from "@/components/ui/button"
@@ -33,7 +34,7 @@ function span(start: string, end: string | null, current: boolean) {
   const m = Math.max(1, (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()) + 1)
   const y = Math.floor(m / 12)
   const r = m % 12
-  return [y ? `${y} yr${y > 1 ? "s" : ""}` : "", r ? `${r} mo${r > 1 ? "s" : ""}` : ""].filter(Boolean).join(" ")
+  return [y ? `${y} yr` : "", r ? `${r} mo` : ""].filter(Boolean).join(" ")
 }
 
 const SMALL_BTN =
@@ -49,13 +50,16 @@ function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
   )
 }
 
-function IconDelete({ onClick, label }: { onClick: () => void; label: string }) {
+function IconDelete({ onClick, label, always }: { onClick: () => void; label: string; always?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 outline-none transition-[opacity,background-color,color] duration-150 group-hover/item:opacity-100 hover:bg-(--pink-bg) hover:text-(--pink-fg) focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring"
+      className={cn(
+        "flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground outline-none transition-[opacity,background-color,color] duration-150 hover:bg-(--pink-bg) hover:text-(--pink-fg) focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring",
+        always ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover/item:opacity-100"
+      )}
     >
       <TrashIcon className="size-[18px]" />
     </button>
@@ -325,76 +329,259 @@ function ExperienceDialog({ open, onOpenChange, onSave }: { open: boolean; onOpe
 
 type Extras = ReturnType<typeof useProfileExtras>
 
-const EXP_TONES = ["tone-blue", "tone-violet", "tone-mint", "tone-peach", "tone-pink"]
+/** Roles at the same company are grouped under it, newest first, like a career tree. */
+function groupByCompany(items: Experience[]) {
+  const sorted = [...items].sort((a, b) => +new Date(b.start_date) - +new Date(a.start_date))
+  const groups: { company: string; roles: Experience[] }[] = []
+  for (const e of sorted) {
+    const g = groups.find((x) => x.company.trim().toLowerCase() === e.company.trim().toLowerCase())
+    if (g) g.roles.push(e)
+    else groups.push({ company: e.company.trim(), roles: [e] })
+  }
+  return groups
+}
+
+/** Months covered by a set of roles, counting overlapping stretches once. */
+function totalMonths(items: Experience[]) {
+  const ranges = items
+    .map((e) => [+new Date(e.start_date), e.is_current || !e.end_date ? Date.now() : +new Date(e.end_date)] as const)
+    .sort((a, b) => a[0] - b[0])
+  let total = 0
+  let s = 0
+  let t = 0
+  for (const [a, b] of ranges) {
+    if (a > t) {
+      total += t - s
+      s = a
+      t = b
+    } else t = Math.max(t, b)
+  }
+  total += t - s
+  return Math.max(1, Math.round(total / (1000 * 60 * 60 * 24 * 30.44)))
+}
+const fmtMonths = (m: number) => [Math.floor(m / 12) ? `${Math.floor(m / 12)} yr` : "", m % 12 ? `${m % 12} mo` : ""].filter(Boolean).join(" ")
+
+function Stat({ value, label }: { value: React.ReactNode; label: string }) {
+  return (
+    <div className="min-w-0 rounded-[18px] border border-(--hairline) bg-card px-2.5 py-2.5 sm:px-4 sm:py-3">
+      <p className="truncate text-[17px] leading-tight font-semibold tracking-[-0.02em] tabular-nums sm:text-[20px]">{value}</p>
+      <p className="mt-0.5 truncate text-[11px] text-muted-foreground min-[400px]:text-[12px] sm:text-[12.5px]">{label}</p>
+    </div>
+  )
+}
+
+function Chip({ icon: Icon, children }: { icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-(--hairline) bg-card px-3 py-1 text-[13px] font-medium text-foreground/75">
+      <Icon className="size-3.5 text-(--c-violet)" />
+      {children}
+    </span>
+  )
+}
+
+const Eyebrow = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <p className={cn("text-[11.5px] font-semibold tracking-[0.14em] text-muted-foreground uppercase", className)}>{children}</p>
+)
+
+/**
+ * Every role on one line, placed by date from the first start to today; the picked one is violet.
+ * Click a segment to open that role.
+ */
+function CareerBar({ items, selectedId, onPick }: { items: Experience[]; selectedId: number; onPick: (id: number) => void }) {
+  const from = Math.min(...items.map((e) => +new Date(e.start_date)))
+  const [to] = React.useState(() => Date.now())
+  const pct = (t: number) => ((t - from) / Math.max(1, to - from)) * 100
+  return (
+    <div>
+      <div className="relative h-2.5 rounded-full bg-foreground/[0.06]">
+        {items.map((e) => {
+          const a = pct(+new Date(e.start_date))
+          const b = pct(e.is_current || !e.end_date ? to : +new Date(e.end_date))
+          const on = e.id === selectedId
+          return (
+            <button
+              key={e.id}
+              type="button"
+              onClick={() => onPick(e.id)}
+              title={`${e.title} · ${e.company}`}
+              aria-label={`Show ${e.title} at ${e.company}`}
+              className={cn(
+                "absolute inset-y-0 rounded-full outline-none transition-[background-color,box-shadow] duration-200 focus-visible:ring-2 focus-visible:ring-ring",
+                on ? "z-[1] bg-(--c-violet) shadow-[0_0_0_3px_var(--card)]" : "bg-foreground/20 hover:bg-foreground/35"
+              )}
+              style={{ left: `${a}%`, width: `max(${b - a}%, 8px)` }}
+            />
+          )
+        })}
+      </div>
+      <div className="mt-1.5 flex justify-between text-[12px] text-muted-foreground tabular-nums">
+        <span>{new Date(from).getFullYear()}</span>
+        <span>Today</span>
+      </div>
+    </div>
+  )
+}
+
+/** The role picked in the branched menu, as a full card: who, when, where, what they did, and where it sits in the career. */
+function ExperienceDetail({
+  e,
+  items,
+  onPick,
+  onDelete,
+}: {
+  e: Experience
+  items: Experience[]
+  onPick: (id: number) => void
+  onDelete?: () => void
+}) {
+  const lines = e.description ? e.description.split("\n").filter(Boolean) : []
+  const sameCompany = items.filter((r) => r.id !== e.id && r.company.trim().toLowerCase() === e.company.trim().toLowerCase())
+  return (
+    <div className="relative min-w-0 overflow-hidden rounded-[22px] border border-(--hairline) bg-[color-mix(in_oklab,var(--c-violet)_5%,var(--card))] p-5 sm:p-6">
+      {/* a soft glow in the corner so the card doesn't read flat */}
+      <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 size-56 rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--c-violet)_16%,transparent),transparent)]" />
+
+      <div key={e.id} className="relative animate-in duration-300 fade-in-0 slide-in-from-bottom-1">
+        <div className="flex items-start gap-3.5">
+          <OrgAvatar name={e.company} className="size-12 shrink-0 bg-card text-[15px] shadow-[0_6px_14px_-8px_oklch(0.3_0.08_280/0.45)] ring-[3px] ring-card" />
+          <div className="min-w-0 flex-1">
+            <p className="text-[20px] leading-tight font-semibold tracking-[-0.015em]">{e.title}</p>
+            <p className="mt-1 text-[15px] leading-snug text-foreground/70">{e.company}</p>
+          </div>
+          {e.is_current && (
+            <span className="tone-mint inline-flex shrink-0 items-center gap-1.5 rounded-full bg-(--t-bg) px-2.5 py-1 text-[12.5px] leading-none font-medium text-(--t-fg)">
+              <span className="size-1.5 animate-pulse rounded-full bg-(--t-fg)" />
+              Current
+            </span>
+          )}
+          {onDelete && <IconDelete always onClick={onDelete} label={`Remove ${e.title}`} />}
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Chip icon={Calendar}>
+            <span className="tabular-nums">
+              {month(e.start_date)} – {e.is_current ? "Present" : month(e.end_date)}
+            </span>
+          </Chip>
+          <Chip icon={Clock}>{span(e.start_date, e.end_date, e.is_current)}</Chip>
+          {e.location && <Chip icon={MapPin}>{e.location}</Chip>}
+        </div>
+
+        <Eyebrow className="mt-5">What I did</Eyebrow>
+        {lines.length > 0 ? (
+          <ul className="mt-2.5 space-y-2">
+            {lines.map((line, j) => (
+              <li key={j} className="flex gap-2.5 text-[14.5px] leading-snug text-foreground/80">
+                <span aria-hidden className="mt-[7px] size-1.5 shrink-0 rounded-full bg-(--c-violet)" />
+                {line}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-2 text-[14px] text-muted-foreground">No description added for this role.</p>
+        )}
+
+        {sameCompany.length > 0 && (
+          <>
+            <Eyebrow className="mt-5">Also at {e.company}</Eyebrow>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              {sameCompany.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => onPick(r.id)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-(--hairline) bg-card px-3 py-1 text-[13px] font-medium transition-colors hover:bg-secondary"
+                >
+                  {r.title}
+                  <ArrowRight className="size-3.5 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {items.length > 1 && (
+        <div className="relative mt-6 border-t border-(--hairline) pt-4">
+          <Eyebrow className="mb-2.5">Career timeline</Eyebrow>
+          <CareerBar items={items} selectedId={e.id} onPick={onPick} />
+        </div>
+      )}
+    </div>
+  )
+}
 
 function ExperienceInner({ x, className }: { x: Extras; className?: string }) {
   const [open, setOpen] = React.useState(false)
   const { items, isDemo } = x.experience
+  const groups = React.useMemo(() => groupByCompany(items), [items])
+  // the role shown on the right; falls back to the newest one (also after the picked one is deleted)
+  const [picked, setPicked] = React.useState<string>("")
+  const selected = items.find((e) => String(e.id) === picked) ?? groups[0]?.roles[0]
+  const pick = (id: number) => setPicked(String(id))
+
+  // companies are the branches' heads, their roles the leaves — all open, newest first
+  const menuItems = groups.map((g) => ({
+    label: g.company,
+    children: g.roles.map((r) => ({
+      value: String(r.id),
+      label: r.title,
+      icon: r.is_current ? <span className="tone-mint block size-2 rounded-full bg-(--t-fg)" /> : undefined,
+    })),
+  }))
+  // remount the menu when the list itself changes, so its open sections start fresh
+  const menuKey = items.map((e) => e.id).join(",")
+
   return (
     <>
-      <Panel
-        className={className}
-        title="Experience"
-        style={stagger(6)}
-        action={<AddButton onClick={() => setOpen(true)} label="Add experience" />}
-      >
+      <Panel className={className} title="Experience" style={stagger(6)} action={<AddButton onClick={() => setOpen(true)} label="Add experience" />}>
         {isDemo && <p className="-mt-2 mb-5 text-[14px] text-muted-foreground">Sample data — add your own and it replaces this.</p>}
-        <ol className="stagger relative space-y-4 pl-9">
-          {/* the timeline: a soft line that fades out at both ends */}
-          <span aria-hidden className="absolute top-3 bottom-3 left-[11px] w-0.5 rounded-full bg-gradient-to-b from-transparent via-(--c-violet)/35 to-transparent" />
-          {items.map((e, i) => {
-            const tone = EXP_TONES[i % EXP_TONES.length]
-            const year = new Date(e.is_current || !e.end_date ? e.start_date : e.end_date).getFullYear()
-            return (
-              <li key={e.id} className={cn(tone, "group/item relative")}>
-                {/* node on the line */}
-                <span aria-hidden className="absolute top-7 -left-9 flex size-6 items-center justify-center rounded-full bg-card shadow-[0_0_0_4px_var(--card),0_4px_10px_-4px_oklch(0.3_0.1_280/0.4)]">
-                  <span className={cn("size-2.5 rounded-full bg-(--t-fg)", e.is_current && "animate-pulse")} />
-                </span>
-
-                <div className="relative overflow-hidden rounded-[28px] bg-(--t-bg) p-5 shadow-[inset_0_0_0_1px_oklch(1_0_0/0.55)] transition-transform duration-200 hover:-translate-y-0.5">
-                  <span aria-hidden className="pointer-events-none absolute -right-2 -bottom-6 text-[6rem] leading-none font-light tracking-[-0.06em] text-(--t-fg)/[0.07] select-none">
-                    {year}
-                  </span>
-
-                  <div className="relative flex items-start gap-4">
-                    <OrgAvatar name={e.company} className="size-14 bg-card text-[15px] shadow-[0_6px_14px_-8px_oklch(0.3_0.08_280/0.4)] ring-4 ring-card/60" />
-                    <div className="min-w-0 flex-1 pt-0.5">
-                      <p className="text-[19px] leading-snug font-medium tracking-[-0.01em] text-foreground">{e.title}</p>
-                      <p className="mt-0.5 text-[15.5px] text-foreground/65">
-                        {e.company}
-                        {e.location && ` · ${e.location}`}
-                      </p>
-                    </div>
-                    {!isDemo && <IconDelete onClick={() => x.removeExperience(e.id)} label={`Remove ${e.title}`} />}
-                  </div>
-
-                  <div className="relative mt-4 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-card/85 px-3.5 py-1.5 text-[13.5px] font-medium text-(--t-fg) tabular-nums">
-                      {month(e.start_date)} – {e.is_current ? "Present" : month(e.end_date)}
-                    </span>
-                    <span className="rounded-full border border-(--t-fg)/20 px-3.5 py-1.5 text-[13.5px] text-foreground/65">{span(e.start_date, e.end_date, e.is_current)}</span>
-                    {e.is_current && <span className="rounded-full bg-(--t-fg) px-3.5 py-1.5 text-[13.5px] font-medium text-white">Current</span>}
-                  </div>
-
-                  {e.description && (
-                    <ul className="relative mt-4 space-y-2">
-                      {e.description
-                        .split("\n")
-                        .filter(Boolean)
-                        .map((line, j) => (
-                          <li key={j} className="flex gap-3 text-[15px] leading-snug text-foreground/80">
-                            <span aria-hidden className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-card/85 text-[11px] font-semibold text-(--t-fg)">✓</span>
-                            {line}
-                          </li>
-                        ))}
-                    </ul>
-                  )}
-                </div>
-              </li>
-            )
-          })}
-        </ol>
+        {selected ? (
+          <>
+            <div className="mb-6 grid grid-cols-3 gap-2 sm:gap-2.5">
+              <Stat
+                value={
+                  <>
+                    {/* "2y 8m" on phones, "2 yr 8 mo" where there's room */}
+                    <span className="sm:hidden">{fmtMonths(totalMonths(items)).replace(" yr", "y").replace(" mo", "m")}</span>
+                    <span className="hidden sm:inline">{fmtMonths(totalMonths(items))}</span>
+                  </>
+                }
+                label="Experience"
+              />
+              <Stat value={groups.length} label={groups.length === 1 ? "Company" : "Companies"} />
+              <Stat value={items.length} label={items.length === 1 ? "Role" : "Roles"} />
+            </div>
+            <div className="grid gap-6 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] md:gap-7">
+              <div className="min-w-0">
+                <Eyebrow className="mb-3">Career path</Eyebrow>
+                <BranchedMenu
+                  key={menuKey}
+                  items={menuItems}
+                  defaultOpen={menuItems.map((_, i) => i)}
+                  active={String(selected.id)}
+                  onSelect={(value) => setPicked(value)}
+                  color="var(--foreground)"
+                  accentColor="var(--c-violet)"
+                  lineColor="color-mix(in oklab, var(--foreground) 16%, transparent)"
+                  width={224}
+                  rowHeight={36}
+                  indent={40}
+                  trunk={14}
+                  radius={10}
+                  lineWidth={1.5}
+                  fontSize={14}
+                  drawDuration={400}
+                  foldDuration={300}
+                />
+                <p className="mt-3 hidden text-[12.5px] text-muted-foreground md:block">Pick a role to see the details.</p>
+              </div>
+              <ExperienceDetail e={selected} items={items} onPick={pick} onDelete={isDemo ? undefined : () => x.removeExperience(selected.id)} />
+            </div>
+          </>
+        ) : (
+          <p className="text-[14.5px] text-muted-foreground">No experience yet — add your first role.</p>
+        )}
       </Panel>
       <ExperienceDialog open={open} onOpenChange={setOpen} onSave={x.addExperience} />
     </>

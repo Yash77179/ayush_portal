@@ -43,6 +43,16 @@ const BASE = "/institutions/student-profile"
 /* ── Sample data, shown while a section is empty ─────────────────────────── */
 const DEMO_EXPERIENCE: Experience[] = [
   {
+    id: -4,
+    title: "Software Engineer",
+    company: "Zoho Corporation",
+    location: "Chennai",
+    start_date: "2025-09-01",
+    end_date: null,
+    is_current: true,
+    description: "Own the onboarding flow of a customer-facing product used by 40k+ teams\nLead the migration of legacy screens to a shared design system",
+  },
+  {
     id: -1,
     title: "Frontend Developer Intern",
     company: "Zoho Corporation",

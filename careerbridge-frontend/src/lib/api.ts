@@ -3,7 +3,27 @@
  * Handles JWT token storage, refresh, and all API calls to the Django backend.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const CONFIGURED_API = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+
+/**
+ * The API address, as seen from this browser. When it's configured as this machine (localhost / 127.0.0.1) but
+ * the site was opened from another device — your phone on the same Wi-Fi, or through a tunnel — "localhost" would
+ * mean the phone itself. Then the API is called on the site's own address, under /backend/, and the Next.js server
+ * passes it on to Django (see rewrites in next.config.ts).
+ */
+export function resolveApiUrl(configured = CONFIGURED_API) {
+  if (typeof window === "undefined") return configured
+  try {
+    const url = new URL(configured)
+    const local = (h: string) => h === "localhost" || h === "127.0.0.1" || h === "[::1]"
+    if (local(url.hostname) && !local(window.location.hostname)) return `${window.location.origin}/backend${url.pathname.replace(/\/$/, "")}`
+    return url.toString().replace(/\/$/, "")
+  } catch {
+    return configured
+  }
+}
+
+const API_BASE = resolveApiUrl();
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -46,6 +66,20 @@ async function refreshAccessToken(): Promise<string | null> {
   const data = await res.json();
   localStorage.setItem("cb_access", data.access);
   return data.access;
+}
+
+export const API_URL = API_BASE;
+
+/**
+ * The current access token (refreshed first if it's missing), or null for visitors.
+ * For requests apiFetch can't make — e.g. reading a streamed response.
+ */
+export async function getAccessToken({ forceRefresh = false } = {}): Promise<string | null> {
+  if (typeof window === "undefined") return null;
+  const { access, refresh } = getTokens();
+  if (access && !forceRefresh) return access;
+  if (!refresh) return null;
+  return refreshAccessToken();
 }
 
 export async function apiFetch<T = unknown>(
@@ -107,7 +141,23 @@ export async function login(username: string, password: string) {
   return data;
 }
 
-export async function register(payload: {
+/** Google sign-in: the server checks Google's access token and answers with our own JWT pair (creating the account the first time). */
+export async function googleLogin(accessToken: string, role?: string) {
+  const data = await apiFetch<{ access: string; refresh: string; created: boolean; user: { profile_completed?: boolean } }>("/accounts/google/", {
+    method: "POST",
+    body: { access_token: accessToken, role },
+    auth: false,
+  });
+  setTokens(data.access, data.refresh);
+  return data;
+}
+
+/** The one-time "finish your profile" step after a Google sign-up. */
+export async function completeProfile(data: { role: string; gender: string; first_name: string; last_name: string; username: string }) {
+  return apiFetch("/accounts/complete-profile/", { method: "POST", body: data });
+}
+
+export type RegisterPayload = {
   username: string;
   email: string;
   first_name: string;
@@ -116,8 +166,52 @@ export async function register(payload: {
   gender?: string;
   password: string;
   password2: string;
-}) {
+};
+
+export type OtpSent = { message: string; expires_in: number; resend_in: number };
+
+/** Sign-up, part 1: the server checks the form and emails a 6-digit code. Nothing is saved yet. */
+export async function sendRegisterOtp(payload: RegisterPayload) {
+  return apiFetch<OtpSent>("/accounts/register/send-otp/", { method: "POST", body: payload, auth: false });
+}
+
+/** Sign-up, part 2: the same form plus the code; the account is created only if the code is right. */
+export async function register(payload: RegisterPayload & { otp: string }) {
   return apiFetch("/accounts/register/", { method: "POST", body: payload, auth: false });
+}
+
+export async function sendPasswordResetOtp(email: string) {
+  return apiFetch<OtpSent>("/accounts/password-reset/send-otp/", { method: "POST", body: { email }, auth: false });
+}
+
+/** Checks a reset code without using it up, so the next screen can ask for the new password. */
+export async function verifyPasswordResetOtp(email: string, otp: string) {
+  return apiFetch<{ message: string }>("/accounts/password-reset/verify-otp/", { method: "POST", body: { email, otp }, auth: false });
+}
+
+export async function confirmPasswordReset(payload: { email: string; otp: string; password: string; password2: string }) {
+  return apiFetch<{ message: string; username: string }>("/accounts/password-reset/confirm/", {
+    method: "POST",
+    body: payload,
+    auth: false,
+  });
+}
+
+/**
+ * A readable message from a failed request. The backend answers with Django REST Framework's JSON
+ * (`{"detail": "…"}` or `{"field": ["…"]}`), which apiFetch passes through as the error text.
+ */
+export function errorMessage(err: unknown, fallback = "Something went wrong. Please try again.") {
+  if (!(err instanceof Error)) return fallback;
+  try {
+    const data = JSON.parse(err.message);
+    const first = (v: unknown): string | undefined =>
+      typeof v === "string" ? v : Array.isArray(v) ? first(v[0]) : v && typeof v === "object" ? first(Object.values(v)[0]) : undefined;
+    if (data && typeof data === "object" && "detail" in data) return first(data.detail) ?? fallback;
+    return first(data) ?? fallback;
+  } catch {
+    return err.message && err.message.length < 200 && !err.message.startsWith("<") ? err.message : fallback;
+  }
 }
 
 export async function uploadProfilePhoto(file: File) {
@@ -178,10 +272,10 @@ export async function getMyApplications() {
   return apiFetch("/applications/");
 }
 
-export async function applyToInternship(internshipId: number, coverLetter: string) {
+export async function applyToInternship(internshipId: number, coverLetter: string, answers: { question_id: number; answer: string }[] = []) {
   return apiFetch("/applications/", {
     method: "POST",
-    body: { internship_id: internshipId, cover_letter: coverLetter },
+    body: { internship_id: internshipId, cover_letter: coverLetter, answers },
   });
 }
 

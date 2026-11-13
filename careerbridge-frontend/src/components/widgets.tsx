@@ -253,7 +253,8 @@ export function ActivityFeed({ items, now, title = "Activity", className }: { it
             </ul>
           </div>
 
-          {/* timeline: date gutter · rail · tinted event card */}
+          {/* timeline: date gutter · rail · tinted event card — scrolls inside the panel so neighbours don't stretch */}
+          <div className="-mr-2 max-h-[23rem] overflow-y-auto overscroll-contain pr-2 [scrollbar-width:thin]">
           <ol className="stagger relative space-y-3">
             <span aria-hidden className="absolute top-3 bottom-3 left-[calc(3.25rem+0.625rem)] w-px bg-border" />
             {items.map((a) => {
@@ -281,6 +282,7 @@ export function ActivityFeed({ items, now, title = "Activity", className }: { it
               )
             })}
           </ol>
+          </div>
         </div>
       )}
     </Panel>

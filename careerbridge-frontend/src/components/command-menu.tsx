@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { cn } from "cn"
 
 import { useAuth } from "@/contexts/auth-context"
 import { GlobalIcon, LogoutIcon, MoonIcon, SearchIcon } from "@/components/icons"
@@ -25,6 +24,7 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
   const [query, setQuery] = React.useState("")
   const [active, setActive] = React.useState(0)
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const listRef = React.useRef<HTMLUListElement>(null)
 
   const go = React.useCallback(
     (href: string) => {
@@ -91,6 +91,10 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
     return () => cancelAnimationFrame(id)
   }, [open])
 
+  React.useEffect(() => {
+    listRef.current?.querySelector("[data-active]")?.scrollIntoView({ block: "nearest" })
+  }, [active])
+
   if (!open) return null
 
   const onInputKey = (e: React.KeyboardEvent) => {
@@ -114,9 +118,9 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
         className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px] animate-in fade-in duration-150"
         onClick={() => onOpenChange(false)}
       />
-      <div className="relative w-full max-w-xl overflow-hidden rounded-[28px] border border-(--hairline) bg-popover shadow-2xl animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
-        <div className="flex items-center gap-3 border-b border-border px-5 py-4">
-          <SearchIcon className="size-5 text-muted-foreground" />
+      <div className="glass-card relative flex w-full max-w-[36rem] flex-col overflow-hidden rounded-[26px] bg-popover p-2 shadow-[0_2px_6px_oklch(0.2_0.02_280/0.06),0_40px_90px_-30px_oklch(0.2_0.02_280/0.45)] [--r:26px] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
+        <div className="field-surface flex h-13 items-center gap-3 rounded-[18px] pr-2 pl-4">
+          <SearchIcon className="size-5 shrink-0 text-muted-foreground" />
           <input
             ref={inputRef}
             value={query}
@@ -126,30 +130,53 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
             }}
             onKeyDown={onInputKey}
             placeholder="Search pages and actions…"
-            className="w-full bg-transparent text-[16px] outline-none placeholder:text-muted-foreground"
+            aria-label="Search pages and actions"
+            className="min-w-0 flex-1 bg-transparent text-[15.5px] outline-none placeholder:text-muted-foreground"
           />
-          <kbd className="rounded-lg border border-(--hairline) bg-secondary px-2 py-1 text-[11px] text-muted-foreground">esc</kbd>
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            aria-label="Close search"
+            className="flex h-8 shrink-0 items-center gap-1.5 rounded-[10px] bg-secondary px-2.5 text-[12px] font-medium text-muted-foreground transition-[background-color,color,transform] duration-150 hover:text-foreground active:scale-95"
+          >
+            Esc
+          </button>
         </div>
-        <ul className="max-h-80 overflow-y-auto p-2">
-          {results.length === 0 && <li className="px-4 py-8 text-center text-sm text-muted-foreground">No results</li>}
+
+        <ul ref={listRef} className="no-scrollbar mt-2 max-h-[min(22rem,55vh)] overflow-y-auto overscroll-contain px-0.5 py-0.5">
+          {results.length === 0 && (
+            <li className="px-4 py-10 text-center text-[14px] text-muted-foreground">Nothing matches “{query.trim()}”</li>
+          )}
           {results.map((c, i) => (
             <li key={c.id}>
               <button
-                onMouseEnter={() => setActive(i)}
+                data-active={i === active || undefined}
+                onMouseMove={() => setActive(i)}
                 onClick={c.run}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-[14px] transition-colors duration-100",
-                  i === active ? "bg-secondary" : ""
-                )}
+                className="flex w-full items-center gap-3 rounded-[12px] px-3 py-2 text-left text-[14px] transition-colors duration-100 data-active:bg-secondary"
               >
-                <span className="flex size-9 items-center justify-center rounded-xl bg-card text-foreground ring-1 ring-(--hairline)">{c.icon}</span>
-                <span className="flex-1 font-medium">{c.label}</span>
-                <span className="text-xs text-muted-foreground">{c.hint}</span>
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-card text-foreground/80 ring-1 ring-(--hairline)">{c.icon}</span>
+                <span className="min-w-0 flex-1 truncate font-medium">{c.label}</span>
+                <span className="shrink-0 text-[12px] text-muted-foreground">{c.hint}</span>
               </button>
             </li>
           ))}
         </ul>
+
+        <div className="mt-1.5 flex items-center gap-4 border-t border-(--hairline) px-3 pt-2.5 pb-1 text-[11.5px] text-muted-foreground">
+          <span className="flex items-center gap-1.5"><Key>↑</Key><Key>↓</Key> to move</span>
+          <span className="flex items-center gap-1.5"><Key>↵</Key> to open</span>
+          <span className="ml-auto flex items-center gap-1.5"><Key>Ctrl</Key><Key>K</Key> anytime</span>
+        </div>
       </div>
     </div>
+  )
+}
+
+function Key({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded-[6px] bg-secondary px-1 font-sans text-[10.5px] font-medium text-foreground/70 shadow-[inset_0_-1px_0_var(--hairline)]">
+      {children}
+    </kbd>
   )
 }

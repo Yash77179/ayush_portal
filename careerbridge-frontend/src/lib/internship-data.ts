@@ -35,6 +35,12 @@ export interface InternshipDetail {
   stipend: string
   duration_months: number
   openings: number
+  screening_questions?: { id: number; text: string; kind: "text" | "yesno" | "choice"; choices: string[]; required: boolean }[]
+  min_cgpa?: string | null
+  allowed_branches?: string
+  allowed_degrees?: string
+  graduation_year_min?: number | null
+  graduation_year_max?: number | null
   deadline: string
   status: string
   created_at?: string
