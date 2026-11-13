@@ -74,7 +74,11 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL:
     try:
         import dj_database_url
-        DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+        # conn_health_checks: Neon's free tier suspends idle databases, so check a kept-open connection before reusing it.
+        DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, conn_health_checks=True)}
+        # Neon's pooled endpoint ("-pooler" host) runs PgBouncer in transaction mode, which can't hold server-side cursors.
+        if "-pooler" in (DATABASES["default"].get("HOST") or ""):
+            DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
     except ImportError:
         import urllib.parse as urlparse
         url = urlparse.urlparse(DATABASE_URL)
