@@ -184,11 +184,14 @@ except ImportError:
     pass
 
 # Where uploads go. Locally: the media/ folder. In production on a host without a persistent disk
-# (Render's free plan), set FILE_STORAGE=database so resumes, photos and logos are kept in Postgres.
-if config("FILE_STORAGE", default="filesystem") == "database":
+# (Render's free plan), keep resumes, photos and logos somewhere permanent:
+#   FILE_STORAGE=cloudinary  → Cloudinary (needs CLOUDINARY_URL)   ·   FILE_STORAGE=database → Postgres
+_FILE_BACKENDS = {"cloudinary": "filestore.storage.CloudinaryStorage", "database": "filestore.storage.DatabaseStorage"}
+FILE_STORAGE = config("FILE_STORAGE", default="filesystem")
+if FILE_STORAGE in _FILE_BACKENDS:
     STORAGES = {
         **globals().get("STORAGES", {"staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}}),
-        "default": {"BACKEND": "filestore.storage.DatabaseStorage"},
+        "default": {"BACKEND": _FILE_BACKENDS[FILE_STORAGE]},
     }
 
 # Google sign-in: the OAuth "Web application" client ID (no secret needed — the browser popup does the OAuth part)
