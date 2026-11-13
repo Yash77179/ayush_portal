@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "assistant",
     "notifications",
     "campus",
+    "filestore",
 ]
 
 MIDDLEWARE = [
@@ -73,7 +74,11 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL:
     try:
         import dj_database_url
-        DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+        # conn_health_checks: Neon's free tier suspends idle databases, so check a kept-open connection before reusing it.
+        DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, conn_health_checks=True)}
+        # Neon's pooled endpoint ("-pooler" host) runs PgBouncer in transaction mode, which can't hold server-side cursors.
+        if "-pooler" in (DATABASES["default"].get("HOST") or ""):
+            DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
     except ImportError:
         import urllib.parse as urlparse
         url = urlparse.urlparse(DATABASE_URL)
@@ -118,11 +123,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "/media/"
-# Uploads (resumes, photos, logos). On Fly.io this points at the persistent volume (/data/media) so files survive redeploys.
+# Uploads (resumes, photos, logos) when stored on disk — used locally. Production keeps them in the database (FILE_STORAGE below).
 MEDIA_ROOT = config("MEDIA_ROOT", default=str(BASE_DIR / "media"))
 
-# Production (DEBUG off): Fly terminates HTTPS at its proxy and forwards plain HTTP, so trust its header,
-# and only send cookies over HTTPS. The HTTP→HTTPS redirect is done by Fly (force_https in fly.toml).
+# Production (DEBUG off): the host (Render) terminates HTTPS at its proxy and forwards plain HTTP, so trust its
+# header, and only send cookies over HTTPS. The host already redirects HTTP to HTTPS.
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
@@ -181,6 +186,35 @@ try:
     }
 except ImportError:
     pass
+
+# Where uploads go. Locally: the media/ folder. In production on a host without a persistent disk
+# (Render's free plan), keep resumes, photos and logos somewhere permanent:
+#   FILE_STORAGE=cloudinary  → Cloudinary (needs CLOUDINARY_URL)   ·   FILE_STORAGE=database → Postgres
+_FILE_BACKENDS = {"cloudinary": "filestore.storage.CloudinaryStorage", "database": "filestore.storage.DatabaseStorage"}
+FILE_STORAGE = config("FILE_STORAGE", default="filesystem")
+if FILE_STORAGE in _FILE_BACKENDS:
+    STORAGES = {
+        **globals().get("STORAGES", {"staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}}),
+        "default": {"BACKEND": _FILE_BACKENDS[FILE_STORAGE]},
+    }
+
+# Email (sign-up codes, password resets, hiring notifications), through Brevo:
+#   BREVO_API_KEY set           → Brevo's HTTPS API (works even where hosts block SMTP ports)
+#   BREVO_SMTP_USER/KEY set     → Brevo's SMTP relay
+#   neither, while developing   → printed in the server console
+BREVO_API_KEY = config("BREVO_API_KEY", default="")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="CareerBridge <noreply@careerbridge.local>")
+BREVO_SMTP_USER = config("BREVO_SMTP_USER", default="")
+if BREVO_SMTP_USER:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp-relay.brevo.com"
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = BREVO_SMTP_USER
+    EMAIL_HOST_PASSWORD = config("BREVO_SMTP_KEY", default="")
+    EMAIL_TIMEOUT = 15
+elif DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Google sign-in: the OAuth "Web application" client ID (no secret needed — the browser popup does the OAuth part)
 GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")

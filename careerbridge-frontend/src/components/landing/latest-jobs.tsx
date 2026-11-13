@@ -4,10 +4,8 @@ import * as React from "react"
 import Link from "next/link"
 import { cn } from "cn"
 
-import { MODE_LABEL, type BrowseInternship } from "@/lib/internship-data"
-import { useJobs } from "@/lib/use-jobs"
+import { MODE_LABEL } from "@/lib/internship-data"
 import { ArrowRightIcon, ChevronLeftIcon, ChevronRightIcon } from "@/components/icons"
-import { OrgAvatar } from "@/components/kit"
 import { PlateArt, type ArtKind } from "@/components/landing/plate-art"
 
 const CATS = [
@@ -27,7 +25,35 @@ const LOOKS: { tint: string; hue: number; art: ArtKind }[] = [
   { tint: "oklch(0.955 0.04 262)", hue: 262, art: "spiro" },
 ]
 
-const daysLeft = (d: string, now: number) => Math.ceil((new Date(d).getTime() - now) / 86_400_000)
+/** Showcase roles for the landing page: well-known companies with their real logos (from /public/logos). */
+interface ShowcaseJob {
+  id: string
+  title: string
+  company: string
+  logo: string
+  location: string
+  work_mode: "onsite" | "hybrid" | "remote"
+  stipend: number
+  duration_months: number
+  openings: number
+  skills: number
+  days_left: number
+}
+
+const SHOWCASE: ShowcaseJob[] = [
+  { id: "google", title: "Software Engineering Intern", company: "Google", logo: "google", location: "Bengaluru", work_mode: "hybrid", stipend: 100000, duration_months: 3, openings: 6, skills: 5, days_left: 12 },
+  { id: "nvidia", title: "Deep Learning Research Intern", company: "NVIDIA", logo: "nvidia", location: "Pune", work_mode: "onsite", stipend: 90000, duration_months: 6, openings: 3, skills: 6, days_left: 9 },
+  { id: "atlassian", title: "Frontend Engineering Intern", company: "Atlassian", logo: "atlassian", location: "Bengaluru", work_mode: "remote", stipend: 85000, duration_months: 3, openings: 4, skills: 4, days_left: 18 },
+  { id: "meta", title: "Product Design Intern", company: "Meta", logo: "meta", location: "Hyderabad", work_mode: "hybrid", stipend: 80000, duration_months: 3, openings: 2, skills: 4, days_left: 6 },
+  { id: "razorpay", title: "Backend Engineer Intern", company: "Razorpay", logo: "razorpay", location: "Bengaluru", work_mode: "onsite", stipend: 60000, duration_months: 6, openings: 5, skills: 5, days_left: 14 },
+  { id: "netflix", title: "Data Science Intern", company: "Netflix", logo: "netflix", location: "Mumbai", work_mode: "hybrid", stipend: 75000, duration_months: 3, openings: 2, skills: 5, days_left: 21 },
+  { id: "postman", title: "DevOps Intern", company: "Postman", logo: "postman", location: "Bengaluru", work_mode: "remote", stipend: 50000, duration_months: 6, openings: 3, skills: 4, days_left: 11 },
+  { id: "swiggy", title: "Data Analyst Intern", company: "Swiggy", logo: "swiggy", location: "Bengaluru", work_mode: "hybrid", stipend: 45000, duration_months: 6, openings: 4, skills: 4, days_left: 5 },
+  { id: "figma", title: "UX Design Intern", company: "Figma", logo: "figma", location: "Remote", work_mode: "remote", stipend: 70000, duration_months: 3, openings: 2, skills: 3, days_left: 25 },
+  { id: "phonepe", title: "Android Developer Intern", company: "PhonePe", logo: "phonepe", location: "Pune", work_mode: "onsite", stipend: 55000, duration_months: 6, openings: 4, skills: 4, days_left: 16 },
+  { id: "zomato", title: "Machine Learning Intern", company: "Zomato", logo: "zomato", location: "Gurugram", work_mode: "hybrid", stipend: 50000, duration_months: 6, openings: 3, skills: 5, days_left: 8 },
+  { id: "zoho", title: "Full Stack Developer Intern", company: "Zoho", logo: "zoho", location: "Chennai", work_mode: "onsite", stipend: 35000, duration_months: 6, openings: 8, skills: 5, days_left: 20 },
+]
 const short = (v: string | number) => {
   const n = Number(v || 0)
   return n >= 1000 ? `${Math.round(n / 1000)}K` : String(n)
@@ -36,10 +62,10 @@ const short = (v: string | number) => {
 const INK = "oklch(0.22 0.05 280)"
 
 /** A framed card: a tinted plate with its own figure and a big stipend, then the role, the facts and the company. */
-function JobCard({ j, i, now }: { j: BrowseInternship; i: number; now: number }) {
+function JobCard({ j, i }: { j: ShowcaseJob; i: number }) {
   const ref = React.useRef<HTMLAnchorElement>(null)
   const look = LOOKS[i % LOOKS.length]
-  const left = daysLeft(j.deadline, now)
+  const left = j.days_left
   const urgent = left > 0 && left <= 7
 
   const move = (e: React.PointerEvent<HTMLAnchorElement>) => {
@@ -60,7 +86,7 @@ function JobCard({ j, i, now }: { j: BrowseInternship; i: number; now: number })
     <li className="shrink-0 snap-start [perspective:1100px] sm:[zoom:0.86]">
       <Link
         ref={ref}
-        href={`/internships/${j.id}`}
+        href="/internships"
         style={{ color: INK }}
         onPointerMove={move}
         onPointerLeave={leave}
@@ -96,12 +122,12 @@ function JobCard({ j, i, now }: { j: BrowseInternship; i: number; now: number })
               <path d="M8 14.5s4.6-4.1 4.6-7.7A4.6 4.6 0 0 0 3.4 6.8C3.4 10.4 8 14.5 8 14.5Z" />
               <circle cx="8" cy="6.8" r="1.6" />
             </svg>
-            {j.location || "Flexible location"}
+            {j.location}
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {j.openings > 0 && <span className="rounded-full border border-[oklch(0.22_0.05_280/0.14)] px-3 py-1 text-[12.5px] font-medium">{j.openings} {j.openings === 1 ? "opening" : "openings"}</span>}
-            {j.skills_count > 0 && <span className="rounded-full border border-[oklch(0.22_0.05_280/0.14)] px-3 py-1 text-[12.5px] font-medium">{j.skills_count} skills</span>}
+            <span className="rounded-full border border-[oklch(0.22_0.05_280/0.14)] px-3 py-1 text-[12.5px] font-medium">{j.skills} skills</span>
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12.5px] font-medium"
               style={{ background: urgent ? "oklch(0.95 0.06 60)" : "oklch(0.96 0.012 280)", color: urgent ? "oklch(0.42 0.12 50)" : INK }}
@@ -112,10 +138,13 @@ function JobCard({ j, i, now }: { j: BrowseInternship; i: number; now: number })
           </div>
 
           <div className="mt-4 flex items-center gap-3 border-t border-[oklch(0.22_0.05_280/0.1)] pt-3 sm:mt-5 sm:pt-4">
-            <OrgAvatar name={j.company_name} className="size-9 sm:size-11" />
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[oklch(0.22_0.05_280/0.1)] bg-white shadow-[0_4px_10px_-6px_oklch(0.2_0.06_280/0.35)] sm:size-11">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`/logos/${j.logo}.svg`} alt={`${j.company} logo`} className="size-[55%] object-contain" loading="lazy" />
+            </span>
             <div className="min-w-0 flex-1 leading-tight">
               <p className="text-[11px] tracking-[0.2em] text-[oklch(0.22_0.05_280/0.5)] uppercase">Hiring company</p>
-              <p className="mt-1 truncate text-[16.5px] font-medium">{j.company_name}</p>
+              <p className="mt-1 truncate text-[16.5px] font-medium">{j.company}</p>
             </div>
             <span className="flex size-10 shrink-0 items-center sm:size-12 justify-center rounded-full bg-[oklch(0.22_0.05_280)] text-white transition-transform duration-500 ease-(--ease-out) group-hover/job:-rotate-45">
               <ArrowRightIcon className="size-5" />
@@ -129,9 +158,8 @@ function JobCard({ j, i, now }: { j: BrowseInternship; i: number; now: number })
 
 /** Category tabs with a sliding hairline marker, then a swipeable row of listings that runs the full width of the screen. */
 export function LatestJobs() {
-  const { jobs } = useJobs()
+  const jobs = SHOWCASE
   const [cat, setCat] = React.useState("all")
-  const [now] = React.useState(() => Date.now())
   const rail = React.useRef<HTMLUListElement>(null)
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([])
   const [mark, setMark] = React.useState({ x: 0, w: 0 })
@@ -139,7 +167,7 @@ export function LatestJobs() {
   const counts = CATS.map((c) => ({ ...c, n: jobs.filter((j) => c.test(j.title)).length }))
   const index = Math.max(0, CATS.findIndex((c) => c.id === cat))
   const active = CATS[index]
-  const list: BrowseInternship[] = jobs.filter((j) => active.test(j.title))
+  const list = jobs.filter((j) => active.test(j.title))
 
   React.useLayoutEffect(() => {
     const el = tabRefs.current[index]
@@ -222,7 +250,7 @@ export function LatestJobs() {
       {/* full-bleed: cards start at the page gutter and slide off the real screen edges */}
       <ul ref={rail} onScroll={onScroll} className={`no-scrollbar -mt-2 flex snap-x snap-mandatory scroll-px-[clamp(1.5rem,4vw,4rem)] gap-4 overflow-x-auto pt-6 pb-10 -mb-8 sm:gap-5 sm:pt-8 sm:pb-14 sm:-mb-10 ${gutter}`}>
         {list.map((j, i) => (
-          <JobCard key={j.id} j={j} i={i} now={now} />
+          <JobCard key={j.id} j={j} i={i} />
         ))}
         {list.length === 0 && <li className="py-16 text-[17px] text-white/70">No roles in this category yet.</li>}
       </ul>

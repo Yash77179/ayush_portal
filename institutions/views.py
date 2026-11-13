@@ -127,7 +127,8 @@ class ResumeUploadView(APIView):
         profile, _ = StudentProfile.objects.get_or_create(user=request.user)
         profile.resume_file.save(f"resume-{request.user.pk}.pdf", upload, save=True)
 
-        text = self._extract_text(profile.resume_file.path)
+        upload.seek(0)
+        text = self._extract_text(upload)  # read the upload itself, so this works whatever storage holds the file
         have = set(StudentSkill.objects.filter(student=profile).values_list("skill_id", flat=True))
         found = []
         for skill in Skill.objects.all():
@@ -142,11 +143,12 @@ class ResumeUploadView(APIView):
             status=status.HTTP_200_OK,
         )
 
-    def _extract_text(self, path):
+    def _extract_text(self, source):
+        """`source` is a file path or an open file object."""
         try:
             from pypdf import PdfReader
 
-            reader = PdfReader(path)
+            reader = PdfReader(source)
             chunks = []
             for page in reader.pages[: self.MAX_PAGES]:
                 chunks.append(page.extract_text() or "")

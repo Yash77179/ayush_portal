@@ -1,0 +1,49 @@
+# Render Blueprint for the CareerBridge API (Django). In Render: New → Blueprint → pick this repo.
+# Values marked `sync: false` are secrets — Render asks for them when the Blueprint is created.
+services:
+  - type: web
+    name: careerbridge-api
+    runtime: python
+    plan: free
+    region: singapore          # closest Render region to India; create the Neon database in Singapore too
+    branch: yash
+    buildCommand: ./build.sh
+    # One worker with threads keeps memory inside the free plan's 512 MB; the long timeout lets the
+    # AI assistant finish streaming its answers.
+    startCommand: gunicorn ayush_portal.wsgi --bind 0.0.0.0:$PORT --workers 1 --threads 8 --worker-class gthread --timeout 120
+    healthCheckPath: /api/health/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.1
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FILE_STORAGE      # uploads go to Cloudinary — the free plan has no persistent disk
+        value: cloudinary
+      - key: CLOUDINARY_URL    # from the Cloudinary dashboard: cloudinary://<api_key>:<api_secret>@<cloud_name>
+        sync: false
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: DATABASE_URL      # Neon connection string (…?sslmode=require)
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS   # your Vercel URL, e.g. https://careerbridge.vercel.app
+        sync: false
+      - key: BREVO_API_KEY          # Brevo API key (xkeysib-…) — preferred
+        sync: false
+      - key: BREVO_SMTP_USER        # or Brevo SMTP login + key (xsmtpsib-…)
+        sync: false
+      - key: BREVO_SMTP_KEY
+        sync: false
+      - key: DEFAULT_FROM_EMAIL     # e.g. CareerBridge <you@yourdomain.com>
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: SPEECHIFY_API_KEY
+        sync: false
