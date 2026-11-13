@@ -3,10 +3,11 @@ import { cn } from "cn"
 
 import { ArrowRightIcon } from "@/components/icons"
 import { FogEdge } from "@/components/landing/fog-edge"
-import { HeroBackdrop } from "@/components/landing/hero-backdrop"
-import { HeroStickers } from "@/components/landing/hero-stickers"
+import { HeroLetters } from "@/components/landing/hero-letters"
+import { IntroWindow } from "@/components/landing/intro-window"
+import { JobMoments } from "@/components/landing/job-moments"
+import { NightSky } from "@/components/landing/night-sky"
 import { LandingMotion }from "@/components/landing/landing-motion"
-import { LatestJobs } from "@/components/landing/latest-jobs"
 import { MeetBridge } from "@/components/landing/meet-bridge"
 import { Roll, RollLink } from "@/components/landing/roll-link"
 import { RolesScroll } from "@/components/landing/roles-scroll"
@@ -55,10 +56,19 @@ export default function HomePage() {
       {/* the whole page: it lifts away at the end to uncover the footer behind it */}
       <div className="relative z-10 bg-background [overflow:clip]">
 
+      {/* ───────────────────────── Intro: fly through the window of job-hunt chaos, up into the night (scroll-driven) ───────────────────────── */}
+      <IntroWindow />
+
       {/* ───────────────────────── Hero: a field of violet micro-slats (React Bits), a centred line ───────────────────────── */}
-      <section className="relative isolate flex min-h-svh flex-col items-center overflow-hidden bg-[#0a132a] text-white [border-radius:0_0_50%_50%/0_0_3.5rem_3.5rem]">
-        <HeroBackdrop />
-        <HeroStickers />
+      {/* the hero holds still (sticky) for a moment once it has risen into place, then scrolls on */}
+      <div className="relative motion-safe:-mt-[100svh]">
+      <section data-hero className="relative isolate flex min-h-svh flex-col items-center overflow-hidden bg-[#04060f] text-white motion-safe:sticky motion-safe:top-0">
+        {/* the same night sky as the intro (held still on screen while the hero rises, see intro-window.tsx) */}
+        <div data-hero-sky aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-20 h-svh will-change-transform">
+          <NightSky />
+        </div>
+        {/* giant letters drifting past each other behind the title (see HeroLetters) */}
+        <HeroLetters />
 
         {/* (the site nav sits on top of the hero: see StickyNav) */}
         <div aria-hidden className="h-[4.75rem] shrink-0" />
@@ -99,6 +109,10 @@ export default function HomePage() {
         </a>
       </section>
 
+      {/* a beat of scroll for the title to hold still before the page moves on */}
+      <div aria-hidden className="h-[45svh] motion-reduce:hidden" />
+      </div>
+
       {/* ───────────────────────── Marquee: real logos ───────────────────────── */}
       <section aria-label="Teams students apply to" className="marquee overflow-hidden pt-16 pb-6">
         <p className="mb-9 text-center text-[13px] font-medium tracking-[0.2em] text-muted-foreground uppercase">Teams students apply to</p>
@@ -135,54 +149,8 @@ export default function HomePage() {
       </div>
       </section>
 
-      {/* ───────────────────────── Latest: its own dark band, rail runs edge to edge ───────────────────────── */}
-      <section id="internships" data-leave data-nav-tone="oklch(0.5 0.17 281)" className="relative isolate z-10 -mt-[100svh] flex flex-col justify-center overflow-hidden py-14 sm:min-h-svh sm:py-16 bg-[linear-gradient(180deg,oklch(0.5_0.17_281),oklch(0.58_0.16_287)_55%,oklch(0.68_0.14_293))] text-white shadow-[0_-24px_50px_-28px_oklch(0.2_0.1_280/0.4),0_36px_60px_-24px_oklch(0.2_0.1_280/0.45)]">
-        {/* depth: hairline arcs from two corners, a pool of light behind the cards, a soft vignette at the foot */}
-        <svg aria-hidden data-parallax="0.08" className="pointer-events-none absolute inset-0 -z-10 size-full text-white" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" fill="none" stroke="currentColor" strokeOpacity="0.15" strokeWidth="1">
-          <ellipse cx="1560" cy="90" rx="820" ry="540" />
-          <ellipse cx="1560" cy="90" rx="600" ry="390" />
-          <ellipse cx="1560" cy="90" rx="380" ry="240" />
-          <ellipse cx="40" cy="880" rx="720" ry="440" />
-          <ellipse cx="40" cy="880" rx="500" ry="300" />
-        </svg>
-        <div aria-hidden className="pointer-events-none absolute top-[38%] left-1/2 -z-10 h-[46rem] w-[min(120rem,140vw)] -translate-x-1/2 bg-[radial-gradient(closest-side,oklch(0.8_0.12_300/0.34),transparent)]" />
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-1/3 bg-gradient-to-t from-[oklch(0.3_0.12_285/0.35)] to-transparent" />
-
-        <div className="mb-3 flex items-center justify-between gap-4 px-[clamp(1.5rem,4vw,4rem)] sm:mb-5">
-          <p className="flex items-center gap-4 text-[12px] font-medium tracking-[0.22em] text-white/70 uppercase sm:text-[13px]">
-            <span aria-hidden className="h-px w-8 bg-white/50 sm:w-10" />
-            Open now
-          </p>
-          {/* phones: a small link instead of the big button */}
-          <Link href="/internships" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-white underline decoration-white/40 underline-offset-4 sm:hidden">
-            See all <ArrowRightIcon className="size-4" />
-          </Link>
-        </div>
-
-        <div className="flex flex-wrap items-end justify-between gap-6 px-[clamp(1.5rem,4vw,4rem)]">
-          <div className="min-w-[18rem] flex-1">
-          <h2 data-mask className="text-[clamp(1.85rem,4.6vw,4.2rem)] leading-[1.05] font-medium tracking-[-0.04em] lg:whitespace-nowrap">
-            <span className="mask-line -mx-12 -mt-8 px-12 pt-8 pb-3">
-              <span>
-                <span className="relative mr-3 inline-block px-1">
-                  <svg aria-hidden viewBox="0 0 320 110" className="pointer-events-none absolute -top-5 -left-7 h-[calc(100%+2.2rem)] w-[calc(100%+3.4rem)] text-white/80" fill="none" preserveAspectRatio="none">
-                    <path data-draw d="M22 58C26 22 112 6 192 10c82 4 124 20 114 54-10 32-98 44-188 38C56 98 8 84 14 58" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                  <span className="font-display relative text-[oklch(0.86_0.1_300)] italic">Latest</span>
-                </span>
-                Internship opportunities
-              </span>
-            </span>
-          </h2>
-          <p className="mt-4 max-w-xl text-[clamp(1rem,1.2vw,1.1rem)] leading-relaxed text-white/75 max-sm:hidden">Verified roles — pay, length and deadline up front.</p>
-          </div>
-          <RollLink href="/internships" variant="light" className="max-sm:hidden">
-            Browse all internships
-          </RollLink>
-        </div>
-
-        <LatestJobs />
-      </section>
+      {/* ───────────────────────── Open roles: a slanted field slides over the statement, then the cards travel sideways ───────────────────────── */}
+      <JobMoments />
 
       {/* ───────────────────────── Roles: horizontal journey (stays pinned while what follows rises over it) ───────────────────────── */}
       <RolesScroll />
