@@ -1,5 +1,7 @@
 import { cn } from "cn"
 
+import { RoadWheel } from "@/components/landing/road-wheel"
+import { RoleSteps, type Step } from "@/components/landing/role-steps"
 import { PlateArt, type ArtKind } from "@/components/landing/plate-art"
 import { OvalLink, PickYours, RolesChapters } from "@/components/landing/roles-chapters"
 
@@ -97,6 +99,26 @@ function Center({ caption, title, extra, cta, href }: { caption: string; title: 
   )
 }
 
+/* ── how it works, for each role (RoleSteps) ───────────────────────────── */
+const STUDENT_STEPS: Step[] = [
+  { title: "Build your", em: "profile", text: "Upload a resume and your skills are read for you: no forms to fill twice." },
+  { title: "Get", em: "matched", text: "Every listing shows how well you fit it, and why, before you apply." },
+  { title: "Apply in", em: "one tap", text: "One profile for every application, with your best work already attached." },
+  { title: "Track it to", em: "the offer", text: "Each application keeps a live status, from applied to offer letter." },
+]
+const COMPANY_STEPS: Step[] = [
+  { title: "Post a", em: "role", text: "Pay, length, skills and deadline in minutes: verified and visible at once." },
+  { title: "See who", em: "fits", text: "Candidates arrive ranked by skill fit, with the reasons shown." },
+  { title: "Shortlist &", em: "interview", text: "Move people through your pipeline, and schedule interviews in place." },
+  { title: "Hire &", em: "onboard", text: "Send the offer, close the role, and keep the record for next season." },
+]
+const UNIVERSITY_STEPS: Step[] = [
+  { title: "Invite your", em: "batch", text: "Bring students in by batch and department in a single step." },
+  { title: "Map their", em: "skills", text: "See the skill spread across a class, and where the gaps are." },
+  { title: "Follow every", em: "placement", text: "Applications, interviews and offers, live, for every student." },
+  { title: "Report", em: "outcomes", text: "Placement results by batch, ready to export for review." },
+]
+
 /* ── the section ─────────────────────────────────────────────────────────── */
 export function RolesScroll() {
   return (
@@ -149,7 +171,9 @@ export function RolesScroll() {
           </div>
 
           {/* ── students ── */}
-          <div data-seg className="h-panel relative lg:h-full lg:w-[128vw]">
+          {/* the scene and its "how it works" columns count as one step of the journey (data-seg on the pair) */}
+          <div data-seg className="lg:flex">
+          <div className="h-panel relative lg:h-full lg:w-[128vw]">
             <Arcs />
             <Win art="waves" pos={{ left: "3%", top: "20%", w: "27%", h: "36%", par: "0.45", label: "Fig. 01 · Skill map" }} hue={262}>
               <div className="relative flex h-full flex-col justify-between p-6">
@@ -188,9 +212,13 @@ export function RolesScroll() {
               href="/register?role=student"
             />
           </div>
+          <RoleSteps role="students" hue={268} steps={STUDENT_STEPS} />
+          </div>
 
           {/* ── companies ── */}
-          <div data-seg className="h-panel relative lg:h-full lg:w-[128vw]">
+          {/* the scene and its "how it works" columns count as one step of the journey (data-seg on the pair) */}
+          <div data-seg className="lg:flex">
+          <div className="h-panel relative lg:h-full lg:w-[128vw]">
             <Arcs />
             <Win art="silk" pos={{ left: "66%", top: "54%", w: "28%", h: "32%", par: "0.5", label: "Fig. 04 · Pipeline" }} hue={300}>
               <div className="flex h-full flex-col justify-center gap-3 p-6">
@@ -228,9 +256,13 @@ export function RolesScroll() {
               href="/register?role=company"
             />
           </div>
+          <RoleSteps role="companies" hue={300} steps={COMPANY_STEPS} />
+          </div>
 
           {/* ── universities ── */}
-          <div data-seg className="h-panel relative lg:h-full lg:w-[128vw]">
+          {/* the scene and its "how it works" columns count as one step of the journey (data-seg on the pair) */}
+          <div data-seg className="lg:flex">
+          <div className="h-panel relative lg:h-full lg:w-[128vw]">
             <Arcs />
             <Win art="ripples" pos={{ left: "5%", top: "10%", w: "21%", h: "44%", par: "0.4", label: "Fig. 07 · Outcomes" }} hue={190}>
               <div className="flex h-full flex-col justify-end p-6">
@@ -259,6 +291,8 @@ export function RolesScroll() {
               href="/register?role=university"
             />
           </div>
+          <RoleSteps role="universities" hue={215} steps={UNIVERSITY_STEPS} />
+          </div>
 
           {/* ── outro ── */}
           <div className="h-panel relative lg:h-full lg:w-screen">
@@ -274,6 +308,9 @@ export function RolesScroll() {
             </div>
           </div>
         </div>
+
+        {/* A → B: a wheel rolling along a road that starts bumpy and flattens as you go (see RoadWheel) */}
+        <RoadWheel />
 
         {/* progress: no box, no bar — three italic labels, and the one you are in gets circled by a hand-drawn
             oval that draws itself as its scene passes (--p and data-state per step are set from landing-motion).

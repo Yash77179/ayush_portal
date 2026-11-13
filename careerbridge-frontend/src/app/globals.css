@@ -731,3 +731,10 @@ a:hover > .roll > .roll-track, a:hover .roll .roll-track, .group\/roll:hover .ro
 @keyframes cb-twinkle { 0%, 100% { transform: scale(0.55) rotate(0deg); opacity: 0.35; } 50% { transform: scale(1) rotate(45deg); opacity: 1; } }
 /* roles chapters: a scan line passing down a resume */
 @keyframes cb-scan { from { transform: translateY(0); } to { transform: translateY(6rem); } }
+
+/* the opening scene (components/landing/intro-window.tsx) */
+@keyframes cb-intro-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+@keyframes cb-intro-drift { from { translate: -3vw 0; } to { translate: 3vw 0; } }
+@keyframes cb-intro-float { 0%, 100% { translate: 0 0; rotate: 0deg; } 50% { translate: 0 -1.6%; rotate: 0.6deg; } }
+@keyframes cb-star-twinkle { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes cb-card-float { 0%, 100% { translate: 0 5px; } 50% { translate: 0 -5px; } }

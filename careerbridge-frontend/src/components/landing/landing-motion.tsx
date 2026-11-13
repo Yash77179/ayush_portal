@@ -69,7 +69,12 @@ export function LandingMotion() {
         gsap.ticker.lagSmoothing(0)
 
         // ── Entrance ──
-        const intro = gsap.timeline({ defaults: { ease: "power4.out" } })
+        // with the opening scene in front of the hero, the entrance plays when the hero comes up, not on load
+        const behindIntro = !!document.querySelector("[data-hero]") && !!document.querySelector("[aria-label='Intro']")
+        const intro = gsap.timeline({
+          defaults: { ease: "power4.out" },
+          scrollTrigger: behindIntro ? { trigger: "[data-hero]", start: "top 75%", once: true } : undefined,
+        })
         intro
           .from("[data-intro='line'] > span", { yPercent: 118, duration: 1.15, stagger: 0.12 }, 0.1)
           .from("[data-intro='fade']", { y: 26, autoAlpha: 0, duration: 0.9, stagger: 0.1 }, 0.45)

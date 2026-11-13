@@ -53,7 +53,9 @@ export function StickyNav() {
       if (!frame) frame = requestAnimationFrame(sampleTone)
       const vh = window.innerHeight
       const max = document.documentElement.scrollHeight - vh
-      setShow(window.scrollY > vh * 0.82)
+      // past the hero: its bottom is above the top 18% of the screen (the hero may sit below the opening scene)
+      const hero = document.querySelector("[data-hero]")
+      setShow(hero ? hero.getBoundingClientRect().bottom < vh * 0.18 : window.scrollY > vh * 0.82)
       // once the footer behind the page is mostly uncovered, the nav switches to light-on-dark instead of vanishing
       setOverFooter(window.scrollY > max - vh * 0.55)
     }

@@ -21,7 +21,7 @@ const Grainient = dynamic<GrainientProps>(
 /** The hero's background: a flowing, lightly grained violet gradient that swirls under the pointer. */
 export function HeroBackdrop() {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+    <div data-hero-glow aria-hidden className="pointer-events-none absolute inset-0 -z-10 [mask-image:linear-gradient(transparent,rgb(0_0_0/0.55)_30%,#000_62%)]">
       <Grainient colors={["#120f17", "#0a132a", "#5b129a", "#a855f7", "#a855f7"]} angle={55} flow={0.8} silk={0.35} grainAmount={0.04} />
       {/* a soft pool behind the words, so they stay crisp */}
       <div className="absolute inset-0 bg-[radial-gradient(48%_38%_at_50%_50%,oklch(0.2_0.08_285/0.5),transparent_75%)]" />

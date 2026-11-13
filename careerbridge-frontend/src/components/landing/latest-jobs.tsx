@@ -16,7 +16,7 @@ const CATS = [
 ]
 
 /** One colour and one line-art figure per card, in the same language as the plates in the horizontal journey. */
-const LOOKS: { tint: string; hue: number; art: ArtKind }[] = [
+export const LOOKS: { tint: string; hue: number; art: ArtKind }[] = [
   { tint: "oklch(0.955 0.04 300)", hue: 300, art: "silk" },
   { tint: "oklch(0.955 0.04 230)", hue: 230, art: "ripples" },
   { tint: "oklch(0.955 0.045 175)", hue: 175, art: "waves" },
@@ -26,7 +26,7 @@ const LOOKS: { tint: string; hue: number; art: ArtKind }[] = [
 ]
 
 /** Showcase roles for the landing page: well-known companies with their real logos (from /public/logos). */
-interface ShowcaseJob {
+export interface ShowcaseJob {
   id: string
   title: string
   company: string
@@ -40,7 +40,7 @@ interface ShowcaseJob {
   days_left: number
 }
 
-const SHOWCASE: ShowcaseJob[] = [
+export const SHOWCASE: ShowcaseJob[] = [
   { id: "google", title: "Software Engineering Intern", company: "Google", logo: "google", location: "Bengaluru", work_mode: "hybrid", stipend: 100000, duration_months: 3, openings: 6, skills: 5, days_left: 12 },
   { id: "nvidia", title: "Deep Learning Research Intern", company: "NVIDIA", logo: "nvidia", location: "Pune", work_mode: "onsite", stipend: 90000, duration_months: 6, openings: 3, skills: 6, days_left: 9 },
   { id: "atlassian", title: "Frontend Engineering Intern", company: "Atlassian", logo: "atlassian", location: "Bengaluru", work_mode: "remote", stipend: 85000, duration_months: 3, openings: 4, skills: 4, days_left: 18 },
@@ -54,7 +54,7 @@ const SHOWCASE: ShowcaseJob[] = [
   { id: "zomato", title: "Machine Learning Intern", company: "Zomato", logo: "zomato", location: "Gurugram", work_mode: "hybrid", stipend: 50000, duration_months: 6, openings: 3, skills: 5, days_left: 8 },
   { id: "zoho", title: "Full Stack Developer Intern", company: "Zoho", logo: "zoho", location: "Chennai", work_mode: "onsite", stipend: 35000, duration_months: 6, openings: 8, skills: 5, days_left: 20 },
 ]
-const short = (v: string | number) => {
+export const short = (v: string | number) => {
   const n = Number(v || 0)
   return n >= 1000 ? `${Math.round(n / 1000)}K` : String(n)
 }
