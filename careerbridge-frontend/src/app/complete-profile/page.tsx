@@ -86,7 +86,7 @@ export default function CompleteProfilePage() {
               logout();
               router.replace("/login");
             }}
-            className="font-semibold text-[oklch(0.5_0.17_285)] underline-offset-4 hover:underline"
+            className="font-semibold text-[oklch(0.5_0.17_285)] dark:text-[oklch(0.78_0.12_285)] underline-offset-4 hover:underline"
           >
             Sign out
           </button>

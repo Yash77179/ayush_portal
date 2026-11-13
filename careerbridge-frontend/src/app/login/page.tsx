@@ -54,7 +54,7 @@ export default function LoginPage() {
         <Field
           label="Password"
           action={
-            <Link href="/forgot-password" className="mr-1 text-[13.5px] font-medium text-[oklch(0.5_0.17_285)] underline-offset-4 hover:underline">
+            <Link href="/forgot-password" className="mr-1 text-[13.5px] font-medium text-[oklch(0.5_0.17_285)] dark:text-[oklch(0.78_0.12_285)] underline-offset-4 hover:underline">
               Forgot password?
             </Link>
           }

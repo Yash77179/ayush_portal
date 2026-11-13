@@ -47,12 +47,12 @@ export function AuthShell({
           </div>
 
           {aside && <div className="relative mb-2.5 flex justify-end">{aside}</div>}
-          <h1 className="font-display relative text-[1.9rem] sm:text-[2.7rem] leading-[0.95] tracking-[-0.02em] text-[oklch(0.22_0.05_280)] italic">{title}</h1>
+          <h1 className="font-display relative text-[1.9rem] sm:text-[2.7rem] leading-[0.95] tracking-[-0.02em] text-[oklch(0.22_0.05_280)] italic dark:text-[oklch(0.95_0.025_285)]">{title}</h1>
           <p className="relative mt-1.5 text-[13.5px] leading-snug text-muted-foreground sm:mt-2 sm:text-[15px]">{subtitle}</p>
 
           <div className="relative mt-4 sm:mt-6">{children}</div>
           {/* the footer: plain text on the white card — no rule, no band */}
-          <p className="relative mt-4 text-center text-[13.5px] sm:mt-5 sm:text-[14.5px] text-muted-foreground [&_a]:font-semibold [&_a]:text-[oklch(0.5_0.17_285)] [&_a]:underline-offset-4 [&_a]:hover:underline">{footer}</p>
+          <p className="relative mt-4 text-center text-[13.5px] sm:mt-5 sm:text-[14.5px] text-muted-foreground [&_a]:font-semibold [&_a]:text-[oklch(0.5_0.17_285)] dark:[&_a]:text-[oklch(0.78_0.12_285)] [&_a]:underline-offset-4 [&_a]:hover:underline">{footer}</p>
         </section>
       </main>
     </div>

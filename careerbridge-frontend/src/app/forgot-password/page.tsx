@@ -167,7 +167,7 @@ export default function ForgotPasswordPage() {
                 ) : (
                   <>
                     Didn&apos;t get it? Check spam, or{" "}
-                    <button type="button" onClick={sendCode} disabled={loading} className="font-semibold text-[oklch(0.5_0.17_285)] underline-offset-4 hover:underline disabled:opacity-50">
+                    <button type="button" onClick={sendCode} disabled={loading} className="font-semibold text-[oklch(0.5_0.17_285)] dark:text-[oklch(0.78_0.12_285)] underline-offset-4 hover:underline disabled:opacity-50">
                       send a new code
                     </button>
                   </>
