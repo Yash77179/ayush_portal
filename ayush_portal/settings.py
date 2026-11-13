@@ -118,7 +118,16 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# Uploads (resumes, photos, logos). On Fly.io this points at the persistent volume (/data/media) so files survive redeploys.
+MEDIA_ROOT = config("MEDIA_ROOT", default=str(BASE_DIR / "media"))
+
+# Production (DEBUG off): Fly terminates HTTPS at its proxy and forwards plain HTTP, so trust its header,
+# and only send cookies over HTTPS. The HTTP→HTTPS redirect is done by Fly (force_https in fly.toml).
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

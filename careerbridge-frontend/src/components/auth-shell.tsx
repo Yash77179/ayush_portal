@@ -42,12 +42,16 @@ export function AuthShell({
       <main className="relative grid min-h-svh place-items-center px-4 py-24 sm:px-8">
         {/* one card — the site's double-border surface, with a few fine lines fading in from its top edge */}
         <section className="glass-card rise relative w-full max-w-[21.5rem] overflow-hidden rounded-[24px] px-4 pt-5 pb-4 [--r:24px] sm:max-w-[25rem] sm:rounded-[30px] sm:px-9 sm:pt-8 sm:pb-6 sm:[--r:30px] max-sm:[&_button]:text-[14.5px] max-sm:[&_button:not([role])]:h-11 max-sm:[&_input]:h-11 max-sm:[&_[data-slot=select-trigger]]:h-11 max-sm:[&_[data-slot=select-trigger]]:text-[15px] max-sm:[&_[role=combobox]]:h-11max-sm:[&_input]:text-[15px] max-sm:[&_label]:text-[13px]">
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-52 opacity-70 [mask-image:linear-gradient(to_bottom,#000,transparent)]">
+          {/* ink lines on the light card, light lines on the dark card */}
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-52 opacity-70 [mask-image:linear-gradient(to_bottom,#000,transparent)] dark:hidden">
             <PlateArt kind="silk" hue={292} id="auth-lines" tone="ink" />
+          </div>
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 hidden h-52 opacity-45 [mask-image:linear-gradient(to_bottom,#000,transparent)] dark:block">
+            <PlateArt kind="silk" hue={292} id="auth-lines-dark" tone="light" />
           </div>
 
           {aside && <div className="relative mb-2.5 flex justify-end">{aside}</div>}
-          <h1 className="font-display relative text-[1.9rem] sm:text-[2.7rem] leading-[0.95] tracking-[-0.02em] text-[oklch(0.22_0.05_280)] italic dark:text-[oklch(0.95_0.025_285)]">{title}</h1>
+          <h1 className="font-display relative text-[1.9rem] sm:text-[2.7rem] leading-[0.95] tracking-[-0.02em] text-[oklch(0.22_0.05_280)] italic dark:text-[oklch(0.84_0.035_292)]">{title}</h1>
           <p className="relative mt-1.5 text-[13.5px] leading-snug text-muted-foreground sm:mt-2 sm:text-[15px]">{subtitle}</p>
 
           <div className="relative mt-4 sm:mt-6">{children}</div>

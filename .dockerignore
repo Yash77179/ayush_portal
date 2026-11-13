@@ -1,0 +1,17 @@
+# Only the Django app goes into the image — the Next.js frontend deploys to Vercel.
+careerbridge-frontend/
+.git/
+.github/
+.vscode/
+.idea/
+**/__pycache__/
+*.py[cod]
+*.sqlite3
+media/
+staticfiles/
+.env
+.env.*
+fly.toml
+Dockerfile
+.dockerignore
+*.md
