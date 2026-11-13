@@ -87,6 +87,12 @@ class Internship(models.Model):
         choices=Status.choices,
         default=Status.DRAFT,
     )
+    # Eligibility: students who don't meet these can't apply (and are told why). Blank = no rule.
+    min_cgpa = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    allowed_branches = models.CharField(max_length=500, blank=True, help_text="Comma-separated, e.g. CSE, IT, ECE")
+    allowed_degrees = models.CharField(max_length=300, blank=True, help_text="Comma-separated, e.g. B.Tech, BCA")
+    graduation_year_min = models.PositiveIntegerField(null=True, blank=True)
+    graduation_year_max = models.PositiveIntegerField(null=True, blank=True)
     required_skills = models.ManyToManyField(
         Skill,
         through="InternshipSkill",
@@ -125,3 +131,27 @@ class InternshipSkill(models.Model):
     def __str__(self):
         req = "Required" if self.is_required else "Preferred"
         return f"{self.skill.name} ({req}) for {self.internship.title}"
+
+
+class ScreeningQuestion(models.Model):
+    """A question students answer when they apply. A knockout answer rejects the application automatically."""
+
+    class Kind(models.TextChoices):
+        TEXT = "text", "Short answer"
+        YESNO = "yesno", "Yes / No"
+        CHOICE = "choice", "Multiple choice"
+
+    internship = models.ForeignKey(Internship, on_delete=models.CASCADE, related_name="screening_questions")
+    text = models.CharField(max_length=300)
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.TEXT)
+    choices = models.JSONField(default=list, blank=True)
+    required = models.BooleanField(default=True)
+    # For yes/no and multiple choice: the answer that is needed. Any other answer = automatic rejection.
+    knockout_answer = models.CharField(max_length=200, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.text

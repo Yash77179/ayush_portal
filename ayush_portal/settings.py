@@ -3,6 +3,7 @@ Django settings for CareerBridge — Academia–Industry Collaboration Portal
 SIH26044 | Ministry of Ayush
 """
 
+import os
 from pathlib import Path
 from decouple import config, Csv
 from datetime import timedelta
@@ -31,12 +32,14 @@ INSTALLED_APPS = [
     "internships",
     "applications",
     "analytics",
+    "assistant",
+    "notifications",
+    "campus",
 ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -65,28 +68,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "ayush_portal.wsgi.application"
 
-# Database — use PostgreSQL in production (via DATABASE_URL or DB_* params), SQLite for development
-DATABASE_URL = config("DATABASE_URL", default=None)
+# Database — PostgreSQL if DATABASE_URL is set (production), SQLite otherwise (local development)
+DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL:
     try:
         import dj_database_url
         DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
     except ImportError:
+        import urllib.parse as urlparse
+        url = urlparse.urlparse(DATABASE_URL)
         DATABASES = {
             "default": {
-                "ENGINE": config("DB_ENGINE", default="django.db.backends.sqlite3"),
-                "NAME": config("DB_NAME", default=str(BASE_DIR / "db.sqlite3")),
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": url.path.lstrip("/"),
+                "USER": url.username,
+                "PASSWORD": url.password,
+                "HOST": url.hostname,
+                "PORT": url.port or 5432,
             }
         }
 else:
     DATABASES = {
         "default": {
-            "ENGINE": config("DB_ENGINE", default="django.db.backends.sqlite3"),
-            "NAME": config("DB_NAME", default=str(BASE_DIR / "db.sqlite3")),
-            "USER": config("DB_USER", default=""),
-            "PASSWORD": config("DB_PASSWORD", default=""),
-            "HOST": config("DB_HOST", default=""),
-            "PORT": config("DB_PORT", default=""),
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
@@ -138,18 +143,8 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-# Static files storage with WhiteNoise
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
-
 # CORS & CSRF — allow Next.js frontend (local and deployed)
-CORS_ALLOW_ALL_ORIGINS = config("CORS_ALLOW_ALL_ORIGINS", default=False, cast=bool)
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
     default="http://localhost:3000,http://127.0.0.1:3000",
@@ -162,3 +157,36 @@ CSRF_TRUSTED_ORIGINS = config(
     default="http://localhost:3000,http://127.0.0.1:3000",
     cast=Csv(),
 )
+
+# Enable WhiteNoise automatically if installed (production)
+try:
+    import whitenoise  # noqa: F401
+    MIDDLEWARE.insert(2, "whitenoise.middleware.WhiteNoiseMiddleware")
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+except ImportError:
+    pass
+
+# Google sign-in: the OAuth "Web application" client ID (no secret needed — the browser popup does the OAuth part)
+GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")
+
+# Bridge, the AI assistant. NVIDIA answers first, then OpenRouter, then Google Gemini — each one a backup for the last.
+# Without any key the chat explains that it is not set up yet.
+NVIDIA_API_KEY = config("NVIDIA_API_KEY", default="")
+NVIDIA_MODEL = config("NVIDIA_MODEL", default="nvidia/nemotron-3.5-super-vl-120b-a12b")
+NVIDIA_THINKING = config("NVIDIA_THINKING", default=True, cast=bool)  # let the model reason before answering (not shown)
+# second in line: OpenRouter (openrouter.ai). Models ending in ":free" cost nothing.
+OPENROUTER_API_KEY = config("OPENROUTER_API_KEY", default="")
+OPENROUTER_MODEL = config("OPENROUTER_MODEL", default="google/gemma-4-31b-it:free")
+GEMINI_API_KEY = config("GEMINI_API_KEY", default="")
+# tried in order: if one is overloaded (503) before answering, the next one takes over
+GEMINI_MODELS = config("GEMINI_MODELS", default="gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest", cast=Csv())
+# Bridge's spoken voice: Speechify (simba-3.5) first, Microsoft Edge neural voices (free, no key) as the backup
+SPEECHIFY_API_KEY = config("SPEECHIFY_API_KEY", default="")
+SPEECHIFY_MODEL = config("SPEECHIFY_MODEL", default="simba-3.5")

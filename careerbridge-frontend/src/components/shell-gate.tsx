@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { AppShell } from "@/components/app-shell";
 
-const SHELL_ROOTS = ["/dashboard", "/internships"];
+const SHELL_ROOTS = ["/dashboard", "/internships", "/companies"];
 const inRoot = (path: string, root: string) => path === root || path.startsWith(root + "/");
 
 /**
@@ -22,13 +22,17 @@ export function ShellGate({ children }: { children: React.ReactNode }) {
   const inShell = SHELL_ROOTS.some((r) => inRoot(pathname, r));
   const needsAuth = inRoot(pathname, "/dashboard");
 
+  // a Google sign-up that hasn't picked its role, gender, name and username can't use the app yet
+  const unfinished = !!user && user.profile_completed === false;
+
   useEffect(() => {
     if (!loading && !user && needsAuth) router.push("/login");
-  }, [loading, user, needsAuth, router]);
+    else if (unfinished && inShell) router.replace("/complete-profile");
+  }, [loading, user, needsAuth, unfinished, inShell, router]);
 
   if (!inShell) return <>{children}</>;
 
-  if (loading || (!user && needsAuth)) {
+  if (loading || (!user && needsAuth) || unfinished) {
     return (
       <div className="flex min-h-svh items-center justify-center bg-background">
         <Loader2 className="size-6 animate-spin text-muted-foreground" />

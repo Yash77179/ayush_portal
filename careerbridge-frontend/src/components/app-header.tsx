@@ -65,6 +65,7 @@ export function AppHeader() {
 
   // Top-level pages only: skip duplicates that share an href.
   const topLinks = links.filter((l, i) => links.findIndex((x) => x.href === l.href) === i)
+  const crowded = topLinks.length > 5
 
   return (
     <header className="sticky top-0 z-30 flex h-[5.75rem] shrink-0 items-center gap-2 bg-gradient-to-b from-background/90 via-background/50 to-transparent px-4 pt-4 sm:px-6 lg:px-10">
@@ -109,13 +110,17 @@ export function AppHeader() {
                 itemRefs.current[l.href] = el
               }}
               aria-current={active ? "page" : undefined}
+              aria-label={l.label}
+              title={crowded && !active ? l.label : undefined}
               className={cn(
-                "group/tab relative z-10 flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-[15.5px] font-medium transition-[color,transform] duration-300 ease-(--ease-out) active:scale-[0.96]",
+                "group/tab relative z-10 flex shrink-0 items-center gap-2 rounded-full py-2.5 text-[15.5px] font-medium transition-[color,transform] duration-300 ease-(--ease-out) active:scale-[0.96]",
+                crowded && !active ? "px-3.5 2xl:px-5" : "px-5",
                 active ? "text-(--on-lime)" : "text-foreground/55 hover:text-foreground"
               )}
             >
               <Icon className="size-[18px] transition-transform duration-300 ease-(--ease-out) group-hover/tab:-translate-y-px group-hover/tab:scale-110" />
-              {l.label}
+              {/* with many sections, inactive tabs show only their icon until the screen is wide enough */}
+              <span className={cn(crowded && !active && "hidden 2xl:inline")}>{l.label}</span>
             </Link>
           )
         })}

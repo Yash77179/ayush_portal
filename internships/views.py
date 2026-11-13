@@ -1,6 +1,7 @@
 """Views for internships app."""
 
-from django.db.models import Q
+from django.db.models import Count, Q
+from rest_framework.exceptions import ValidationError
 from rest_framework import generics, permissions, status, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -10,9 +11,11 @@ from .serializers import (
     StudentSkillSerializer,
     InternshipListSerializer,
     InternshipDetailSerializer,
-    InternshipCreateSerializer,
+    InternshipManageSerializer,
+    CompanyInternshipRowSerializer,
 )
-from institutions.models import StudentProfile, CompanyMembership
+from institutions.access import company_membership, require_membership
+from institutions.models import StudentProfile
 
 
 class IsCompanyRecruiter(permissions.BasePermission):
@@ -61,27 +64,54 @@ class InternshipDetailView(generics.RetrieveAPIView):
 
 
 class CompanyInternshipListCreateView(generics.ListCreateAPIView):
-    """Recruiter: list their company's internships and create new ones."""
+    """Recruiter: list their company's internships (with applicant counts) and create new ones."""
     permission_classes = [IsCompanyRecruiter]
+    pagination_class = None
 
     def get_serializer_class(self):
         if self.request.method == "POST":
-            return InternshipCreateSerializer
-        return InternshipListSerializer
+            return InternshipManageSerializer
+        return CompanyInternshipRowSerializer
 
     def get_queryset(self):
-        company_ids = CompanyMembership.objects.filter(
-            user=self.request.user, is_active=True
-        ).values_list("company_id", flat=True)
-        return Internship.objects.filter(company_id__in=company_ids)
+        m = company_membership(self.request.user)
+        if m is None:
+            return Internship.objects.none()
+        active = ["applied", "review", "shortlisted", "interview", "offered"]
+        return (
+            Internship.objects.filter(company=m.company)
+            .select_related("company")
+            .annotate(
+                applicants=Count("applications", distinct=True),
+                active_applicants=Count("applications", filter=Q(applications__status__in=active), distinct=True),
+            )
+        )
 
     def perform_create(self, serializer):
-        membership = CompanyMembership.objects.filter(
-            user=self.request.user, is_active=True
-        ).first()
-        if not membership:
-            raise permissions.PermissionDenied("No active company membership found.")
-        serializer.save(company=membership.company, posted_by=self.request.user)
+        m = require_membership(self.request.user, manage=True)
+        serializer.save(company=m.company, posted_by=self.request.user)
+
+
+class CompanyInternshipDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Recruiter: read, edit (incl. skills, eligibility, screening questions), publish/close or delete a listing."""
+    permission_classes = [IsCompanyRecruiter]
+    serializer_class = InternshipManageSerializer
+
+    def get_queryset(self):
+        m = company_membership(self.request.user)
+        if m is None:
+            return Internship.objects.none()
+        return Internship.objects.filter(company=m.company).prefetch_related("internship_skills__skill", "screening_questions")
+
+    def perform_update(self, serializer):
+        require_membership(self.request.user, manage=True)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        require_membership(self.request.user, manage=True)
+        if instance.applications.exists():
+            raise ValidationError("This listing has applicants — close it instead of deleting it.")
+        instance.delete()
 
 
 class StudentSkillListCreateView(generics.ListCreateAPIView):
@@ -134,3 +164,25 @@ def skill_match_view(request, internship_id):
     skills_input = [{"name": s["skill__name"], "is_required": s["is_required"]} for s in internship_skills]
     match = calculate_skill_match(student_skills, skills_input)
     return Response(match)
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def eligibility_view(request, internship_id):
+    """Can the signed-in student apply? {eligible, reasons, already_applied, profile_verified}."""
+    from applications.models import Application
+    from .eligibility import internship_reasons
+
+    internship = Internship.objects.filter(pk=internship_id).first()
+    if internship is None:
+        return Response({"error": "Internship not found."}, status=404)
+    profile = StudentProfile.objects.filter(user=request.user).first()
+    if profile is None:
+        return Response({"eligible": False, "reasons": ["Complete your student profile first."], "already_applied": False})
+    reasons = internship_reasons(profile, internship)
+    return Response({
+        "eligible": not reasons,
+        "reasons": reasons,
+        "already_applied": Application.objects.filter(student=profile, internship=internship).exists(),
+        "profile_verified": profile.verification_status == "verified",
+    })

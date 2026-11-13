@@ -5,6 +5,9 @@ import Lenis from "lenis"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
+import { setLenis } from "@/lib/lenis-instance"
+import { SMOOTH_SCROLL } from "@/lib/smooth-scroll-config"
+
 /**
  * One place for all landing-page motion: Lenis smooth scrolling driven by GSAP's ticker,
  * ScrollTrigger-scrubbed parallax, masked line reveals, word-by-word "reading" text,
@@ -19,21 +22,47 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
  *   data-stack                    sticky cards that scale back as the next one arrives
  *   data-curtain                  stays pinned and recedes (scale/fade) while the next section slides over it
  *   data-count="1200"             number counts up when seen
+ *   data-leave                    a band that slides off like a sheet, uncovering what waits underneath it
+ *                                 (the next section is pulled up under it by --under, and holds still while it goes)
  *   data-draw                     an svg path draws itself
  */
 export function LandingMotion() {
+  // --under: the height of the band that leaves (data-leave). The section after it is pulled up by this much, so it
+  // already sits underneath, in place, before the band goes.
+  React.useEffect(() => {
+    const band = document.querySelector<HTMLElement>("[data-leave]")
+    if (!band) return
+    const root = document.documentElement
+    let last = -1
+    const set = () => {
+      const h = Math.round(band.offsetHeight)
+      if (h === last) return
+      last = h
+      root.style.setProperty("--under", `${h}px`)
+      ScrollTrigger.refresh()
+    }
+    const ro = new ResizeObserver(set)
+    ro.observe(band)
+    set()
+    return () => {
+      ro.disconnect()
+      root.style.removeProperty("--under")
+    }
+  }, [])
+
   React.useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
     const root = document.documentElement
     const mm = gsap.matchMedia()
 
     mm.add(
-      { motion: "(prefers-reduced-motion: no-preference)", wide: "(min-width: 900px)" },
+      { motion: "(prefers-reduced-motion: no-preference)", wide: "(min-width: 1024px)" },
       (ctx) => {
         const { wide } = ctx.conditions as { motion: boolean; wide: boolean }
 
         // ── Smooth scrolling (Lenis) wired to GSAP's clock ──
-        const lenis = new Lenis({ lerp: 0.105, wheelMultiplier: 1, smoothWheel: true, anchors: { offset: -90 } })
+        const lenis = new Lenis(SMOOTH_SCROLL)
+        setLenis(lenis)
         lenis.on("scroll", ScrollTrigger.update)
         const tick = (t: number) => lenis.raf(t * 1000)
         gsap.ticker.add(tick)
@@ -86,50 +115,82 @@ export function LandingMotion() {
           )
         })
 
+        const cleanups: Array<() => void> = []
+
         // ── Horizontal scroll: the page pins, the track slides sideways, layers drift at their own speed ──
         if (wide) {
           gsap.utils.toArray<HTMLElement>("[data-hscroll]").forEach((section) => {
             const track = section.querySelector<HTMLElement>(".h-track")
             if (!track) return
-            const segs = Array.from(section.querySelectorAll<HTMLElement>(".h-seg"))
+            const steps = Array.from(section.querySelectorAll<HTMLElement>(".h-step"))
             const dist = () => Math.max(0, track.scrollWidth - window.innerWidth)
             // CSS-sticky pin (no JS pin, so no flicker); a short hold at each end makes the hand-off to vertical scrolling calm
-            const travel = () => dist() * 1.75
+            const travel = () => Math.max(1, dist() * 1.75)
+            // Once the track has finished the stage stays pinned for HOLD more scroll while the next section
+            // (pulled up by the same 220svh in page.tsx) rises over it, fog first.
+            const hold = () => window.innerHeight * 2.2
+            // it sits under the band above until that has gone: the journey only starts moving after that much scroll
+            // …and then a short pause once it's uncovered, so the scene sinks in before it starts to travel
+            const lead = () => {
+              const under = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--under")) || 0
+              return under ? under + window.innerHeight * 0.7 : 0
+            }
             const setHeight = () => {
-              section.style.height = `${travel() + window.innerHeight}px`
+              section.style.height = `${lead() + travel() + window.innerHeight + hold()}px`
             }
             setHeight()
-            ScrollTrigger.addEventListener("refreshInit", setHeight)
+
+            // Measure once (and on refresh), never per scroll tick: reading offsetLeft/offsetWidth while
+            // transforms are changing forces layout, which is what made scrolling here feel heavy.
+            let vw = window.innerWidth
+            let layers: { el: HTMLElement; mid: number; k: number }[] = []
+            let scenes: { left: number; width: number }[] = []
+            const measure = () => {
+              vw = window.innerWidth
+              layers = []
+              section.querySelectorAll<HTMLElement>(".h-panel").forEach((pn) => {
+                const mid = pn.offsetLeft + pn.offsetWidth / 2
+                pn.querySelectorAll<HTMLElement>("[data-hpar]").forEach((el) => layers.push({ el, mid, k: parseFloat(el.dataset.hpar || "0.3") * 340 }))
+              })
+              scenes = Array.from(section.querySelectorAll<HTMLElement>("[data-seg]")).map((pn) => ({ left: pn.offsetLeft, width: pn.offsetWidth }))
+            }
+            measure()
+            const onRefresh = () => {
+              setHeight()
+              measure()
+            }
+            ScrollTrigger.addEventListener("refreshInit", onRefresh)
+            cleanups.push(() => ScrollTrigger.removeEventListener("refreshInit", onRefresh))
+
             const tl = gsap.timeline({
               defaults: { ease: "none" },
               scrollTrigger: {
                 trigger: section,
                 scrub: 0.4,
-                start: "top top",
-                end: "bottom bottom",
+                start: () => `top+=${lead()} top`,
+                end: () => `+=${travel()}`,
                 invalidateOnRefresh: true,
                 onUpdate: () => {
                   const x = -(gsap.getProperty(track, "x") as number)
-                  const allPanels = Array.from(section.querySelectorAll<HTMLElement>(".h-panel"))
-                  const panels = Array.from(section.querySelectorAll<HTMLElement>("[data-seg]"))
-                  // parallax: each layer drifts by how far its panel is from the middle of the screen
-                  allPanels.forEach((pn) => {
-                    const rel = (pn.offsetLeft - x + pn.offsetWidth / 2 - window.innerWidth / 2) / window.innerWidth
-                    pn.querySelectorAll<HTMLElement>("[data-hpar]").forEach((layer) => {
-                      const speed = parseFloat(layer.dataset.hpar || "0.3")
-                      gsap.set(layer, { x: rel * speed * 340 })
-                    })
-                  })
-                  segs.forEach((seg, i) => {
-                    const pn = panels[i]
-                    if (!pn) return
-                    const f = (x + window.innerWidth * 0.5 - pn.offsetLeft) / pn.offsetWidth
-                    gsap.set(seg, { scaleX: Math.max(0, Math.min(1, f)) })
-                  })
+                  // parallax: each layer drifts by how far its panel is from the middle of the screen — one cheap transform each
+                  for (const l of layers) l.el.style.transform = `translate3d(${(((l.mid - x - vw / 2) / vw) * l.k).toFixed(1)}px,0,0)`
+                  // progress: how far through each scene we are, and which step is lit (written only when it changes)
+                  for (let i = 0; i < steps.length; i++) {
+                    const sc = scenes[i]
+                    if (!sc) continue
+                    const f = Math.max(0, Math.min(1, (x + vw * 0.5 - sc.left) / sc.width))
+                    const step = steps[i]
+                    const state = f >= 0.995 ? "done" : f > 0.004 ? "active" : "idle"
+                    if (step.dataset.state !== state) step.dataset.state = state
+                    if (Math.abs(f - Number(step.dataset.p || 0)) > 0.002) {
+                      step.dataset.p = f.toFixed(3)
+                      step.style.setProperty("--p", f.toFixed(3))
+                    }
+                  }
                 },
               },
             })
-            tl.to(track, { x: () => -dist(), duration: 1, ease: "none" })
+            tl.to(track, { x: () => -dist(), duration: 1, ease: "none" }, 0)
           })
         }
 
@@ -157,10 +218,10 @@ export function LandingMotion() {
           const state = { v: 0 }
           gsap.to(state, {
             v: target,
-            duration: 1.8,
+            duration: 2.6,
             ease: "power3.out",
             onUpdate: () => (el.textContent = Math.round(state.v).toLocaleString("en-IN") + suffix),
-            scrollTrigger: { trigger: el, start: "top 90%", once: true },
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
           })
         })
 
@@ -176,9 +237,11 @@ export function LandingMotion() {
         window.addEventListener("load", refresh)
 
         return () => {
+          cleanups.forEach((fn) => fn())
           document.querySelectorAll<HTMLElement>("[data-hscroll]").forEach((n) => (n.style.height = ""))
           window.removeEventListener("load", refresh)
           gsap.ticker.remove(tick)
+          setLenis(null)
           lenis.destroy()
           root.classList.remove("motion-ready")
         }

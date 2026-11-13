@@ -44,5 +44,35 @@ export {
   WalletIcon,
   WidgetIcon as OverviewIcon,
 } from "@solar-icons/react/linear"
+export {
+  ArrowUpIcon,
+  ChatRoundDotsIcon as ChatIcon,
+  HistoryIcon,
+  MaximizeSquareIcon as ExpandIcon,
+  MicrophoneIcon,
+  PenNewSquareIcon as NewChatIcon,
+  StarsIcon as SparkleIcon,
+  StopIcon,
+  VolumeLoudIcon as SpeakerIcon,
+  VolumeCrossIcon as SpeakerOffIcon,
+} from "@solar-icons/react/linear"
 export { BookmarkIcon } from "@solar-icons/react/linear"
 export { BookmarkIcon as BookmarkSolidIcon } from "@solar-icons/react/bold"
+export {
+  KanbanIcon as PipelineIcon,
+  ClipboardListIcon as ClipboardIcon,
+  CopyIcon,
+  DownloadMinimalisticIcon as DownloadIcon,
+  FilterIcon,
+  LetterIcon as MailIcon,
+  LinkIcon,
+  MapPointIcon as LocationIcon,
+  NotesIcon,
+  PhoneIcon,
+  PrinterIcon,
+  ShieldCheckIcon as VerifiedIcon,
+  TagIcon,
+  VideocameraRecordIcon as VideoIcon,
+  VolumeLoudIcon as MegaphoneIcon,
+} from "@solar-icons/react/linear"
+export { StarIcon as StarSolidIcon } from "@solar-icons/react/bold"

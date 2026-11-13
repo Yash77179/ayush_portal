@@ -1,7 +1,7 @@
-import Link from "next/link"
 import { cn } from "cn"
 
-import { Roll } from "@/components/landing/roll-link"
+import { PlateArt, type ArtKind } from "@/components/landing/plate-art"
+import { OvalLink, PickYours, RolesChapters } from "@/components/landing/roles-chapters"
 
 /**
  * "Who it's for": a pinned horizontal journey. One thread runs through every scene;
@@ -10,45 +10,35 @@ import { Roll } from "@/components/landing/roll-link"
  */
 
 /* ── little pieces ───────────────────────────────────────────────────────── */
-function OvalLink({ href, children }: { href: string; children: string }) {
-  return (
-    <Link href={href} className="group/oval font-display relative inline-flex h-14 items-center justify-center px-12 text-[1.1rem] tracking-[0.08em] text-[oklch(0.22_0.06_280)] uppercase outline-none">
-      <svg aria-hidden viewBox="0 0 320 56" preserveAspectRatio="none" className="absolute inset-0 size-full text-[oklch(0.22_0.06_280/0.55)] transition-[transform,color] duration-500 ease-(--ease-out) group-hover/oval:scale-[1.06] group-hover/oval:text-[oklch(0.22_0.06_280)]" fill="none" stroke="currentColor">
-        <ellipse cx="160" cy="28" rx="158" ry="26" />
-      </svg>
-      <span className="relative">
-        <Roll>{children}</Roll>
-      </span>
-    </Link>
-  )
-}
 
 type Pos = { left: string; top: string; w: string; h: string; par: string; rot?: string; label?: string }
 
 
-/** Fine line-art ground for each plate: dots, rules or contour rings, in ink at very low contrast. */
-function ground(hue: number) {
-  const kind = Math.round(hue / 10) % 3
-  const line = "oklch(0.25 0.08 280 / 0.1)"
-  if (kind === 0) return `radial-gradient(${line} 1.2px, transparent 1.6px) 0 0 / 14px 14px`
-  if (kind === 1) return `repeating-linear-gradient(0deg, ${line} 0 1px, transparent 1px 11px)`
-  return `repeating-radial-gradient(circle at 78% 18%, ${line} 0 1px, transparent 1px 12px)`
-}
-
-/** An editorial plate: paper, a hairline frame, a second frame offset behind it, and a figure caption. */
-function Win({ pos, shape = "rect", hue, children, className }: { pos: Pos; shape?: "rect" | "circle"; hue: number; children?: React.ReactNode; className?: string }) {
+/** An editorial plate: paper, a hairline frame with crop marks, a second frame offset behind it, its own line art, and a figure caption. */
+function Win({ pos, shape = "rect", hue, art, children, className }: { pos: Pos; shape?: "rect" | "circle"; hue: number; art: ArtKind; children?: React.ReactNode; className?: string }) {
   const round = shape === "circle"
+  const id = `pa-${art}-${pos.par.replace(/[^0-9]/g, "")}-${hue}`
   return (
-    <div data-hpar={pos.par} className="absolute hidden lg:block" style={{ left: pos.left, top: pos.top, width: pos.w, height: pos.h }}>
+    <div data-hpar={pos.par} className="absolute hidden will-change-transform lg:block" style={{ left: pos.left, top: pos.top, width: pos.w, height: pos.h }}>
       {/* the offset frame behind */}
       <span aria-hidden className={cn("absolute inset-0 translate-x-3 translate-y-3 border border-[oklch(0.2_0.05_280/0.22)]", round ? "rounded-full" : "")} />
       <div
-        className={cn("relative size-full overflow-hidden border border-[oklch(0.2_0.05_280/0.85)] bg-[oklch(0.995_0.004_285)] text-[oklch(0.2_0.05_280)]", round ? "rounded-full" : "", className)}
-        style={{ transform: pos.rot ? `rotate(${pos.rot})` : undefined }}
+        className={cn("relative size-full overflow-hidden border border-[oklch(0.2_0.05_280/0.85)] text-[oklch(0.2_0.05_280)] shadow-[0_30px_50px_-34px_oklch(0.2_0.06_280/0.4)]", round ? "rounded-full" : "", className)}
+        style={{ transform: pos.rot ? `rotate(${pos.rot})` : undefined, background: `linear-gradient(158deg, oklch(0.999 0.002 285), oklch(0.962 0.026 ${hue}))` }}
       >
-        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: ground(hue) }} />
-        {/* one soft wash of accent, bottom-right, so each plate has a single quiet colour */}
-        <span aria-hidden className="pointer-events-none absolute -right-1/4 -bottom-1/3 size-[75%] rounded-full opacity-60 blur-2xl" style={{ background: `oklch(0.88 0.08 ${hue})` }} />
+        <PlateArt kind={art} hue={hue} id={id} centered={round} />
+        {/* an inner hairline, and little crop marks at the corners */}
+        <span aria-hidden className={cn("pointer-events-none absolute inset-[7px] border border-[oklch(0.2_0.05_280/0.14)]", round ? "rounded-full" : "")} />
+        {!round && (
+          <>
+            <span aria-hidden className="pointer-events-none absolute top-[7px] left-[7px] size-2.5 border-t-2 border-l-2 border-[oklch(0.2_0.05_280/0.7)]" />
+            <span aria-hidden className="pointer-events-none absolute top-[7px] right-[7px] size-2.5 border-t-2 border-r-2 border-[oklch(0.2_0.05_280/0.7)]" />
+            <span aria-hidden className="pointer-events-none absolute bottom-[7px] left-[7px] size-2.5 border-b-2 border-l-2 border-[oklch(0.2_0.05_280/0.7)]" />
+            <span aria-hidden className="pointer-events-none absolute right-[7px] bottom-[7px] size-2.5 border-r-2 border-b-2 border-[oklch(0.2_0.05_280/0.7)]" />
+          </>
+        )}
+        {/* round plates keep their words on a quiet white medallion, with the figure circling around it */}
+        {round && <span aria-hidden className="pointer-events-none absolute inset-[25%] rounded-full bg-[oklch(0.998_0.003_285/0.94)] shadow-[0_0_0_1px_oklch(0.2_0.05_280/0.12),0_10px_24px_-12px_oklch(0.2_0.06_280/0.3)]" />}
         <div className="relative size-full">{children}</div>
       </div>
       {pos.label && (
@@ -110,9 +100,30 @@ function Center({ caption, title, extra, cta, href }: { caption: string; title: 
 /* ── the section ─────────────────────────────────────────────────────────── */
 export function RolesScroll() {
   return (
-    <section id="roles" data-hscroll className="relative bg-[oklch(0.987_0.005_285)] text-[oklch(0.2_0.05_280)]">
-      <div className="h-stick relative overflow-hidden py-24 lg:sticky lg:top-0 lg:h-svh lg:py-0">
-        <div className="h-track relative flex flex-col gap-24 lg:h-full lg:w-max lg:flex-row lg:gap-0">
+    <section
+      id="roles"
+      data-hscroll
+      // pulled up under the internships band (--under = its height), so it is already there when that band leaves;
+      // on phones a spacer after it gives its sticky opening screen that much scroll to hold still for
+      className="relative [margin-top:calc(-1*var(--under,0px))] bg-[oklch(0.987_0.005_285)] text-[oklch(0.2_0.05_280)]"
+    >
+      {/* phones & tablets, 1 · the chapters: held still while the internships band leaves, then they scroll */}
+      <div className="lg:hidden">
+        <div className="sticky top-0">
+          <RolesChapters />
+        </div>
+        {/* (a sticky box can't travel into its parent's padding, so the room to hold still is a real element) */}
+        <div aria-hidden className="h-[calc(var(--under,0px)+8svh)]" /> {/* uncovered, then a beat before the next screen arrives (kept short so "Pick yours" follows the last card closely) */}
+      </div>
+      {/* phones & tablets, 2 · "Pick yours" holds the last screen while the numbers band rises over it */}
+      <div className="h-[200svh] lg:hidden">
+        <div className="sticky top-0 flex h-svh items-center">
+          <PickYours />
+        </div>
+      </div>
+      {/* desktop: the pinned horizontal journey */}
+      <div className="h-stick relative overflow-hidden max-lg:hidden lg:sticky lg:top-0 lg:h-svh">
+        <div className="h-track relative flex will-change-transform flex-col gap-24 lg:h-full lg:w-max lg:flex-row lg:gap-0">
           {/* the thread: one hairline through every scene */}
           <span aria-hidden className="pointer-events-none absolute top-1/2 right-0 left-0 hidden h-px bg-gradient-to-r from-transparent via-[oklch(0.2_0.05_280/0.4)] to-transparent lg:block" />
 
@@ -132,15 +143,15 @@ export function RolesScroll() {
                 </svg>
               </p>
             </div>
-            <Win pos={{ left: "70%", top: "58%", w: "13rem", h: "13rem", par: "0.5", label: "Fig. 00 · Overview" }} shape="circle" hue={285}>
-              <div className="absolute inset-0 flex items-center justify-center font-display text-[4.6rem] italic">3</div>
+            <Win art="spiral" pos={{ left: "76%", top: "55%", w: "14.5rem", h: "14.5rem", par: "0.5", label: "Fig. 00 · Overview" }} shape="circle" hue={285}>
+              <div className="absolute inset-0 flex items-center justify-center font-display text-[4.4rem] italic leading-none">3</div>
             </Win>
           </div>
 
           {/* ── students ── */}
           <div data-seg className="h-panel relative lg:h-full lg:w-[128vw]">
             <Arcs />
-            <Win pos={{ left: "3%", top: "20%", w: "27%", h: "36%", par: "0.45", label: "Fig. 01 · Skill map" }} hue={262}>
+            <Win art="waves" pos={{ left: "3%", top: "20%", w: "27%", h: "36%", par: "0.45", label: "Fig. 01 · Skill map" }} hue={262}>
               <div className="relative flex h-full flex-col justify-between p-6">
                 <div className="flex flex-wrap gap-2">
                   {["Python", "React", "SQL", "Figma", "Git"].map((s) => (
@@ -150,7 +161,7 @@ export function RolesScroll() {
                 <p className="font-display text-[2.6rem] leading-none italic">Your skills, mapped</p>
               </div>
             </Win>
-            <Win pos={{ left: "40%", top: "-3%", w: "22%", h: "30%", par: "-0.35", label: "Fig. 02 · Match score" }} hue={300}>
+            <Win art="ripples" pos={{ left: "40%", top: "-3%", w: "22%", h: "30%", par: "-0.35", label: "Fig. 02 · Match score" }} hue={300}>
               <div className="flex h-full flex-col items-center justify-center gap-2">
                 <div className="relative flex items-center justify-center text-[oklch(0.45_0.17_285)]">
                   <Ring v={86} size={124} />
@@ -159,7 +170,7 @@ export function RolesScroll() {
                 <p className="text-[12.5px] tracking-[0.18em] text-[oklch(0.22_0.06_280/0.6)] uppercase">Match score</p>
               </div>
             </Win>
-            <Win pos={{ left: "70%", top: "56%", w: "24%", h: "28%", par: "0.7", label: "Fig. 03 · Status" }} hue={240}>
+            <Win art="contours" pos={{ left: "70%", top: "56%", w: "24%", h: "28%", par: "0.7", label: "Fig. 03 · Status" }} hue={240}>
               <ul className="flex h-full flex-col justify-center gap-2.5 p-6 text-[13.5px]">
                 {[["Zoho", "Shortlisted"], ["Razorpay", "In review"], ["Freshworks", "Offer"]].map(([a, b]) => (
                   <li key={a} className="flex items-center justify-between border-b border-[oklch(0.3_0.1_280/0.1)] pb-2">
@@ -181,7 +192,7 @@ export function RolesScroll() {
           {/* ── companies ── */}
           <div data-seg className="h-panel relative lg:h-full lg:w-[128vw]">
             <Arcs />
-            <Win pos={{ left: "66%", top: "54%", w: "28%", h: "32%", par: "0.5", label: "Fig. 04 · Pipeline" }} hue={300}>
+            <Win art="silk" pos={{ left: "66%", top: "54%", w: "28%", h: "32%", par: "0.5", label: "Fig. 04 · Pipeline" }} hue={300}>
               <div className="flex h-full flex-col justify-center gap-3 p-6">
                 {[["Applied", 92], ["In review", 58], ["Shortlisted", 36], ["Selected", 14]].map(([l, n]) => (
                   <div key={l as string} className="flex items-center gap-3 text-[12.5px]">
@@ -193,7 +204,7 @@ export function RolesScroll() {
                 ))}
               </div>
             </Win>
-            <Win pos={{ left: "6%", top: "52%", w: "20%", h: "32%", par: "-0.4", label: "Fig. 05 · Shortlist" }} hue={320}>
+            <Win art="rays" pos={{ left: "6%", top: "52%", w: "20%", h: "32%", par: "-0.4", label: "Fig. 05 · Shortlist" }} hue={320}>
               <ul className="flex h-full flex-col justify-center gap-3 p-6 text-[13.5px]">
                 {["Aarav S.", "Priya N.", "Liam K."].map((n, i) => (
                   <li key={n} className="flex items-center gap-3">
@@ -204,7 +215,7 @@ export function RolesScroll() {
                 ))}
               </ul>
             </Win>
-            <Win pos={{ left: "36%", top: "-4%", w: "26%", h: "30%", par: "0.3", label: "Fig. 06 · Volume" }} hue={280}>
+            <Win art="spiral" pos={{ left: "36%", top: "-4%", w: "26%", h: "30%", par: "0.3", label: "Fig. 06 · Volume" }} hue={280}>
               <div className="flex h-full items-end p-6">
                 <p className="font-display text-[3.2rem] leading-none italic">38 applicants</p>
               </div>
@@ -221,23 +232,23 @@ export function RolesScroll() {
           {/* ── universities ── */}
           <div data-seg className="h-panel relative lg:h-full lg:w-[128vw]">
             <Arcs />
-            <Win pos={{ left: "5%", top: "10%", w: "21%", h: "44%", par: "0.4", label: "Fig. 07 · Outcomes" }} hue={190}>
+            <Win art="ripples" pos={{ left: "5%", top: "10%", w: "21%", h: "44%", par: "0.4", label: "Fig. 07 · Outcomes" }} hue={190}>
               <div className="flex h-full flex-col justify-end p-6">
                 <p className="font-display text-[5.4rem] leading-[0.85] italic">92%</p>
                 <p className="mt-2 text-[12.5px] tracking-[0.18em] text-[oklch(0.22_0.06_280/0.6)] uppercase">Placed</p>
               </div>
             </Win>
-            <Win pos={{ left: "70%", top: "4%", w: "24%", h: "34%", par: "-0.5", label: "Fig. 08 · Skills" }} hue={175}>
+            <Win art="waves" pos={{ left: "70%", top: "4%", w: "24%", h: "34%", par: "-0.5", label: "Fig. 08 · Skills" }} hue={175}>
               <div className="flex h-full items-end gap-2 p-6">
                 {[40, 68, 52, 88, 74, 96].map((h, i) => (
                   <span key={i} className="flex-1 bg-[oklch(0.5_0.17_283)]" style={{ height: `${h * 0.6}%` }} />
                 ))}
               </div>
             </Win>
-            <Win pos={{ left: "56%", top: "60%", w: "13rem", h: "13rem", par: "0.75", label: "Fig. 09 · Reach" }} shape="circle" hue={200}>
+            <Win art="spiro" pos={{ left: "80%", top: "55%", w: "14.5rem", h: "14.5rem", par: "0.75", label: "Fig. 09 · Reach" }} shape="circle" hue={200}>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="font-display text-[3.6rem] leading-none italic">476</span>
-                <span className="mt-1 text-[11px] tracking-[0.18em] text-[oklch(0.22_0.06_280/0.6)] uppercase">Universities</span>
+                <span className="mt-1.5 text-[9.5px] tracking-[0.2em] text-[oklch(0.22_0.06_280/0.6)] uppercase">Universities</span>
               </div>
             </Win>
             <Center
@@ -250,7 +261,7 @@ export function RolesScroll() {
           </div>
 
           {/* ── outro ── */}
-          <div className="h-panel relative lg:h-full lg:w-[80vw]">
+          <div className="h-panel relative lg:h-full lg:w-screen">
             <Arcs />
             <div className="relative z-10 flex flex-col items-center px-6 text-center lg:absolute lg:top-1/2 lg:left-[8%] lg:w-[84%] lg:-translate-y-1/2 lg:px-0">
               <h3 className="font-display text-[clamp(3.4rem,7vw,6.8rem)] leading-[0.92] tracking-[-0.01em] uppercase italic">
@@ -264,19 +275,36 @@ export function RolesScroll() {
           </div>
         </div>
 
-        {/* progress: three labelled segments, each fills as its scene passes */}
-        <div aria-hidden className="absolute right-[clamp(1.5rem,6vw,6rem)] bottom-8 left-[clamp(1.5rem,6vw,6rem)] hidden gap-6 lg:flex">
+        {/* progress: no box, no bar — three italic labels, and the one you are in gets circled by a hand-drawn
+            oval that draws itself as its scene passes (--p and data-state per step are set from landing-motion).
+            Finished ones keep their oval, quietly; the ones to come wait, faded. */}
+        <div
+          aria-hidden
+          data-fog-dock
+          className="pointer-events-none absolute bottom-7 left-1/2 z-20 hidden -translate-x-1/2 items-center gap-2 lg:flex"
+        >
           {["Students", "Companies", "Universities"].map((l, i) => (
-            <div key={l} className="flex-1">
-              <p className="mb-2.5 text-[12px] font-semibold tracking-[0.2em] text-[oklch(0.22_0.06_280/0.55)] uppercase">
-                0{i + 1} <span className="ml-2">{l}</span>
-              </p>
-              <span className="relative block h-px bg-[oklch(0.3_0.1_280/0.18)]">
-                <span className="h-seg absolute inset-y-0 left-0 h-[2px] w-full origin-left -translate-y-px scale-x-0 bg-[oklch(0.4_0.16_280)]" />
-              </span>
+            <div key={l} className="flex items-center gap-2">
+              {i > 0 && <span className="h-px w-10 bg-[oklch(0.2_0.05_280/0.22)]" />}
+              <div
+                data-state="idle"
+                style={{ "--p": 0 } as React.CSSProperties}
+                className="h-step relative px-10 py-4 text-[oklch(0.2_0.05_280)] opacity-40 transition-opacity duration-500 data-[state=active]:opacity-100 data-[state=done]:opacity-60"
+              >
+                <svg aria-hidden viewBox="0 0 220 60" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+                  <path d="M110 2A108 28 0 0 1 110 58A108 28 0 0 1 110 2" pathLength={1} strokeDasharray="1" style={{ strokeDashoffset: "calc(1 - var(--p))" }} />
+                </svg>
+                <span className="font-display relative flex items-baseline gap-3 text-[1.1rem] tracking-[0.14em] whitespace-nowrap uppercase italic">
+                  <span className="text-[0.78em] tracking-[0.08em] opacity-55">0{i + 1}</span>
+                  {l}
+                </span>
+              </div>
             </div>
           ))}
         </div>
+
+        {/* the scene dims to a dusky blue-grey as the fog comes up over it (FogEdge drives its opacity directly) */}
+        <div aria-hidden data-fog-dim className="pointer-events-none absolute inset-0 z-30 hidden bg-[oklch(0.27_0.05_265)] will-change-[opacity] lg:block" style={{ opacity: 0 }} />
       </div>
     </section>
   )

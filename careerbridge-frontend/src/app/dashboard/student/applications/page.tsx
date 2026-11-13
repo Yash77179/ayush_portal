@@ -19,9 +19,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ActionCenter, ApplicationSheet } from "@/components/ats/student-actions";
 
-const ACTIVE = ["applied", "review", "shortlisted"];
-const STAGES = ["applied", "review", "shortlisted", "selected", "rejected"];
+const ACTIVE = ["applied", "review", "shortlisted", "interview", "offered"];
+const STAGES = ["applied", "review", "shortlisted", "interview", "offered", "selected", "rejected"];
 
 export default function StudentApplicationsPage() {
   const { user } = useAuth();
@@ -29,6 +30,8 @@ export default function StudentApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
   const [tab, setTab] = useState("all");
+  const [reload, setReload] = useState(0);
+  const [openId, setOpenId] = useState<number | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -50,7 +53,7 @@ export default function StudentApplicationsPage() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [reload]);
 
   const handleWithdraw = async (id: number) => {
     try {
@@ -86,6 +89,8 @@ export default function StudentApplicationsPage() {
         }
       />
 
+      <ActionCenter apps={apps as Parameters<typeof ActionCenter>[0]["apps"]} demo={isDemo} onChanged={() => setReload((n) => n + 1)} />
+
       <div className="grid gap-5 lg:grid-cols-12">
         <HeroCard
           className="lg:col-span-5"
@@ -105,14 +110,14 @@ export default function StudentApplicationsPage() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile index={2} tone="blue" icon={<ApplicationsIcon />} title="Total" value={total} caption="Applications sent" />
         <StatTile index={3} tone="amber" icon={<ClockIcon />} title="In progress" value={count("active")} caption="Awaiting a decision" />
-        <StatTile index={4} tone="mint" icon={<TrophyIcon />} title="Selected" value={selected} caption="Offers received" />
+        <StatTile index={4} tone="mint" icon={<TrophyIcon />} title="Hired" value={selected} caption={`${count("offered")} offer${count("offered") === 1 ? "" : "s"} waiting`} />
         <StatTile index={5} tone="pink" icon={<CloseCircleIcon />} title="Rejected" value={count("rejected")} caption="Not this time" />
       </div>
 
       <Panel title="All applications" style={stagger(6)} contentClassName="space-y-5">
         <Tabs value={tab} onValueChange={(v) => setTab(String(v))}>
           <TabsList className="max-w-full justify-start overflow-x-auto [scrollbar-width:none]">
-            {[["all", "All"], ["active", "Active"], ["selected", "Selected"], ["rejected", statusLabel("rejected")]].map(([v, label]) => (
+            {[["all", "All"], ["active", "Active"], ["selected", statusLabel("selected")], ["rejected", statusLabel("rejected")]].map(([v, label]) => (
               <TabsTrigger key={v} value={v}>
                 {label}
                 <span className="opacity-60 tabular-nums">{count(v)}</span>
@@ -132,7 +137,7 @@ export default function StudentApplicationsPage() {
                 <TableHead className="hidden lg:table-cell">Mode</TableHead>
                 <TableHead className="hidden md:table-cell">Applied</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-12" />
+                <TableHead className="w-28" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -152,8 +157,13 @@ export default function StudentApplicationsPage() {
                   <TableCell>
                     <StatusBadge status={a.status} />
                   </TableCell>
-                  <TableCell>
-                    {a.status === "applied" && (
+                  <TableCell className="text-right">
+                    {!isDemo && (
+                      <Button size="sm" variant="ghost" onClick={() => setOpenId(a.id)}>
+                        Details
+                      </Button>
+                    )}
+                    {(a.status === "applied" || a.status === "review") && (
                       <AlertDialog>
                         <AlertDialogTrigger
                           render={<Button size="icon-sm" variant="ghost" className="text-destructive hover:bg-destructive/10" aria-label="Withdraw application" />}
@@ -183,6 +193,7 @@ export default function StudentApplicationsPage() {
           </Table>
         )}
       </Panel>
+      <ApplicationSheet id={openId} onClose={() => setOpenId(null)} />
     </div>
   );
 }

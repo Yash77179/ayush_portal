@@ -7,6 +7,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ShellGate } from "@/components/shell-gate";
+import { SmoothScroll } from "@/components/smooth-scroll";
+import { AssistantPopup } from "@/components/assistant/assistant-popup";
 
 const display = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-display" });
 const interTight = Inter_Tight({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
@@ -27,10 +29,18 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${interTight.className} ${display.variable}`}>
         <ThemeProvider>
+          {/* reads the URL, so it needs its own boundary or dynamic routes can't prerender */}
+          <Suspense fallback={null}>
+            <SmoothScroll />
+          </Suspense>
           <TooltipProvider>
             <AuthProvider>
               <Suspense fallback={null}>
                 <ShellGate>{children}</ShellGate>
+              </Suspense>
+              {/* its own boundary: Bridge hydrates on its own, so tapping it while a page is still loading can't stall that page */}
+              <Suspense fallback={null}>
+                <AssistantPopup />
               </Suspense>
             </AuthProvider>
             <Toaster position="top-right" />

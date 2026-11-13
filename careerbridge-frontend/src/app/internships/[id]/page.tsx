@@ -8,7 +8,8 @@ import { toast } from "sonner";
 import { cn } from "cn";
 
 import { useAuth } from "@/contexts/auth-context";
-import { applyToInternship, getInternship, getSkillMatch } from "@/lib/api";
+import { applyToInternship, errorMessage, getInternship, getSkillMatch } from "@/lib/api";
+import { getEligibility } from "@/lib/ats";
 import { DEMO_ENABLED, demoSkills } from "@/lib/demo";
 import {
   MODE_LABEL, MODE_NOTE, getSampleDetail, makeSample, parseDescription,
@@ -28,8 +29,8 @@ const SIZE_LABEL: Record<string, string> = { startup: "1–50 people", small: "5
 const PROCESS = [
   { title: "Apply", Icon: ApplicationsIcon, text: "Send your application with an optional cover letter. Your profile and skills go with it." },
   { title: "Review", Icon: SearchIcon, text: "The recruiter looks at your profile, skills and how well they match the role." },
-  { title: "Shortlist", Icon: StarIcon, text: "Shortlisted candidates are contacted for the next step." },
-  { title: "Decision", Icon: TrophyIcon, text: "You'll see Selected or Rejected in your Applications page as soon as it's decided." },
+  { title: "Interview", Icon: StarIcon, text: "Shortlisted candidates get an interview invite they can confirm or reschedule." },
+  { title: "Offer", Icon: TrophyIcon, text: "Offers arrive in your Applications page — accept or decline, and download the letter." },
 ];
 
 export default function InternshipDetailPage() {
@@ -46,6 +47,8 @@ export default function InternshipDetailPage() {
   const [applyOpen, setApplyOpen] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
   const [applying, setApplying] = useState(false);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [elig, setElig] = useState<{ eligible: boolean; reasons: string[]; already_applied: boolean } | null>(null);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setNow(Date.now()));
@@ -86,6 +89,13 @@ export default function InternshipDetailPage() {
     };
   }, [isStudent, isDemo, detail]);
 
+  useEffect(() => {
+    if (!isStudent || isDemo || !detail) return;
+    getEligibility(detail.id)
+      .then(setElig)
+      .catch(() => setElig(null));
+  }, [isStudent, isDemo, detail]);
+
   // In sample mode, compute the match locally from the sample skills.
   const match = useMemo<SkillMatch | null>(() => {
     if (!isStudent || !detail) return null;
@@ -113,13 +123,26 @@ export default function InternshipDetailPage() {
     if (!user) return router.push("/login");
     setApplying(true);
     try {
-      if (!isDemo) await applyToInternship(detail.id, coverLetter);
-      toast.success("Application submitted");
+      const missing = (detail.screening_questions ?? []).filter((q) => q.required && !answers[q.id]?.trim());
+      if (missing.length) {
+        toast.error("Please answer the required questions.");
+        return;
+      }
+      if (!isDemo)
+        await applyToInternship(
+          detail.id,
+          coverLetter,
+          Object.entries(answers)
+            .filter(([, v]) => v.trim())
+            .map(([k, v]) => ({ question_id: Number(k), answer: v }))
+        );
+      toast.success("Application submitted", { action: { label: "Track it", onClick: () => router.push("/dashboard/student/applications") } });
       setApplyOpen(false);
       setCoverLetter("");
+      setAnswers({});
+      setElig((e) => (e ? { ...e, already_applied: true } : e));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Application failed.";
-      toast.error(msg.includes("already applied") ? "You have already applied for this internship." : msg);
+      toast.error(errorMessage(err, "Application failed."));
     } finally {
       setApplying(false);
     }
@@ -204,7 +227,7 @@ export default function InternshipDetailPage() {
       <section className="scene rise overflow-hidden rounded-[32px] border border-(--hairline) p-5 sm:p-7">
         <Link
           href="/internships"
-          className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/60 bg-white/40 px-3.5 py-1.5 text-[13px] font-medium backdrop-blur-md transition-[background-color,transform] duration-150 hover:bg-white/60 active:scale-95"
+          className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card/60 px-3.5 py-1.5 text-[13px] font-medium text-foreground backdrop-blur-md transition-[background-color,transform] duration-150 hover:bg-card/90 active:scale-95"
         >
           <ArrowLeftIcon className="size-4" /> All internships
         </Link>
@@ -215,7 +238,13 @@ export default function InternshipDetailPage() {
               <OrgAvatar name={detail.company.name} className="size-11" />
               <div className="leading-tight">
                 <p className="flex flex-wrap items-center gap-2 text-[15px] font-medium">
-                  {detail.company.name}
+                  {isDemo ? (
+                    detail.company.name
+                  ) : (
+                    <Link href={`/companies/${detail.company.id}`} className="underline-offset-4 hover:underline">
+                      {detail.company.name}
+                    </Link>
+                  )}
                   {detail.company.is_verified && <Badge variant="success">Verified</Badge>}
                   {isDemo && <Badge variant="lime">Sample data</Badge>}
                 </p>
@@ -229,10 +258,16 @@ export default function InternshipDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Button size="lg" onClick={() => (user ? setApplyOpen(true) : router.push("/login"))} disabled={daysLeft <= 0}>
-              {user ? "Apply now" : "Sign in to apply"}
-            </Button>
-            <Button size="lg" variant="outline" className="border-white/60 bg-white/40 backdrop-blur-md hover:bg-white/60" render={<Link href="/internships" />} nativeButton={false}>
+            {elig?.already_applied ? (
+              <Button size="lg" variant="outline" className="bg-card/60" render={<Link href="/dashboard/student/applications" />} nativeButton={false}>
+                Applied ✓ Track it
+              </Button>
+            ) : (
+              <Button size="lg" onClick={() => (user ? setApplyOpen(true) : router.push("/login"))} disabled={daysLeft <= 0 || (!!user && !isStudent)}>
+                {!user ? "Sign in to apply" : !isStudent ? "Students apply here" : elig && !elig.eligible ? "Check eligibility" : "Apply now"}
+              </Button>
+            )}
+            <Button size="lg" variant="outline" className="border-border bg-card/60 text-foreground backdrop-blur-md hover:bg-card/90" render={<Link href="/internships" />} nativeButton={false}>
               Browse more
             </Button>
           </div>
@@ -414,14 +449,58 @@ export default function InternshipDetailPage() {
             <DialogTitle className="text-2xl font-medium tracking-tight">Apply for {detail.title}</DialogTitle>
             <DialogDescription>{detail.company.name} will see your profile and skills with this application.</DialogDescription>
           </DialogHeader>
-          <Field label="Cover letter (optional)">
-            <Textarea rows={5} placeholder="Why are you a great fit for this role?" value={coverLetter} onChange={(e) => setCoverLetter(e.target.value)} />
-          </Field>
+          {elig && !elig.eligible ? (
+            <div className="space-y-3 rounded-2xl bg-(--pink-bg) p-4 text-[14px] text-(--pink-fg)">
+              <p className="font-medium">You can’t apply to this one yet:</p>
+              <ul className="list-disc space-y-1 pl-5">
+                {elig.reasons.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
+              </ul>
+              <Link href="/dashboard/student/profile" className="inline-block font-medium underline underline-offset-4">
+                Update your profile
+              </Link>
+            </div>
+          ) : (
+            <div className="max-h-[55svh] space-y-5 overflow-y-auto pr-1">
+              {(detail.screening_questions ?? []).map((q) => (
+                <Field key={q.id} label={q.text + (q.required ? " *" : "")}>
+                  {q.kind === "text" ? (
+                    <Textarea rows={2} value={answers[q.id] ?? ""} onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))} />
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {(q.kind === "yesno" ? ["Yes", "No"] : q.choices).map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          aria-pressed={answers[q.id] === c}
+                          onClick={() => setAnswers((a) => ({ ...a, [q.id]: c }))}
+                          className={cn(
+                            "rounded-full border px-4 py-2 text-[14px] transition-colors",
+                            answers[q.id] === c ? "border-foreground bg-foreground text-background" : "border-border hover:bg-secondary"
+                          )}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </Field>
+              ))}
+              <Field label="Cover letter (optional)">
+                <Textarea rows={5} placeholder="Why are you a great fit for this role?" value={coverLetter} onChange={(e) => setCoverLetter(e.target.value)} />
+              </Field>
+            </div>
+          )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setApplyOpen(false)}>Cancel</Button>
-            <Button onClick={handleApply} disabled={applying}>
-              {applying && <Loader2 className="animate-spin" />} Submit application
+            <Button variant="outline" onClick={() => setApplyOpen(false)}>
+              {elig && !elig.eligible ? "Close" : "Cancel"}
             </Button>
+            {!(elig && !elig.eligible) && (
+              <Button onClick={handleApply} disabled={applying}>
+                {applying && <Loader2 className="animate-spin" />} Submit application
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

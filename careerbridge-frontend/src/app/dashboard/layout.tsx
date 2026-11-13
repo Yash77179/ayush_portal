@@ -3,3 +3,7 @@
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
+
+// A plain pass-through layout: skip Next's dev-only instant-navigation check for it (it dropped this segment and,
+// when you clicked something while the page was still hydrating, left React stuck in a hydration loop).
+export const instant = false

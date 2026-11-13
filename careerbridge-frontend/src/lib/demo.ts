@@ -34,6 +34,13 @@ export interface UniversityStats {
   verified_companies: number
   placement_rate: number
   top_skills: { skill__name: string; count: number }[]
+  university?: string | null
+  linked?: boolean
+  verified_students?: number
+  pending_verification?: number
+  in_interviews?: number
+  offers_pending?: number
+  recent_activity?: { id: number; student_name: string; internship_title: string; company: string; status: string; updated_at: string }[]
 }
 
 export const DEMO_ENABLED = process.env.NEXT_PUBLIC_DEMO_DATA !== "off"
@@ -111,6 +118,8 @@ export interface ApplicationRow {
   cover_letter: string
   applied_at: string
   internship: { id: number; title: string; company_name: string; work_mode: string; location: string }
+  interviews?: import("@/lib/ats").StudentInterview[]
+  offer?: import("@/lib/ats").Offer | null
 }
 export interface SkillRow {
   id: number
@@ -129,6 +138,8 @@ export interface InternshipRow {
   status: string
   skills_count: number
   created_at: string
+  applicants?: number
+  active_applicants?: number
 }
 export interface ApplicantRow {
   id: number

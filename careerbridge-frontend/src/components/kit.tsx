@@ -333,9 +333,11 @@ export function Gauge({ value, label, className }: { value: number; label: strin
 /* ── Status pill ───────────────────────────────────────────────────────── */
 const STATUS: Record<string, { label: string; variant: "info" | "warning" | "violet" | "success" | "danger" }> = {
   applied: { label: "Applied", variant: "info" },
-  review: { label: "In review", variant: "warning" },
+  review: { label: "Screening", variant: "warning" },
   shortlisted: { label: "Shortlisted", variant: "violet" },
-  selected: { label: "Selected", variant: "success" },
+  interview: { label: "Interview", variant: "info" },
+  offered: { label: "Offer", variant: "warning" },
+  selected: { label: "Hired", variant: "success" },
   rejected: { label: "Rejected", variant: "danger" },
 }
 export const statusLabel = (s: string) => STATUS[s]?.label ?? s
@@ -343,6 +345,8 @@ export const STATUS_DOT: Record<string, string> = {
   applied: "bg-sky-400",
   review: "bg-amber-400",
   shortlisted: "bg-violet-400",
+  interview: "bg-blue-500",
+  offered: "bg-orange-400",
   selected: "bg-green-500",
   rejected: "bg-red-500",
 }
@@ -526,17 +530,27 @@ export function FrostStat({
 export function Field({
   label,
   hint,
+  action,
   className,
   children,
 }: {
   label: string
   hint?: string
+  /** something small at the right end of the label row, e.g. a "Forgot password?" link */
+  action?: React.ReactNode
   className?: string
   children: React.ReactNode
 }) {
   return (
     <div className={cn("space-y-2.5", className)}>
-      <label className="block pl-1 text-[15px] font-medium text-foreground/75">{label}</label>
+      {action ? (
+        <div className="flex items-baseline justify-between gap-3">
+          <label className="block pl-1 text-[15px] font-medium text-foreground/75">{label}</label>
+          {action}
+        </div>
+      ) : (
+        <label className="block pl-1 text-[15px] font-medium text-foreground/75">{label}</label>
+      )}
       {children}
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>

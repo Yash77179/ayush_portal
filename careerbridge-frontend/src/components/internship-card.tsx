@@ -68,11 +68,11 @@ export function InternshipCard({
 
   return (
     <article
-      className={cn("rise lift glass-card group/job relative flex flex-col rounded-[32px] bg-card p-2 [--fh:4.5rem] [--r:32px]", className)}
+      className={cn("rise lift glass-card group/job relative flex flex-col rounded-[32px] bg-card p-2 text-foreground [--fh:4.5rem] [--r:32px]", className)}
       style={{ "--i": index } as React.CSSProperties}
     >
       {/* colour panel */}
-      <div className={cn(PANEL_TONES[index % PANEL_TONES.length], "flex flex-1 flex-col rounded-[26px] bg-[color-mix(in_oklab,var(--t-bg)_72%,var(--card))] p-5")}>
+      <div className={cn(PANEL_TONES[index % PANEL_TONES.length], "flex flex-1 flex-col rounded-[26px] bg-[color-mix(in_oklab,var(--t-bg)_72%,var(--card))] p-5 text-foreground")}>
         <div className="flex items-center justify-between gap-3">
           <span className={cn("inline-flex h-11 items-center rounded-full bg-card px-4 text-[14.5px] font-medium", "text-foreground")}>
             {daysLeft > 0 ? `Closes ${closes}` : "Closed"}
