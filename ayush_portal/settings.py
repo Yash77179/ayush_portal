@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "assistant",
     "notifications",
     "campus",
+    "filestore",
 ]
 
 MIDDLEWARE = [
@@ -118,11 +119,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "/media/"
-# Uploads (resumes, photos, logos). On Fly.io this points at the persistent volume (/data/media) so files survive redeploys.
+# Uploads (resumes, photos, logos) when stored on disk — used locally. Production keeps them in the database (FILE_STORAGE below).
 MEDIA_ROOT = config("MEDIA_ROOT", default=str(BASE_DIR / "media"))
 
-# Production (DEBUG off): Fly terminates HTTPS at its proxy and forwards plain HTTP, so trust its header,
-# and only send cookies over HTTPS. The HTTP→HTTPS redirect is done by Fly (force_https in fly.toml).
+# Production (DEBUG off): the host (Render) terminates HTTPS at its proxy and forwards plain HTTP, so trust its
+# header, and only send cookies over HTTPS. The host already redirects HTTP to HTTPS.
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
@@ -181,6 +182,14 @@ try:
     }
 except ImportError:
     pass
+
+# Where uploads go. Locally: the media/ folder. In production on a host without a persistent disk
+# (Render's free plan), set FILE_STORAGE=database so resumes, photos and logos are kept in Postgres.
+if config("FILE_STORAGE", default="filesystem") == "database":
+    STORAGES = {
+        **globals().get("STORAGES", {"staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}}),
+        "default": {"BACKEND": "filestore.storage.DatabaseStorage"},
+    }
 
 # Google sign-in: the OAuth "Web application" client ID (no secret needed — the browser popup does the OAuth part)
 GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")

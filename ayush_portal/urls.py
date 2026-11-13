@@ -1,18 +1,18 @@
 """CareerBridge root URL configuration."""
 
-from django.conf import settings
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import include, path, re_path
-from django.views.static import serve
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 
+from filestore.views import serve_media
+
 
 def health(_request):
-    """For Fly.io's health check: the app process is up (no database call, so a slow DB doesn't restart the app)."""
+    """For the host's health check: the app process is up (no database call, so a slow DB doesn't restart the app)."""
     return JsonResponse({"ok": True})
 
 
@@ -31,7 +31,7 @@ urlpatterns = [
     path("api/assistant/", include("assistant.urls")),
     path("api/notifications/", include("notifications.urls")),
     path("api/campus/", include("campus.urls")),
-    # Uploaded files. Django's `static()` helper only works with DEBUG on, so serve them directly:
-    # on Fly there is no separate web server in front, and the files live on the persistent volume.
-    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    # Uploaded files, from whichever storage is active (the media/ folder locally, the database in production).
+    # Django's `static()` helper only works with DEBUG on, and there's no separate web server in front.
+    re_path(r"^media/(?P<path>.*)$", serve_media, name="media"),
 ]
