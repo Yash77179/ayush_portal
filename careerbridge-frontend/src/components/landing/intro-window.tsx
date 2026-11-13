@@ -177,7 +177,7 @@ export function IntroWindow() {
           {/* the mountains far below him (public/intro/mountains.webp): they grow with the zoom like the rest of the view,
               and once you're through they sink slowly away, so he seems to keep rising, high above them */}
           <div data-peaks className="absolute inset-0 origin-[50%_var(--cy)]">
-            <div data-peaks-sink className="absolute inset-x-[-6%] bottom-[-16%] [mask-image:linear-gradient(#000_70%,transparent)]">
+            <div data-peaks-sink className="absolute inset-x-[-100%] bottom-[8%] sm:inset-x-[-6%] sm:bottom-[-16%] [mask-image:linear-gradient(#000_70%,transparent)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/intro/mountains.webp" alt="" draggable={false} className="block h-auto w-full" />
             </div>
