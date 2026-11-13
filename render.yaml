@@ -29,7 +29,11 @@ services:
         sync: false
       - key: CSRF_TRUSTED_ORIGINS   # your Vercel URL, e.g. https://careerbridge.vercel.app
         sync: false
-      - key: BREVO_API_KEY
+      - key: BREVO_API_KEY          # Brevo API key (xkeysib-…) — preferred
+        sync: false
+      - key: BREVO_SMTP_USER        # or Brevo SMTP login + key (xsmtpsib-…)
+        sync: false
+      - key: BREVO_SMTP_KEY
         sync: false
       - key: DEFAULT_FROM_EMAIL     # e.g. CareerBridge <you@yourdomain.com>
         sync: false

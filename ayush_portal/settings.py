@@ -198,6 +198,24 @@ if FILE_STORAGE in _FILE_BACKENDS:
         "default": {"BACKEND": _FILE_BACKENDS[FILE_STORAGE]},
     }
 
+# Email (sign-up codes, password resets, hiring notifications), through Brevo:
+#   BREVO_API_KEY set           → Brevo's HTTPS API (works even where hosts block SMTP ports)
+#   BREVO_SMTP_USER/KEY set     → Brevo's SMTP relay
+#   neither, while developing   → printed in the server console
+BREVO_API_KEY = config("BREVO_API_KEY", default="")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="CareerBridge <noreply@careerbridge.local>")
+BREVO_SMTP_USER = config("BREVO_SMTP_USER", default="")
+if BREVO_SMTP_USER:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp-relay.brevo.com"
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = BREVO_SMTP_USER
+    EMAIL_HOST_PASSWORD = config("BREVO_SMTP_KEY", default="")
+    EMAIL_TIMEOUT = 15
+elif DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 # Google sign-in: the OAuth "Web application" client ID (no secret needed — the browser popup does the OAuth part)
 GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")
 
