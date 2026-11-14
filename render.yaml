@@ -39,6 +39,8 @@ services:
         sync: false
       - key: DJANGO_ADMIN_PASSWORD  # the site admin's password (username "admin"); the account is created on deploy
         sync: false
+      - key: SEED_WORLD  # set to 1 to load the demo world on the next deploy (see build.sh); remove it afterwards
+        sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GEMINI_API_KEY

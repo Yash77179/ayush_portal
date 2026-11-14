@@ -7,7 +7,8 @@ import { useAuth } from "@/contexts/auth-context";
 import { API_URL, errorMessage, getAdminStats, type AdminStats } from "@/lib/api";
 import Link from "next/link";
 import { ApplicationsIcon, ArrowRightIcon, ArrowRightUpIcon, BuildingsIcon, GraduateIcon, InternshipsIcon, PeopleIcon, TrophyIcon } from "@/components/icons";
-import { DashboardSkeleton, GreetingHeader, Panel, ProgressBar, StatTile, stagger } from "@/components/kit";
+import { DashboardSkeleton, GreetingHeader, OrgAvatar, Panel, ProgressBar, StatTile, stagger } from "@/components/kit";
+import { approveUniversityRequest, declineUniversityRequest, fmtDay, getUniversityRequests, type UniversityAccessRequest } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
 
 /** The Django admin panel lives on the API host, next to /api. */
@@ -30,6 +31,21 @@ const LINKS = [
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = React.useState<AdminStats | null>(null);
+  // people asking to run a university's placement cell that has no admin yet: only we can approve them
+  const [requests, setRequests] = React.useState<UniversityAccessRequest[]>([]);
+  const loadRequests = React.useCallback(() => getUniversityRequests().then(setRequests).catch(() => setRequests([])), []);
+  React.useEffect(() => {
+    loadRequests();
+  }, [loadRequests]);
+  const decide = async (r: UniversityAccessRequest, approve: boolean) => {
+    try {
+      await (approve ? approveUniversityRequest(r.id) : declineUniversityRequest(r.id));
+      toast.success(approve ? `${r.name} now runs ${r.university}'s placement cell` : `Declined ${r.name}'s request`);
+      loadRequests();
+    } catch (err) {
+      toast.error(errorMessage(err));
+    }
+  };
 
   React.useEffect(() => {
     getAdminStats()
@@ -52,6 +68,35 @@ export default function AdminDashboard() {
           </Button>
         }
       />
+
+      {requests.length > 0 && (
+        <Panel title={`Placement cells waiting for you · ${requests.length}`} style={stagger(1)} contentClassName="space-y-2">
+          <p className="pb-1 text-[15px] text-muted-foreground">
+            The first person from a university has nobody there to approve them. Check they really work at its placement cell; approving makes them its head admin.
+          </p>
+          {requests.map((r) => (
+            <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-[18px] p-2.5 hover:bg-secondary/60">
+              <OrgAvatar name={r.name} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[17px] font-medium">
+                  {r.name} <span className="text-muted-foreground">· {r.title || "Placement cell"}</span>
+                </p>
+                <p className="truncate text-[14.5px] text-muted-foreground">
+                  {r.university} · {r.email} · asked {fmtDay(r.requested_at)}
+                </p>
+              </div>
+              <div className="flex gap-1.5">
+                <Button size="sm" onClick={() => decide(r, true)}>
+                  Approve
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => decide(r, false)}>
+                  Decline
+                </Button>
+              </div>
+            </div>
+          ))}
+        </Panel>
+      )}
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile index={1} tone="blue" icon={<PeopleIcon />} title="Users" value={stats.total_users} caption={`${stats.total_students} students`} />

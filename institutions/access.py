@@ -25,9 +25,17 @@ def require_membership(user, *, manage=False, admin=False):
 
 
 def university_staff(user):
+    """The user's approved placement-cell membership (a request still waiting for approval doesn't count)."""
     if not user or not user.is_authenticated:
         return None
-    return UniversityStaff.objects.filter(user=user).select_related("university").first()
+    return UniversityStaff.objects.filter(user=user, status="active").select_related("university").first()
+
+
+def university_request(user):
+    """The user's request to join a placement cell, if it's still waiting for approval."""
+    if not user or not user.is_authenticated:
+        return None
+    return UniversityStaff.objects.filter(user=user, status="pending").select_related("university").first()
 
 
 def require_staff(user, *, admin=False):
