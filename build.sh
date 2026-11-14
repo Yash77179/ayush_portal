@@ -8,5 +8,7 @@ python manage.py migrate --no-input
 
 # Reference data the app needs: the skills catalogue (matching, profiles) and the university list (sign-up, placement cell).
 python manage.py seed_skills
+# The admin account, from DJANGO_ADMIN_PASSWORD (set it in Render → Environment). Does nothing if it isn't set.
+python manage.py ensure_admin
 # The university list comes from a public API; if it's down, deploy anyway — it fills in on the next deploy.
 python manage.py import_universities || echo "University import skipped (source unavailable)."
