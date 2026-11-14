@@ -74,7 +74,11 @@ export const ROLE_NAV: Record<Role, NavLink[]> = {
     { label: "Reports", href: "/dashboard/university/reports", icon: ChartIcon },
     { label: "Settings", href: "/dashboard/university/settings", icon: SettingsIcon },
   ],
-  admin: [{ label: "Overview", href: "/dashboard/admin", icon: OverviewIcon, exact: true }],
+  admin: [
+    { label: "Overview", href: "/dashboard/admin", icon: OverviewIcon, exact: true },
+    { label: "Users", href: "/dashboard/admin/users", icon: PeopleIcon },
+    { label: "Companies", href: "/dashboard/admin/companies", icon: BuildingsIcon },
+  ],
 }
 
 export const ROLE_HOME: Record<Role, string> = {
@@ -99,6 +103,8 @@ export const PAGE_TITLES: Record<string, string> = {
   "/dashboard/company/profile": "Company",
   "/dashboard/student/campus": "Campus",
   "/dashboard/university/students": "Students",
+  "/dashboard/admin/users": "Users",
+  "/dashboard/admin/companies": "Companies",
   "/dashboard/university/drives": "Placement drives",
   "/dashboard/university/announcements": "Announcements",
   "/dashboard/university/reports": "Reports",
