@@ -127,12 +127,12 @@ export function JobMoments() {
       // (whole pixels only: text on a layer at a fractional offset is resampled, and looks soft)
       tl.fromTo(track, { x: () => pane.offsetWidth * 0.5 }, { x: () => pane.offsetWidth * 0.5 - travel(), duration: 1, modifiers: { x: (x: string) => `${Math.round(parseFloat(x))}px` } }, 0)
 
-      // the field comes up with a slanted top edge (lower on the left), which straightens as it reaches the top
+      // the field comes up with a gently slanted top edge (lower on the left), which straightens as it reaches the top
       const slant = ScrollTrigger.create({
         trigger: section,
         start: "top bottom",
         end: "top top",
-        onUpdate: ({ progress }) => pane.style.setProperty("--slant", `${((1 - progress) * window.innerHeight * 0.24).toFixed(1)}px`),
+        onUpdate: ({ progress }) => pane.style.setProperty("--slant", `${((1 - progress) * Math.min(window.innerHeight * 0.24, window.innerWidth * 0.05)).toFixed(1)}px`),
         onLeave: () => pane.style.setProperty("--slant", "0px"),
       })
       // ...and it leaves with a slanted bottom edge, tilted the other way (higher on the left), which tips quickly as
@@ -142,7 +142,7 @@ export function JobMoments() {
         start: "bottom bottom",
         end: "bottom top",
         onUpdate: ({ progress }) =>
-          pane.style.setProperty("--slant-out", `${(Math.min(1, progress / 0.5) * window.innerHeight * 0.1).toFixed(1)}px`),
+          pane.style.setProperty("--slant-out", `${(Math.min(1, progress / 0.5) * Math.min(window.innerHeight * 0.1, window.innerWidth * 0.03)).toFixed(1)}px`),
         onLeaveBack: () => pane.style.setProperty("--slant-out", "0px"),
       })
 
@@ -236,7 +236,9 @@ export function JobMoments() {
         {/* the giant title, fading down into the field */}
         <h2
           id="open-roles"
-          className={`${anton.className} pointer-events-none absolute inset-x-0 top-[1.5svh] origin-top scale-y-[1.3] bg-clip-text text-center text-[clamp(4rem,23.5vw,24rem)] leading-[0.84] tracking-[-0.03em] whitespace-nowrap text-transparent uppercase [background-image:linear-gradient(180deg,oklch(0.55_0.2_290/0.36),oklch(0.62_0.17_298/0.14)_55%,transparent_95%)] dark:[background-image:linear-gradient(180deg,oklch(0.5_0.2_290/0.9),oklch(0.4_0.16_288/0.45)_50%,transparent_95%)]`}
+          // grain-text: the fill shows through the letters with film grain in it. A full line height, so the tops of the
+          // letters are never cut off; set below the nav on every screen
+          className={`${anton.className} grain-text pointer-events-none absolute inset-x-0 top-[max(8svh,64px)] origin-top scale-y-[1.3] text-center text-[clamp(4rem,23.5vw,24rem)] leading-[1.08] tracking-[-0.03em] whitespace-nowrap uppercase [--grain-under:linear-gradient(180deg,oklch(0.55_0.2_290/0.42),oklch(0.62_0.17_298/0.16)_55%,transparent_95%)] lg:top-[max(4svh,64px)] lg:scale-y-[1.5] dark:[--grain-under:linear-gradient(180deg,oklch(0.5_0.2_290/0.9),oklch(0.4_0.16_288/0.45)_50%,transparent_95%)]`}
         >
           Open roles
         </h2>
@@ -245,7 +247,7 @@ export function JobMoments() {
         <div data-track className="absolute inset-y-0 left-0 flex w-max motion-reduce:relative motion-reduce:w-full motion-reduce:overflow-x-auto">
           {JOBS.map((j, i) => (
             <div key={j.id} className="relative w-[clamp(320px,34vw,520px)] shrink-0">
-              <div data-card className={`absolute left-1/2 -translate-x-1/2 ${i % 2 ? "top-[39svh]" : "top-[23svh]"}`}>
+              <div data-card className={`absolute left-1/2 -translate-x-1/2 ${i % 2 ? "top-[40svh]" : "top-[27svh] lg:top-[23svh]"}`}>
                 <div>
                   <div className="animate-[cb-card-float_var(--d)_ease-in-out_infinite]" style={{ "--d": `${FLOAT[i % 3]}s`, animationDelay: `${-i * 1.27}s` } as React.CSSProperties}>
                     <div data-face>

@@ -13,7 +13,8 @@ const anton = Anton({ subsets: ["latin"], weight: "400" })
  * The top row is filled with a soft starlight-to-violet gradient and flows left; the bottom row is an outline and flows
  * right. They drift on their own (one word every ~22 s) and pick up speed while you scroll, then ease back, so the
  * letters feel carried by the page. Both rows fit the screen (nothing cut by its edges), fade out at the sides, and
- * only run while the hero is on screen. With reduced motion they hold still.
+ * only run while the hero is on screen. They are tinted violet, so they sit behind the white title instead of
+ * reading as grey slabs. With reduced motion they hold still.
  */
 const ROWS = [
   { word: "CAREER", dir: -1, top: "4%", style: "fill" as const },
@@ -70,7 +71,7 @@ export function HeroLetters() {
     <div
       ref={root}
       aria-hidden
-      className={`${anton.className} pointer-events-none absolute inset-0 -z-10 overflow-hidden select-none [mask-image:linear-gradient(90deg,transparent,#000_14%,#000_86%,transparent)]`}
+      className={`${anton.className} pointer-events-none absolute inset-0 -z-10 overflow-hidden select-none lg:[mask-image:linear-gradient(90deg,transparent,#000_14%,#000_86%,transparent)]`}
     >
       {ROWS.map((r, ri) => (
         <div key={r.word} className="absolute inset-x-0 flex h-[45%] items-center" style={{ top: r.top }}>
@@ -86,8 +87,8 @@ export function HeroLetters() {
                 key={i}
                 className={
                   r.style === "fill"
-                    ? "block bg-[linear-gradient(180deg,oklch(1_0_0/0.13),oklch(0.75_0.12_295/0.08)_60%,oklch(0.6_0.16_290/0.03))] bg-clip-text pr-[0.14em] text-[min(54svh,44vw)] leading-[0.82] text-transparent"
-                    : "block pr-[0.14em] text-[min(54svh,44vw)] leading-[0.82] text-transparent [-webkit-text-stroke:1.5px_oklch(0.85_0.08_295/0.22)]"
+                    ? "block bg-[linear-gradient(180deg,oklch(0.62_0.19_292/0.3),oklch(0.5_0.2_288/0.14)_55%,oklch(0.42_0.18_285/0.03))] bg-clip-text pr-[0.14em] text-[min(54svh,44vw)] leading-[0.82] text-transparent"
+                    : "block pr-[0.14em] text-[min(54svh,44vw)] leading-[0.82] text-transparent [-webkit-text-stroke:1.5px_oklch(0.72_0.14_295/0.2)]"
                 }
               >
                 {r.word}

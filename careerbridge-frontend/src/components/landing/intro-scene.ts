@@ -105,6 +105,8 @@ export function createScene(opts: {
   photo: HTMLCanvasElement
   photoSrc: string
   arrowSrc: string
+  /** called once, when the office photo has been drawn (or failed to load), so the page can reveal the scene */
+  onReady?: () => void
 }): Scene {
   const { stage, pane, photo: canvas } = opts
 
@@ -172,10 +174,18 @@ export function createScene(opts: {
     gl.bindTexture(gl.TEXTURE_2D, tex[i])
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source)
   }
+  let ready = false
+  const markReady = () => {
+    if (ready) return
+    ready = true
+    opts.onReady?.()
+  }
   img.onload = () => {
     upload(0, img)
     draw()
+    markReady()
   }
+  img.onerror = markReady
   arrow.onload = () => {
     upload(1, arrow)
     draw()
@@ -271,7 +281,9 @@ export function createScene(opts: {
   }
 
   const size = () => {
-    dpr = Math.min(window.devicePixelRatio || 1, 2)
+    // (touch screens: 1.5 at most; a full-screen shader at 3x on a phone costs more than it shows)
+    const coarse = window.matchMedia("(pointer: coarse)").matches
+    dpr = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2)
     w = stage.offsetWidth
     h = stage.offsetHeight
     canvas.width = Math.round(w * dpr)
@@ -282,18 +294,28 @@ export function createScene(opts: {
   ro.observe(stage)
   size()
 
+  // the loop draws only when it must: the view moved (setZoom/setLight mark it dirty) or the grain is due for its
+  // next exposure (15 a second). Drawing the full screen every frame for nothing is what loaded phones down.
+  let dirty = true
+  let lastSeed = -1
   const loop = (now: number) => {
     raf = requestAnimationFrame(loop)
+    const seed = Math.floor(((now - t0) / 1000) * 15)
+    if (!dirty && seed === lastSeed) return
+    dirty = false
+    lastSeed = seed
     draw(now)
   }
 
   return {
     setZoom: (z) => {
       s = z
+      dirty = true
       if (!running) draw()
     },
     setLight: (l) => {
       light = l
+      dirty = true
       if (!running) draw()
     },
     start: () => {
@@ -310,6 +332,7 @@ export function createScene(opts: {
       cancelAnimationFrame(raf)
       ro.disconnect()
       img.onload = null
+      img.onerror = null
       arrow.onload = null
       // free what we made, but keep the context itself: a canvas hands back the same context on the next mount
       // (React mounts effects twice in development), and a lost one would stay lost

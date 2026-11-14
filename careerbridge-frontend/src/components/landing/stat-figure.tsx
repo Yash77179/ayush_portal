@@ -5,7 +5,8 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 /**
- * One figure in the numbers row: a big number with its label underneath.
+ * One cell in the numbers row: a big number, a small word tucked at its top right, and two lines under it.
+ * The cell itself (.stat-cell, globals.css) floods with violet and grain when you point at it; the text turns white.
  *
  * On desktop the numbers section is pinned and the count is tied to your scroll (smoothed, like the
  * rest of the page): each digit is a reel that glides through one turn of 0–9 and settles on its
@@ -18,7 +19,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 const ROWS = 20 // one full turn of 0–9, then the digit it lands on
 const useIsoLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
 
-export function StatFigure({ n, suffix, label }: { n: number; suffix: string; label: string }) {
+export function StatFigure({ n, suffix, unit, label }: { n: number; suffix: string; unit: string; label: string[] }) {
   const root = React.useRef<HTMLDivElement>(null)
   const digits = String(n).split("").map(Number)
 
@@ -30,7 +31,7 @@ export function StatFigure({ n, suffix, label }: { n: number; suffix: string; la
     const toY = (d: number) => -(((10 + d) / ROWS) * 100)
     const fig = el.querySelector("[data-fig]")
     const sfx = el.querySelector("[data-suffix]")
-    const cap = el.querySelector("[data-label]")
+    const cap = el.querySelectorAll("[data-label], [data-unit]")
     const mm = gsap.matchMedia()
 
     // reduced motion: the finished number, no movement
@@ -72,31 +73,62 @@ export function StatFigure({ n, suffix, label }: { n: number; suffix: string; la
     return () => mm.revert()
   }, [n])
 
+  // phones have no hover: a tap lights this cell (and puts out the one lit before)
+  const light = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") return // (a mouse has hover)
+    const cell = root.current?.closest<HTMLElement>(".stat-cell")
+    if (!cell) return
+    const was = cell.hasAttribute("data-on")
+    cell.parentElement?.querySelectorAll("[data-on]").forEach((c) => c.removeAttribute("data-on"))
+    if (!was) cell.setAttribute("data-on", "")
+  }
+
+  const INK = "text-[oklch(0.25_0.12_283)] group-hover/stat:text-white group-data-[on]/stat:text-white"
   return (
-    <div ref={root} className="flex flex-col items-center text-center">
-      <div data-fig className="font-display flex w-fit items-start text-[clamp(4.2rem,21vw,8rem)] lg:text-[clamp(5rem,9.4vw,11.5rem)] leading-none tracking-[-0.04em] text-white italic lg:text-[oklch(0.25_0.12_283)]">
-        <span role="img" aria-label={`${n}${suffix}`} className="inline-flex">
-          {digits.map((_, i) => (
-            <span key={i} aria-hidden className="relative -mx-[0.045em] inline-block h-[1.04em] overflow-hidden px-[0.04em] text-center">
-              <span data-reel className="flex flex-col will-change-transform">
-                {Array.from({ length: ROWS }, (_, k) => (
-                  <span key={k} className="block h-[1.04em] leading-[1.04]">
-                    {k % 10}
-                  </span>
-                ))}
+    // phones: a row (the number, then its word and two lines beside it); desktop: a tall cell, the word tucked at the
+    // number's top right and the lines underneath
+    <div
+      ref={root}
+      onPointerUp={light}
+      className="@container relative flex h-full cursor-default items-center gap-5 px-5 py-6 text-left select-none sm:px-8 lg:flex-col lg:items-start lg:gap-0 lg:px-[1.6vw] lg:pt-[9svh] lg:pb-[2.4svh]"
+    >
+      {/* the fill: violet, with grain laid over it */}
+      <span aria-hidden className="stat-fill pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300" />
+      <div className="relative w-[44%] shrink-0 lg:w-auto">
+        <div data-fig className={`font-display flex w-fit items-start text-[clamp(3.4rem,17vw,5.5rem)] leading-none tracking-[-0.04em] italic transition-colors duration-300 lg:text-[min(clamp(4rem,9.4vw,11.5rem),38cqw)] ${INK}`}>
+          <span role="img" aria-label={`${n}${suffix} ${unit}`} className="inline-flex">
+            {digits.map((_, i) => (
+              <span key={i} aria-hidden className="relative -mx-[0.045em] inline-block h-[1.04em] overflow-hidden px-[0.04em] text-center">
+                <span data-reel className="flex flex-col will-change-transform">
+                  {Array.from({ length: ROWS }, (_, k) => (
+                    <span key={k} className="block h-[1.04em] leading-[1.04]">
+                      {k % 10}
+                    </span>
+                  ))}
+                </span>
               </span>
+            ))}
+          </span>
+          {suffix && (
+            <span data-suffix aria-hidden className="mt-[0.1em] ml-[0.04em] inline-block text-[0.3em] leading-none not-italic text-[oklch(0.5_0.17_285)] transition-colors duration-300 group-hover/stat:text-white/90 group-data-[on]/stat:text-white/90">
+              {suffix}
+            </span>
+          )}
+        </div>
+        <p data-unit aria-hidden className="absolute top-[2.4cqw] left-full ml-[5.4cqw] hidden text-[clamp(0.8rem,5.2cqw,1.1rem)] font-medium whitespace-nowrap text-[oklch(0.22_0.06_280/0.85)] transition-colors duration-300 group-hover/stat:text-white group-data-[on]/stat:text-white lg:block">
+          {unit}
+        </p>
+      </div>
+      <div className="relative min-w-0">
+        <p data-unit className="font-display text-[1.35rem] leading-tight italic text-[oklch(0.22_0.06_280)] transition-colors duration-300 group-data-[on]/stat:text-white lg:hidden">{unit}</p>
+        <p data-label className="mt-1 text-[0.9rem] leading-snug text-[oklch(0.22_0.06_280/0.65)] transition-colors duration-300 group-hover/stat:text-white/85 group-data-[on]/stat:text-white/85 lg:mt-[3svh] lg:text-[clamp(0.98rem,1.1vw,1.1rem)] lg:leading-[1.45]">
+          {label.map((l) => (
+            <span key={l} className="block">
+              {l}
             </span>
           ))}
-        </span>
-        {suffix && (
-          <span data-suffix aria-hidden className="mt-[0.1em] ml-[0.04em] inline-block text-[0.3em] leading-none not-italic text-[oklch(0.88_0.08_300)] lg:text-[oklch(0.5_0.17_285)]">
-            {suffix}
-          </span>
-        )}
+        </p>
       </div>
-      <p data-label className="mt-3 max-w-[11rem] text-[0.98rem] leading-snug text-white/75 lg:mt-6 lg:max-w-none lg:text-[clamp(1.05rem,1.2vw,1.2rem)] tracking-[0.005em] lg:text-muted-foreground">
-        {label}
-      </p>
     </div>
   )
 }

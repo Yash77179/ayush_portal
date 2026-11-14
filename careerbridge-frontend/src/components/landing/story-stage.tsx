@@ -30,6 +30,9 @@ import { queueBridge } from "@/lib/assistant"
  * sphere). With reduced motion it is a plain static block instead.
  */
 
+/** the words that carry the paragraphs beside the deck */
+const EM = "italic text-[oklch(0.5_0.19_290)]"
+
 const CARDS: { tag: string; title: string; art?: ArtKind; hue: number; end: { x: number; y: number; r: number } }[] = [
   { tag: "Students", title: "Your skills, mapped", art: "waves", hue: 262, end: { x: -34, y: 14, r: -7 } },
   { tag: "Matching", title: "86% match", art: "ripples", hue: 300, end: { x: 30, y: -10, r: 5 } },
@@ -447,17 +450,17 @@ export function StoryStage() {
             <div
               key={c.tag}
               data-card
-              className="absolute top-1/2 left-1/2 aspect-[4/5] w-[min(64vw,19rem,36svh)] rounded-[26px] bg-white p-2 sm:w-[min(42vw,22rem,36svh)] lg:w-[min(23vw,27rem,56svh)] lg:rounded-[30px] opacity-0 shadow-[0_30px_60px_-30px_oklch(0.2_0.1_285/0.55),0_2px_6px_oklch(0.2_0.1_285/0.1)] will-change-transform"
+              className="absolute top-1/2 left-1/2 aspect-[4/5.6] w-[min(64vw,19rem,34svh)] rounded-[16px] bg-white p-2 lg:rounded-[18px] sm:aspect-[4/5] sm:w-[min(42vw,22rem,36svh)] lg:w-[min(23vw,27rem,56svh)] opacity-0 shadow-[0_30px_60px_-30px_oklch(0.2_0.1_285/0.55),0_2px_6px_oklch(0.2_0.1_285/0.1)] will-change-transform"
               style={{ zIndex: i + 1 }}
             >
               {c.art ? (
-                <div className="relative size-full overflow-hidden rounded-[19px] p-5 lg:rounded-[23px] lg:p-6" style={{ background: `linear-gradient(160deg, oklch(0.998 0.003 ${c.hue}), oklch(0.95 0.045 ${c.hue}))` }}>
+                <div className="relative size-full overflow-hidden rounded-[11px] p-5 lg:rounded-[14px] lg:p-6" style={{ background: `linear-gradient(160deg, oklch(0.998 0.003 ${c.hue}), oklch(0.95 0.045 ${c.hue}))` }}>
                   <PlateArt kind={c.art} hue={c.hue} id={`sg-${i}`} />
                   <span className="relative text-[11px] font-semibold tracking-[0.24em] text-[oklch(0.22_0.05_280/0.6)] uppercase">{c.tag}</span>
                   <p className="font-display absolute right-5 bottom-5 left-5 text-[clamp(1.9rem,3.2vw,3.4rem)] leading-[0.95] tracking-[-0.02em] text-[oklch(0.22_0.05_280)] italic lg:right-6 lg:bottom-6 lg:left-6">{c.title}</p>
                 </div>
               ) : (
-                <div className="relative size-full overflow-hidden rounded-[19px] bg-[radial-gradient(90%_60%_at_45%_22%,oklch(0.86_0.09_295),transparent_70%),linear-gradient(170deg,oklch(0.6_0.2_288),oklch(0.42_0.22_283))] p-5 text-white lg:rounded-[23px] lg:p-6">
+                <div className="relative size-full overflow-hidden rounded-[11px] lg:rounded-[14px] bg-[radial-gradient(90%_60%_at_45%_22%,oklch(0.86_0.09_295),transparent_70%),linear-gradient(170deg,oklch(0.6_0.2_288),oklch(0.42_0.22_283))] p-5 text-white lg:p-6">
                   <span className="relative inline-flex rounded-full bg-black/20 px-3 py-1.5 text-[11px] font-semibold tracking-[0.24em] uppercase backdrop-blur-sm">{c.tag}</span>
                   <svg data-card-spark viewBox="0 0 100 100" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ width: SPARK, height: SPARK }}>
                     <path d={STAR_D} fill="white" />
@@ -510,11 +513,13 @@ export function StoryStage() {
         </div>
 
         {/* a paragraph on each side of the deck */}
-        <p data-side className="relative z-10 mx-auto mt-10 max-w-md text-center text-[1.05rem] leading-relaxed font-medium text-[oklch(0.22_0.05_280)] motion-safe:absolute motion-safe:inset-x-6 motion-safe:top-[13svh] motion-safe:mt-0 motion-safe:text-[1rem] motion-safe:opacity-0 sm:motion-safe:text-[1.1rem] lg:motion-safe:inset-x-auto lg:motion-safe:top-1/2 lg:motion-safe:left-[6vw] lg:motion-safe:max-w-[22vw] lg:motion-safe:-translate-y-1/2 lg:motion-safe:text-left lg:motion-safe:text-[clamp(1.05rem,1.35vw,1.45rem)]">
-          CareerBridge began with a simple question: why is the first internship the hardest one to find?
+        <p data-side className="relative z-10 mx-auto mt-10 max-w-md text-center text-[1.05rem] font-display leading-[1.3] tracking-[-0.005em] text-[oklch(0.22_0.05_280)] motion-safe:absolute motion-safe:inset-x-6 motion-safe:top-[13svh] motion-safe:mt-0 motion-safe:text-[1.15rem] motion-safe:opacity-0 sm:motion-safe:text-[1.3rem] lg:motion-safe:inset-x-auto lg:motion-safe:top-1/2 lg:motion-safe:left-[6vw] lg:motion-safe:max-w-[22vw] lg:motion-safe:-translate-y-1/2 lg:motion-safe:text-left lg:motion-safe:text-[clamp(1.25rem,1.7vw,1.85rem)]">
+          CareerBridge began with a simple question: why is the <em className={EM}>first internship</em> the{" "}
+          <em className={EM}>hardest one to find?</em>
         </p>
-        <p data-side className="relative z-10 mx-auto mt-6 max-w-md text-center text-[1.05rem] leading-relaxed font-medium text-[oklch(0.22_0.05_280)] motion-safe:absolute motion-safe:inset-x-6 motion-safe:bottom-[7svh] motion-safe:mt-0 motion-safe:text-[1rem] motion-safe:opacity-0 sm:motion-safe:text-[1.1rem] lg:motion-safe:inset-x-auto lg:motion-safe:top-1/2 lg:motion-safe:right-[6vw] lg:motion-safe:bottom-auto lg:motion-safe:max-w-[22vw] lg:motion-safe:-translate-y-1/2 lg:motion-safe:text-left lg:motion-safe:text-[clamp(1.05rem,1.35vw,1.45rem)]">
-          So everything is in the open — skills matched with the gaps spelled out, every application tracked to its last step, placements measured, not guessed.
+        <p data-side className="relative z-10 mx-auto mt-6 max-w-md text-center text-[1.05rem] font-display leading-[1.3] tracking-[-0.005em] text-[oklch(0.22_0.05_280)] motion-safe:absolute motion-safe:inset-x-6 motion-safe:bottom-[7svh] motion-safe:mt-0 motion-safe:text-[1.15rem] motion-safe:opacity-0 sm:motion-safe:text-[1.3rem] lg:motion-safe:inset-x-auto lg:motion-safe:top-1/2 lg:motion-safe:right-[6vw] lg:motion-safe:bottom-auto lg:motion-safe:max-w-[22vw] lg:motion-safe:-translate-y-1/2 lg:motion-safe:text-left lg:motion-safe:text-[clamp(1.25rem,1.7vw,1.85rem)]">
+          So everything is <em className={EM}>in the open</em>: skills matched with the gaps spelled out, every application{" "}
+          <em className={EM}>tracked to its last step</em>, placements <em className={EM}>measured, not guessed.</em>
         </p>
       </div>
     </section>
