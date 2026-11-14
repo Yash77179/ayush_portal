@@ -89,7 +89,7 @@ class Command(BaseCommand):
         # organisations and their people
         uni, _ = University.objects.get_or_create(name=UNIVERSITY, defaults={"location": "Phagwara, Punjab"})
         tpo = user("demo_tpo", "university", "Kavita", "Rao")
-        UniversityStaff.objects.get_or_create(user=tpo, defaults={"university": uni, "is_admin": True, "title": "Training & Placement Officer"})
+        UniversityStaff.objects.get_or_create(user=tpo, defaults={"university": uni, "is_admin": True, "admin_rank": 0, "title": "Training & Placement Officer"})
 
         company, _ = Company.objects.get_or_create(
             name=COMPANY,

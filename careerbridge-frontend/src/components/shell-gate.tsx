@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 
 import { useAuth } from "@/contexts/auth-context";
 import { AppShell } from "@/components/app-shell";
+import { UniversityAccess } from "@/components/org-gate";
 
 const SHELL_ROOTS = ["/dashboard", "/internships", "/companies"];
 const inRoot = (path: string, root: string) => path === root || path.startsWith(root + "/");
@@ -40,6 +41,8 @@ export function ShellGate({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // placement officers see nothing but "link your university" until their placement cell has approved them
+  if (user?.role === "university" && needsAuth) return <UniversityAccess><AppShell>{children}</AppShell></UniversityAccess>;
   if (user) return <AppShell>{children}</AppShell>;
 
   return <div className="mx-auto max-w-[1200px] px-5 py-10 sm:px-8">{children}</div>;

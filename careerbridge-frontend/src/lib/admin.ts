@@ -77,6 +77,21 @@ export const getAdminCompany = (id: number) => apiFetch<AdminCompanyDetail>(`/ad
 export const updateAdminCompany = (id: number, body: Record<string, unknown>) =>
   apiFetch<AdminCompanyDetail>(`/admin/companies/${id}/`, { method: "PATCH", body })
 
+/** someone asking to run a university's placement cell that has no admin yet (approving makes them its head admin) */
+export interface UniversityAccessRequest {
+  id: number
+  name: string
+  email: string
+  username: string
+  title: string
+  university: string
+  location: string
+  requested_at: string
+}
+export const getUniversityRequests = () => apiFetch<UniversityAccessRequest[]>("/admin/university-requests/")
+export const approveUniversityRequest = (id: number) => apiFetch(`/admin/university-requests/${id}/`, { method: "POST" })
+export const declineUniversityRequest = (id: number) => apiFetch(`/admin/university-requests/${id}/`, { method: "DELETE" })
+
 export const ROLE_LABEL: Record<Role, string> = { student: "Student", company: "Recruiter", university: "University", admin: "Admin" }
 
 export const fmtDay = (iso: string | null) =>

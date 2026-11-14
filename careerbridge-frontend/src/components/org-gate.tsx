@@ -10,8 +10,10 @@ import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { errorMessage } from "@/lib/api"
-import { createCompany, getMyCompany, getMyUniversity, linkUniversity, type MyCompany, type MyUniversity } from "@/lib/ats"
-import { BuildingsIcon, GraduateIcon } from "@/components/icons"
+import { createCompany, getMyCompany, getMyUniversity, linkUniversity, withdrawUniversityRequest, type MyCompany, type MyUniversity, type UniversityRequest } from "@/lib/ats"
+import { useAuth } from "@/contexts/auth-context"
+import { BrandMark } from "@/components/brand-mark"
+import { BuildingsIcon, ClockIcon, GraduateIcon } from "@/components/icons"
 import { Field, PageHeader, Panel, stagger } from "@/components/kit"
 import { UniversityCombobox, type UniversityOption } from "@/components/university-combobox"
 import { Button } from "@/components/ui/button"
@@ -166,6 +168,11 @@ function CompanySetup({ onDone }: { onDone: (m: MyCompany) => void }) {
 }
 
 /* ── University ──────────────────────────────────────────────────────────── */
+/*
+ * A placement officer's first steps, before anything else: link your university, which sends a request, then wait
+ * until it's approved (by the placement cell's admins, or by CareerBridge if you'd be its first admin). Until then
+ * they see only these screens, full screen, with no dashboard behind (see UniversityAccess, used by the app shell).
+ */
 interface UniversityCtx {
   data: MyUniversity
   refresh: () => Promise<void>
@@ -178,12 +185,11 @@ export function useUniversity() {
   return ctx
 }
 
-export function UniversityGate({ children }: { children: React.ReactNode }) {
-  const [state, setState] = React.useState<{ loading: boolean; data: MyUniversity | null; error: string | null }>({
-    loading: true,
-    data: null,
-    error: null,
-  })
+type UniState = { loading: boolean; data: MyUniversity | UniversityRequest | null; error: string | null }
+
+/** Loads the placement-cell link: approved, a request waiting, or nothing yet. */
+function useUniversityLink() {
+  const [state, setState] = React.useState<UniState>({ loading: true, data: null, error: null })
   const refresh = React.useCallback(
     () =>
       getMyUniversity()
@@ -194,8 +200,43 @@ export function UniversityGate({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     refresh()
   }, [refresh])
-  const value = React.useMemo(() => (state.data ? { data: state.data, refresh } : null), [state.data, refresh])
+  return { state, setState, refresh }
+}
 
+/**
+ * Wraps the whole signed-in app for placement officers: until their placement cell has approved them, they see only
+ * the link / waiting screen, full screen, and nothing else of CareerBridge.
+ */
+export function UniversityAccess({ children }: { children: React.ReactNode }) {
+  const { state, setState, refresh } = useUniversityLink()
+  if (state.loading) return <FullScreen><Loader2 className="size-6 animate-spin text-muted-foreground" /></FullScreen>
+  if (state.data?.status === "active") return <>{children}</>
+  if (state.error)
+    return (
+      <FullScreen>
+        <OnboardingCard title="Couldn't load your university" subtitle={state.error}>
+          <Button size="lg" onClick={refresh}>
+            Try again
+          </Button>
+        </OnboardingCard>
+      </FullScreen>
+    )
+  return (
+    <FullScreen>
+      {state.data?.status === "pending" ? (
+        <UniversityWaiting request={state.data} onChange={refresh} />
+      ) : (
+        <UniversitySetup onDone={(d) => setState({ loading: false, data: d, error: null })} />
+      )}
+    </FullScreen>
+  )
+}
+
+/** For the placement-cell pages: shares the approved link with every page underneath. */
+export function UniversityGate({ children }: { children: React.ReactNode }) {
+  const { state, refresh } = useUniversityLink()
+  const data = state.data?.status === "active" ? state.data : null
+  const value = React.useMemo(() => (data ? { data, refresh } : null), [data, refresh])
   if (state.loading) return <Spinner />
   if (state.error)
     return (
@@ -206,11 +247,42 @@ export function UniversityGate({ children }: { children: React.ReactNode }) {
         </Button>
       </Panel>
     )
-  if (!value) return <UniversitySetup onDone={(d) => setState({ loading: false, data: d, error: null })} />
+  if (!value) return <Spinner /> // (UniversityAccess shows the link / waiting screen in front of this)
   return <UniversityContext.Provider value={value}>{children}</UniversityContext.Provider>
 }
 
-function UniversitySetup({ onDone }: { onDone: (d: MyUniversity) => void }) {
+function FullScreen({ children }: { children: React.ReactNode }) {
+  const { logout } = useAuth()
+  return (
+    <div className="relative flex min-h-svh flex-col overflow-hidden bg-background px-5 pt-5 pb-10 sm:px-8 sm:pt-7">
+      {/* a soft pool of violet behind the card */}
+      <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 h-[46rem] w-[min(70rem,160vw)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(closest-side,oklch(0.9_0.07_295/0.55),transparent)]" />
+      <div className="relative flex items-center justify-between">
+        <span className="flex items-center gap-3">
+          <BrandMark className="size-10" />
+          <span className="text-[17px] font-medium">CareerBridge</span>
+        </span>
+        <Button variant="ghost" onClick={logout}>
+          Sign out
+        </Button>
+      </div>
+      <div className="relative flex w-full flex-1 items-center justify-center py-8">{children}</div>
+    </div>
+  )
+}
+
+function OnboardingCard({ title, subtitle, icon, children }: { title: string; subtitle: React.ReactNode; icon?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="mx-auto w-full max-w-[44rem] rounded-[32px] border border-(--hairline) bg-card p-7 shadow-[0_40px_90px_-50px_oklch(0.3_0.1_285/0.45)] sm:p-12">
+      {icon && <span className="mb-6 flex size-16 items-center justify-center rounded-[22px] bg-secondary [&_svg]:size-8">{icon}</span>}
+      <h1 className="text-[clamp(2.1rem,5vw,3.2rem)] leading-[1.02] font-medium tracking-[-0.03em]">{title}</h1>
+      <p className="mt-4 text-[clamp(1rem,1.6vw,1.15rem)] leading-relaxed text-muted-foreground">{subtitle}</p>
+      <div className="mt-9">{children}</div>
+    </div>
+  )
+}
+
+function UniversitySetup({ onDone }: { onDone: (d: UniversityRequest) => void }) {
   const [uni, setUni] = React.useState<UniversityOption | null>(null)
   const [title, setTitle] = React.useState("Training & Placement Officer")
   const [saving, setSaving] = React.useState(false)
@@ -220,9 +292,7 @@ function UniversitySetup({ onDone }: { onDone: (d: MyUniversity) => void }) {
     if (!uni) return
     setSaving(true)
     try {
-      const d = await linkUniversity({ university_id: uni.id, title })
-      toast.success(d.is_admin ? `You're the placement cell admin for ${d.university.name}` : `Joined ${d.university.name}'s placement cell`)
-      onDone(d)
+      onDone(await linkUniversity({ university_id: uni.id, title }))
     } catch (err) {
       toast.error(errorMessage(err))
     } finally {
@@ -231,27 +301,81 @@ function UniversitySetup({ onDone }: { onDone: (d: MyUniversity) => void }) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
-      <PageHeader title="Link your university" subtitle="Your placement-cell tools work on your own university's students, drives and reports." />
-      <form onSubmit={submit}>
-        <Panel style={stagger(1)} contentClassName="space-y-5 pt-6">
-          <div className="flex items-center gap-3 rounded-2xl bg-secondary p-4 text-[15px] text-muted-foreground">
-            <GraduateIcon className="size-5 shrink-0" />
-            The first officer to link a university becomes its placement-cell admin. Colleagues who link later join your team.
-          </div>
-          <Field label="University *" hint="Not in the list? Type its full name and add it.">
-            <UniversityCombobox value={uni} onChange={setUni} />
-          </Field>
-          <Field label="Your role">
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Training & Placement Officer" />
-          </Field>
-          <div className="flex justify-end">
-            <Button size="lg" type="submit" disabled={!uni || saving}>
-              {saving && <Loader2 className="animate-spin" />} Link university
-            </Button>
-          </div>
-        </Panel>
+    <OnboardingCard
+      icon={<GraduateIcon />}
+      title="Link your university"
+      subtitle="Your placement-cell tools work on your own university's students, drives and reports. Pick it, and we'll ask your placement cell to approve you."
+    >
+      <form onSubmit={submit} className="space-y-6">
+        <Field label="University" hint="Not in the list? Type its full name and add it.">
+          <UniversityCombobox value={uni} onChange={setUni} />
+        </Field>
+        <Field label="Your role">
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Training & Placement Officer" className="h-13 text-[16px]" />
+        </Field>
+        <div className="flex items-center gap-3 rounded-2xl bg-secondary p-4 text-[15px] text-muted-foreground">
+          <GraduateIcon className="size-5 shrink-0" />
+          Your placement cell&rsquo;s admins approve new members. If you&rsquo;re the first from your university, CareerBridge approves you and you become its admin.
+        </div>
+        <Button size="lg" type="submit" disabled={!uni || saving} className="h-13 w-full text-[16px]">
+          {saving && <Loader2 className="animate-spin" />} Send request
+        </Button>
       </form>
-    </div>
+    </OnboardingCard>
+  )
+}
+
+function UniversityWaiting({ request, onChange }: { request: UniversityRequest; onChange: () => Promise<void> }) {
+  const [busy, setBusy] = React.useState(false)
+  // look again every so often, so the dashboard opens as soon as someone approves
+  React.useEffect(() => {
+    const t = setInterval(onChange, 15000)
+    return () => clearInterval(t)
+  }, [onChange])
+
+  const withdraw = async () => {
+    setBusy(true)
+    try {
+      await withdrawUniversityRequest()
+      await onChange()
+    } catch (err) {
+      toast.error(errorMessage(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const who = request.approver === "careerbridge" ? "the CareerBridge team" : `${request.university.name}'s placement-cell admins`
+  return (
+    <OnboardingCard
+      icon={<ClockIcon />}
+      title="Your request has been sent"
+      subtitle={
+        <>
+          We&rsquo;ve forwarded it to {who}. As soon as they approve you, your placement-cell dashboard opens here.
+        </>
+      }
+    >
+      <dl className="grid gap-x-6 gap-y-3 rounded-2xl bg-secondary p-5 text-[15px] sm:grid-cols-[9rem_1fr]">
+        <dt className="text-muted-foreground">University</dt>
+        <dd className="font-medium">{request.university.name}</dd>
+        <dt className="text-muted-foreground">Your role</dt>
+        <dd>{request.title || "—"}</dd>
+        <dt className="text-muted-foreground">Sent</dt>
+        <dd>{new Date(request.requested_at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</dd>
+        <dt className="text-muted-foreground">Status</dt>
+        <dd className="flex items-center gap-2">
+          <span className="size-2 animate-pulse rounded-full bg-(--peach-fg)" /> Waiting for approval
+        </dd>
+      </dl>
+      <div className="mt-6 flex flex-wrap gap-2">
+        <Button size="lg" onClick={() => onChange()}>
+          Check again
+        </Button>
+        <Button size="lg" variant="ghost" disabled={busy} onClick={withdraw}>
+          {busy && <Loader2 className="animate-spin" />} Withdraw and pick another university
+        </Button>
+      </div>
+    </OnboardingCard>
   )
 }

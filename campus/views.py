@@ -17,7 +17,8 @@ from rest_framework.views import APIView
 
 from accounts.permissions import role_required
 from applications.models import Application
-from institutions.access import require_staff, university_staff
+from accounts.models import User
+from institutions.access import require_staff, university_request, university_staff
 from institutions.models import Company, StudentProfile, University, UniversityStaff
 from internships.eligibility import check_rules, internship_reasons
 from internships.models import Internship
@@ -31,18 +32,63 @@ IsStudent = role_required("student")
 CLOSED = ("selected", "rejected")
 
 
+def _rank(s):
+    """Where an admin sits in the chain of command (0 = the top). None for someone who isn't an admin."""
+    if not s.is_admin:
+        return None
+    return s.admin_rank if s.admin_rank is not None else 0
+
+
+def _can_manage(me, member):
+    """Whether `me` may change `member`'s admin rights or remove them: anyone who isn't an admin, and admins at my
+    rank or below, but never anyone above me (so never the person who made me admin). Not yourself: you step down
+    instead (see staff_member)."""
+    if not me.is_admin or member.pk == me.pk:
+        return False
+    return not member.is_admin or _rank(member) >= _rank(me)
+
+
 def _uni_payload(staff, request):
     uni = staff.university
+    members = list(uni.staff.filter(status="active").select_related("user", "made_admin_by__user"))
+    waiting = uni.staff.filter(status="pending").select_related("user").order_by("joined_at") if staff.is_admin else []
     return {
+        "status": "active",
         "university": UniversityEditSerializer(uni, context={"request": request}).data,
         "is_admin": staff.is_admin,
+        "admin_rank": _rank(staff),
         "title": staff.title,
         "student_count": uni.students.count(),
         "staff": [
-            {"id": s.id, "name": s.user.get_full_name() or s.user.username, "email": s.user.email, "title": s.title, "is_admin": s.is_admin}
-            for s in uni.staff.select_related("user")
+            {
+                "id": s.id, "name": s.user.get_full_name() or s.user.username, "email": s.user.email, "title": s.title,
+                "is_admin": s.is_admin, "admin_rank": _rank(s), "is_you": s.pk == staff.pk,
+                "made_admin_by": (s.made_admin_by.user.get_full_name() or s.made_admin_by.user.username) if s.is_admin and s.made_admin_by else "",
+                "can_manage": _can_manage(staff, s),
+            }
+            for s in sorted(members, key=lambda s: (not s.is_admin, _rank(s) or 0, s.user.get_full_name()))
+        ],
+        "requests": [
+            {"id": r.id, "name": r.user.get_full_name() or r.user.username, "email": r.user.email, "title": r.title, "requested_at": r.joined_at}
+            for r in waiting
         ],
     }
+
+
+def _request_payload(req):
+    """What someone waiting for approval sees: where they asked to join, and who will decide."""
+    has_admins = req.university.staff.filter(status="active", is_admin=True).exists()
+    return {
+        "status": "pending",
+        "university": {"id": req.university.id, "name": req.university.name, "location": req.university.location},
+        "title": req.title,
+        "requested_at": req.joined_at,
+        "approver": "placement_cell" if has_admins else "careerbridge",
+    }
+
+
+def _platform_admins():
+    return User.objects.filter(Q(role="admin") | Q(is_superuser=True), is_active=True)
 
 
 class MyUniversityView(APIView):
@@ -53,13 +99,18 @@ class MyUniversityView(APIView):
 
     def get(self, request):
         staff = university_staff(request.user)
-        if staff is None:
-            return Response({"detail": "no_university"}, status=status.HTTP_404_NOT_FOUND)
-        return Response(_uni_payload(staff, request))
+        if staff is not None:
+            return Response(_uni_payload(staff, request))
+        req = university_request(request.user)
+        if req is not None:
+            return Response(_request_payload(req))
+        return Response({"detail": "no_university"}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
         if university_staff(request.user):
             return Response({"detail": "You're already linked to a university."}, status=400)
+        if university_request(request.user):
+            return Response({"detail": "Your request is already waiting for approval. Withdraw it first to pick another university."}, status=400)
         uni_id = request.data.get("university_id")
         if uni_id:
             uni = University.objects.filter(pk=uni_id).first()
@@ -72,16 +123,24 @@ class MyUniversityView(APIView):
             uni = University.objects.filter(name__iexact=name).first() or University.objects.create(
                 name=name[:200], location=str(request.data.get("location", ""))[:200]
             )
-        with transaction.atomic():
-            first = not uni.staff.exists()
-            staff = UniversityStaff.objects.create(
-                user=request.user, university=uni, is_admin=first, title=str(request.data.get("title", ""))[:100]
-            )
-        if not first:
-            notify([s.user for s in uni.staff.filter(is_admin=True).select_related("user")], "team",
-                   f"{request.user.get_full_name() or request.user.username} joined your placement cell", uni.name,
+        req = UniversityStaff.objects.create(user=request.user, university=uni, status="pending", title=str(request.data.get("title", ""))[:100])
+        who = request.user.get_full_name() or request.user.username
+        admins = [s.user for s in uni.staff.filter(status="active", is_admin=True).select_related("user")]
+        if admins:
+            notify(admins, "team", f"{who} asked to join your placement cell", f"{req.title or 'Placement cell'} at {uni.name}. Approve or decline in Settings.",
                    "/dashboard/university/settings")
-        return Response(_uni_payload(staff, request), status=201)
+        else:
+            notify(list(_platform_admins()), "team", f"{who} asked to run {uni.name}'s placement cell",
+                   "They'd be its first admin. Approve or decline on the admin dashboard.", "/dashboard/admin")
+        return Response(_request_payload(req), status=201)
+
+    def delete(self, request):
+        """Withdraw your request while it's still waiting."""
+        req = university_request(request.user)
+        if req is None:
+            return Response({"detail": "There's no request to withdraw."}, status=400)
+        req.delete()
+        return Response(status=204)
 
     def patch(self, request):
         staff = require_staff(request.user, admin=True)
@@ -99,10 +158,30 @@ class MyUniversityView(APIView):
 @api_view(["PATCH", "DELETE"])
 @permission_classes([IsUniversity])
 def staff_member(request, pk):
-    """Admin: PATCH {is_admin} or DELETE a colleague. The last admin stays."""
+    """Admin: PATCH {is_admin} or DELETE a colleague, following the chain of command (see _can_manage).
+
+    Making someone admin puts them one rank below you. You can take admin rights from, or remove, only people at your
+    rank or below; never anyone above you. You can always step down yourself. The last admin stays."""
     me = require_staff(request.user, admin=True)
-    member = get_object_or_404(UniversityStaff, pk=pk, university=me.university)
-    admins = me.university.staff.filter(is_admin=True).count()
+    member = get_object_or_404(UniversityStaff.objects.select_related("user", "university"), pk=pk, university=me.university)
+    if member.status == "pending":
+        uni = member.university.name
+        if request.method == "DELETE":
+            notify(member.user, "team", f"Your request to join {uni}'s placement cell was declined",
+                   "If you think this is a mistake, contact your placement cell.", "/dashboard/university")
+            member.delete()
+            return Response(status=204)
+        if request.data.get("status") != "active":
+            return Response({"detail": "Approve the request first."}, status=400)
+        member.status = "active"
+        member.save(update_fields=["status"])
+        notify(member.user, "team", f"You're in: {uni}'s placement cell approved you", "Your placement-cell dashboard is ready.", "/dashboard/university")
+        return Response({"id": member.id, "status": member.status})
+    admins = me.university.staff.filter(status="active", is_admin=True).count()
+    stepping_down = member.pk == me.pk and request.method == "PATCH" and not request.data.get("is_admin")
+    if not stepping_down and not _can_manage(me, member):
+        who = member.user.get_full_name() or member.user.username
+        return Response({"detail": f"{who} is above you as an admin, so only someone at their level or higher can change that."}, status=403)
     if request.method == "DELETE":
         if member.is_admin and admins == 1:
             return Response({"detail": "Your placement cell needs at least one admin."}, status=400)
@@ -111,9 +190,13 @@ def staff_member(request, pk):
     make_admin = bool(request.data.get("is_admin"))
     if member.is_admin and not make_admin and admins == 1:
         return Response({"detail": "Your placement cell needs at least one admin."}, status=400)
-    member.is_admin = make_admin
-    member.save(update_fields=["is_admin"])
-    return Response({"id": member.id, "is_admin": member.is_admin})
+    if make_admin and not member.is_admin:
+        member.is_admin, member.admin_rank, member.made_admin_by = True, _rank(me) + 1, me
+    elif not make_admin and member.is_admin:
+        member.is_admin, member.admin_rank, member.made_admin_by = False, None, None
+        # (anyone they made admin keeps their rank: the chain is about rank, not about one person)
+    member.save(update_fields=["is_admin", "admin_rank", "made_admin_by"])
+    return Response({"id": member.id, "is_admin": member.is_admin, "admin_rank": _rank(member)})
 
 
 # ── Students ────────────────────────────────────────────────────────────────

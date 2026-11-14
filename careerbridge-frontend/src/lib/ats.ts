@@ -352,12 +352,39 @@ export const respondToOffer = (id: number, decision: "accept" | "decline", note 
   apiFetch<Offer>(`/applications/offers/${id}/respond/`, { method: "POST", body: { decision, note } })
 
 /* ── University placement cell ───────────────────────────────────────────── */
+/** A request to join a placement cell that's still waiting for approval (you see nothing else until it's approved). */
+export interface UniversityRequest {
+  status: "pending"
+  university: { id: number; name: string; location: string }
+  title: string
+  requested_at: string
+  /** who decides: the placement cell's admins, or CareerBridge (when you'd be the university's first admin) */
+  approver: "placement_cell" | "careerbridge"
+}
+
 export interface MyUniversity {
+  status: "active"
   university: { id: number; name: string; location: string; website: string; established_year: number | null; logo: string | null }
   is_admin: boolean
   title: string
   student_count: number
-  staff: { id: number; name: string; email: string; title: string; is_admin: boolean }[]
+  /** where you sit among the admins: 0 is the top (whoever set up the placement cell); null if you're not an admin */
+  admin_rank: number | null
+  staff: {
+    id: number
+    name: string
+    email: string
+    title: string
+    is_admin: boolean
+    admin_rank: number | null
+    /** who made them admin ("" for the top admins) */
+    made_admin_by: string
+    is_you: boolean
+    /** whether you may change their admin rights or remove them (they're at your level or below) */
+    can_manage: boolean
+  }[]
+  /** people asking to join (shown to admins, who approve or decline them) */
+  requests: { id: number; name: string; email: string; title: string; requested_at: string }[]
 }
 export interface CampusStudent {
   id: number
@@ -447,12 +474,15 @@ export interface PlacementReport {
   top_skills: { skill: string; count: number }[]
 }
 
-export const getMyUniversity = () => apiFetch<MyUniversity>("/campus/my-university/")
+export const getMyUniversity = () => apiFetch<MyUniversity | UniversityRequest>("/campus/my-university/")
+export const withdrawUniversityRequest = () => apiFetch("/campus/my-university/", { method: "DELETE" })
 export const linkUniversity = (data: { university_id?: number; name?: string; location?: string; title?: string }) =>
-  apiFetch<MyUniversity>("/campus/my-university/", { method: "POST", body: data })
+  apiFetch<UniversityRequest>("/campus/my-university/", { method: "POST", body: data })
 export const updateUniversity = (data: Record<string, unknown> | FormData) => apiFetch<MyUniversity>("/campus/my-university/", { method: "PATCH", body: data })
 export const updateStaff = (id: number, isAdmin: boolean) => apiFetch(`/campus/my-university/staff/${id}/`, { method: "PATCH", body: { is_admin: isAdmin } })
 export const removeStaff = (id: number) => apiFetch(`/campus/my-university/staff/${id}/`, { method: "DELETE" })
+/** approve a request to join (decline it with removeStaff) */
+export const approveStaff = (id: number) => apiFetch(`/campus/my-university/staff/${id}/`, { method: "PATCH", body: { status: "active" } })
 export const getCampusStudents = (params?: Record<string, string>) =>
   apiFetch<{ results: CampusStudent[]; branches: string[] }>(`/campus/students/${qs(params)}`)
 export const getCampusStudent = (id: number) => apiFetch<CampusStudentDetail>(`/campus/students/${id}/`)

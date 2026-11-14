@@ -101,3 +101,42 @@ class PlacementCellTests(TestCase):
         self.assertGreaterEqual(n["unread"], 1)
         self.api.post("/api/notifications/read/", {}, format="json")
         self.assertEqual(self.api.get("/api/notifications/").json()["unread"], 0)
+
+
+class AdminChainTests(TestCase):
+    """Placement-cell admins form a chain: you can only change or remove admins at your level or below."""
+
+    def setUp(self):
+        from institutions.models import UniversityStaff
+
+        self.uni = University.objects.create(name="Chain University")
+
+        def staff(name, admin=False, rank=None):
+            return UniversityStaff.objects.create(user=make_user(name, "university"), university=self.uni, is_admin=admin, admin_rank=rank)
+
+        self.a, self.b, self.c, self.d = staff("head", True, 0), staff("bina"), staff("chirag"), staff("dev")
+
+    def act(self, who, target, method="PATCH", is_admin=None):
+        api = APIClient()
+        api.force_authenticate(who.user)
+        url = f"/api/campus/my-university/staff/{target.pk}/"
+        return api.delete(url) if method == "DELETE" else api.patch(url, {"is_admin": is_admin}, format="json")
+
+    def test_chain_of_command(self):
+        self.assertEqual(self.act(self.a, self.b, is_admin=True).status_code, 200)  # head makes bina admin
+        self.assertEqual(self.act(self.b, self.c, is_admin=True).status_code, 200)  # bina makes chirag admin
+        self.assertEqual(self.act(self.b, self.d, is_admin=True).status_code, 200)  # ...and dev
+        for s in (self.b, self.c, self.d):
+            s.refresh_from_db()
+        self.assertEqual((self.b.admin_rank, self.c.admin_rank, self.d.admin_rank), (1, 2, 2))
+        self.assertEqual(self.c.made_admin_by, self.b)
+        # nobody can touch someone above them: not the head, not the person who made them admin
+        self.assertEqual(self.act(self.b, self.a, is_admin=False).status_code, 403)
+        self.assertEqual(self.act(self.b, self.a, method="DELETE").status_code, 403)
+        self.assertEqual(self.act(self.c, self.b, is_admin=False).status_code, 403)
+        # same level and below are fine
+        self.assertEqual(self.act(self.c, self.d, is_admin=False).status_code, 200)
+        self.assertEqual(self.act(self.a, self.b, is_admin=False).status_code, 200)
+        # you can always step down yourself, unless you're the last admin
+        self.assertEqual(self.act(self.c, self.c, is_admin=False).status_code, 200)
+        self.assertEqual(self.act(self.a, self.a, is_admin=False).status_code, 400)

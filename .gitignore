@@ -18,6 +18,9 @@ build/
 *.tsbuildinfo
 next-env.d.ts
 
+# Logins for the seeded demo world (python manage.py seed_world): never commit
+seed_accounts.md
+
 # Environment variables & secrets
 .env
 .env.local

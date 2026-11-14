@@ -18,7 +18,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from accounts.permissions import role_required
-from institutions.models import Company, CompanyMembership
+from institutions.models import Company, CompanyMembership, UniversityStaff
 from notifications.service import notify
 
 User = get_user_model()
@@ -271,3 +271,41 @@ def company_detail(request, pk):
         "openings": openings,
         "sizes": dict(Company._meta.get_field("size").choices),
     })
+
+
+# ── placement-cell requests that need a CareerBridge admin ────────────────────
+# The first person to link a university has nobody there to approve them, so it comes to us. Approving makes them its
+# head admin; requests for universities that already have admins are approved by those admins instead.
+
+def _first_requests():
+    with_admins = UniversityStaff.objects.filter(status="active", is_admin=True).values("university_id")
+    return UniversityStaff.objects.filter(status="pending").exclude(university_id__in=with_admins).select_related("user", "university").order_by("joined_at")
+
+
+@api_view(["GET"])
+@permission_classes([IsAdmin])
+def university_requests(request):
+    """GET requests to run a placement cell that has no admin yet."""
+    return Response([
+        {"id": r.id, "name": _name(r.user), "email": r.user.email, "username": r.user.username, "title": r.title,
+         "university": r.university.name, "location": r.university.location, "requested_at": r.joined_at}
+        for r in _first_requests()
+    ])
+
+
+@api_view(["POST", "DELETE"])
+@permission_classes([IsAdmin])
+def university_request_decide(request, pk):
+    """POST approve (they become the university's head admin) · DELETE decline."""
+    r = _first_requests().filter(pk=pk).first()
+    if not r:
+        return Response({"detail": "That request is no longer waiting (someone may have already decided)."}, status=status.HTTP_404_NOT_FOUND)
+    uni = r.university.name
+    if request.method == "DELETE":
+        notify(r.user, "team", f"Your request to run {uni}'s placement cell was declined", "Reply to CareerBridge support if you think this is a mistake.", "/dashboard/university")
+        r.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    r.status, r.is_admin, r.admin_rank, r.made_admin_by = "active", True, 0, None
+    r.save(update_fields=["status", "is_admin", "admin_rank", "made_admin_by"])
+    notify(r.user, "team", f"You're in: you now run {uni}'s placement cell", "You're its head admin. Colleagues who link the university will ask you to approve them.", "/dashboard/university")
+    return Response({"id": r.id, "status": r.status})

@@ -197,9 +197,21 @@ class CompanyMembership(models.Model):
 class UniversityStaff(models.Model):
     """A placement-cell member: links a university-role user to the university they manage."""
 
+    class Status(models.TextChoices):
+        PENDING = "pending", "Waiting for approval"  # asked to join; sees nothing until approved
+        ACTIVE = "active", "Approved"
+
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="university_staff")
     university = models.ForeignKey(University, on_delete=models.CASCADE, related_name="staff")
+    # Linking a university sends a request: the placement cell's admins approve it, or, for the first person from a
+    # university, a CareerBridge admin does (they become its head admin). Only approved members can use anything.
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
     is_admin = models.BooleanField(default=False)
+    # The chain of command among admins: 0 is whoever set the placement cell up; someone made admin by a rank-n admin
+    # is rank n+1. An admin can only take admin rights from (or remove) admins at their own rank or below, never from
+    # the person who made them admin or anyone above. Empty for non-admins.
+    admin_rank = models.PositiveSmallIntegerField(null=True, blank=True)
+    made_admin_by = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
     title = models.CharField(max_length=100, blank=True, help_text="e.g. Training & Placement Officer")
     joined_at = models.DateTimeField(auto_now_add=True)
 
