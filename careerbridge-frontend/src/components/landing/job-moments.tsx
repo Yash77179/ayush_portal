@@ -57,7 +57,7 @@ function RoleCard({ j, i }: { j: ShowcaseJob; i: number }) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`/logos/${j.logo}.svg`} alt={`${j.company} logo`} className="size-[56%] object-contain" loading="lazy" />
             </span>
-            <span className="rounded-full bg-white/70 px-3 py-1.5 text-[12px] font-medium ring-1 ring-black/5 backdrop-blur-md dark:bg-black/30 dark:text-white/90 dark:ring-white/10">
+            <span className="rounded-full bg-white/85 px-3 py-1.5 text-[12px] font-medium ring-1 ring-black/5 dark:bg-black/45 dark:text-white/90 dark:ring-white/10">
               {MODE_LABEL[j.work_mode] ?? j.work_mode}
             </span>
           </div>
@@ -127,13 +127,27 @@ export function JobMoments() {
       // (whole pixels only: text on a layer at a fractional offset is resampled, and looks soft)
       tl.fromTo(track, { x: () => pane.offsetWidth * 0.5 }, { x: () => pane.offsetWidth * 0.5 - travel(), duration: 1, modifiers: { x: (x: string) => `${Math.round(parseFloat(x))}px` } }, 0)
 
+      // The slanted edges are written straight into the pane's clip-path. (They used to be CSS variables, but a variable
+      // is inherited: changing it every frame made the browser recompute the style of every element inside the band,
+      // all 7 cards included, which is what made this part stutter.)
+      let slantIn = 0
+      let slantOutPx = 0
+      const clip = () => {
+        pane.style.clipPath = slantIn || slantOutPx ? `polygon(0 ${slantIn.toFixed(1)}px, 100% 0, 100% 100%, 0 calc(100% - ${slantOutPx.toFixed(1)}px))` : ""
+      }
       // the field comes up with a gently slanted top edge (lower on the left), which straightens as it reaches the top
       const slant = ScrollTrigger.create({
         trigger: section,
         start: "top bottom",
         end: "top top",
-        onUpdate: ({ progress }) => pane.style.setProperty("--slant", `${((1 - progress) * Math.min(window.innerHeight * 0.24, window.innerWidth * 0.05)).toFixed(1)}px`),
-        onLeave: () => pane.style.setProperty("--slant", "0px"),
+        onUpdate: ({ progress }) => {
+          slantIn = (1 - progress) * Math.min(window.innerHeight * 0.24, window.innerWidth * 0.05)
+          clip()
+        },
+        onLeave: () => {
+          slantIn = 0
+          clip()
+        },
       })
       // ...and it leaves with a slanted bottom edge, tilted the other way (higher on the left), which tips quickly as
       // it starts to slide off and holds while the next section is uncovered
@@ -141,9 +155,14 @@ export function JobMoments() {
         trigger: section,
         start: "bottom bottom",
         end: "bottom top",
-        onUpdate: ({ progress }) =>
-          pane.style.setProperty("--slant-out", `${(Math.min(1, progress / 0.5) * Math.min(window.innerHeight * 0.1, window.innerWidth * 0.03)).toFixed(1)}px`),
-        onLeaveBack: () => pane.style.setProperty("--slant-out", "0px"),
+        onUpdate: ({ progress }) => {
+          slantOutPx = Math.min(1, progress / 0.5) * Math.min(window.innerHeight * 0.1, window.innerWidth * 0.03)
+          clip()
+        },
+        onLeaveBack: () => {
+          slantOutPx = 0
+          clip()
+        },
       })
 
       // each card swings in from the right in 3D (turned away, tipped, low and back in depth) and settles flat by the
@@ -202,8 +221,7 @@ export function JobMoments() {
         tilts.forEach((off) => off())
         slant.kill()
         slantOut.kill()
-        pane.style.removeProperty("--slant")
-        pane.style.removeProperty("--slant-out")
+        pane.style.clipPath = ""
         turns.forEach((t) => {
           t.scrollTrigger?.kill()
           t.kill()
@@ -228,7 +246,7 @@ export function JobMoments() {
       <div
         data-pane
         data-leave
-        className="relative h-svh overflow-hidden bg-[radial-gradient(55%_50%_at_10%_90%,oklch(0.93_0.04_330/0.5),transparent_70%),radial-gradient(50%_45%_at_92%_75%,oklch(0.93_0.04_240/0.5),transparent_70%),radial-gradient(80%_60%_at_50%_0%,oklch(0.92_0.05_292/0.55),transparent_75%),linear-gradient(180deg,oklch(0.945_0.026_292),oklch(0.955_0.02_294)_50%,oklch(0.935_0.03_290))] motion-safe:sticky motion-safe:top-0 motion-safe:[clip-path:polygon(0_var(--slant,0px),100%_0,100%_100%,0_calc(100%-var(--slant-out,0px)))] dark:bg-[linear-gradient(180deg,#1b1330,#110c20_45%,#0b0815)]"
+        className="relative h-svh overflow-hidden bg-[radial-gradient(55%_50%_at_10%_90%,oklch(0.93_0.04_330/0.5),transparent_70%),radial-gradient(50%_45%_at_92%_75%,oklch(0.93_0.04_240/0.5),transparent_70%),radial-gradient(80%_60%_at_50%_0%,oklch(0.92_0.05_292/0.55),transparent_75%),linear-gradient(180deg,oklch(0.945_0.026_292),oklch(0.955_0.02_294)_50%,oklch(0.935_0.03_290))] motion-safe:sticky motion-safe:top-0 dark:bg-[linear-gradient(180deg,#1b1330,#110c20_45%,#0b0815)]"
       >
         {/* the field: faint vertical lines, fading toward the bottom */}
         <div aria-hidden className="absolute inset-0 [mask-image:linear-gradient(#000,transparent_85%)] [background-image:linear-gradient(90deg,oklch(0.35_0.12_290/0.05)_1px,transparent_1px)] [background-size:calc(100%/6)_100%] dark:[background-image:linear-gradient(90deg,rgb(255_255_255/0.045)_1px,transparent_1px)]" />
