@@ -31,6 +31,8 @@ urlpatterns = [
     path("api/assistant/", include("assistant.urls")),
     path("api/notifications/", include("notifications.urls")),
     path("api/campus/", include("campus.urls")),
+    # the site's own admin dashboard (users, companies); Django's panel stays at /admin/
+    path("api/admin/", include("accounts.admin_urls")),
     # Uploaded files, from whichever storage is active (the media/ folder locally, the database in production).
     # Django's `static()` helper only works with DEBUG on, and there's no separate web server in front.
     re_path(r"^media/(?P<path>.*)$", serve_media, name="media"),

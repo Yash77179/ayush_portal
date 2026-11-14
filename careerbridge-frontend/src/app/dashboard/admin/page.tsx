@@ -5,16 +5,22 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/contexts/auth-context";
 import { API_URL, errorMessage, getAdminStats, type AdminStats } from "@/lib/api";
-import { ApplicationsIcon, ArrowRightUpIcon, BuildingsIcon, GraduateIcon, InternshipsIcon, PeopleIcon, TrophyIcon } from "@/components/icons";
+import Link from "next/link";
+import { ApplicationsIcon, ArrowRightIcon, ArrowRightUpIcon, BuildingsIcon, GraduateIcon, InternshipsIcon, PeopleIcon, TrophyIcon } from "@/components/icons";
 import { DashboardSkeleton, GreetingHeader, Panel, ProgressBar, StatTile, stagger } from "@/components/kit";
 import { Button } from "@/components/ui/button";
 
 /** The Django admin panel lives on the API host, next to /api. */
 const DJANGO_ADMIN = API_URL.replace(/\/api\/?$/, "") + "/admin/";
 
+/** Managed right here in the dashboard (same database as Django's panel). */
+const HERE = [
+  { label: "Users", hint: "Edit people, change roles, reset passwords, deactivate accounts", href: "/dashboard/admin/users", icon: <PeopleIcon /> },
+  { label: "Companies", hint: "Verify companies, fix their details, see their team", href: "/dashboard/admin/companies", icon: <BuildingsIcon /> },
+];
+
+/** Not built here yet: these still open Django's admin panel. */
 const LINKS = [
-  { label: "Verify companies", hint: "Tick “Is verified” so students see the badge", path: "institutions/company/?is_verified__exact=0" },
-  { label: "Users", hint: "Reset passwords, change roles, deactivate accounts", path: "accounts/user/" },
   { label: "Internships", hint: "Edit or take down listings", path: "internships/internship/" },
   { label: "Applications", hint: "See every application and its history", path: "applications/application/" },
   { label: "Universities", hint: "Fix names, merge duplicates", path: "institutions/university/" },
@@ -72,6 +78,20 @@ export default function AdminDashboard() {
         </Panel>
 
         <Panel className="lg:col-span-7" title="Manage" style={stagger(6)} contentClassName="grid gap-3 sm:grid-cols-2">
+          {HERE.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="group flex items-start gap-3 rounded-[22px] border border-(--hairline) p-4 transition-colors hover:bg-secondary/60"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-secondary [&_svg]:size-5">{l.icon}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[17px] font-medium">{l.label}</span>
+                <span className="mt-0.5 block text-[14.5px] text-muted-foreground">{l.hint}</span>
+              </span>
+              <ArrowRightIcon className="mt-1 size-4 shrink-0 text-muted-foreground transition-[color,transform] group-hover:translate-x-0.5 group-hover:text-foreground" />
+            </Link>
+          ))}
           {LINKS.map((l) => (
             <a
               key={l.path}
@@ -81,7 +101,7 @@ export default function AdminDashboard() {
               className="group flex items-start gap-3 rounded-[22px] border border-(--hairline) p-4 transition-colors hover:bg-secondary/60"
             >
               <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-secondary [&_svg]:size-5">
-                {l.label.startsWith("Verify") ? <BuildingsIcon /> : l.label === "Users" ? <PeopleIcon /> : l.label === "Applications" ? <ApplicationsIcon /> : l.label.startsWith("Student") || l.label === "Universities" ? <GraduateIcon /> : <InternshipsIcon />}
+                {l.label === "Applications" ? <ApplicationsIcon /> : l.label.startsWith("Student") || l.label === "Universities" ? <GraduateIcon /> : <InternshipsIcon />}
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[17px] font-medium">{l.label}</span>
