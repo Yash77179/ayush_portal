@@ -118,6 +118,7 @@ export function createScene(opts: {
   let running = false
   let raf = 0
   const t0 = performance.now()
+  const coarse = window.matchMedia("(pointer: coarse)").matches // a touch screen
 
   const img = new Image()
   img.decoding = "async"
@@ -198,7 +199,10 @@ export function createScene(opts: {
     const k = Math.max(w / iw0, h / ih0)
     const iw = iw0 * k
     const ih = ih0 * k
-    return [(w - iw) * 0.5, (h - ih) * 0.32, iw, ih] as const
+    // centred, except on narrow screens: there the photo shifts right just enough that the neon "OTHER CAREER SITES"
+    // sign (its left edge is ~24.5% across the photo) stays on screen
+    const x = Math.min(0, Math.max((w - iw) * 0.5, w * 0.05 - iw * 0.245))
+    return [x, (h - ih) * 0.32, iw, ih] as const
   }
 
   // the arrow: centred under the window's sill, bobbing gently at rest; it comes at you with the floor
@@ -282,7 +286,6 @@ export function createScene(opts: {
 
   const size = () => {
     // (touch screens: 1.5 at most; a full-screen shader at 3x on a phone costs more than it shows)
-    const coarse = window.matchMedia("(pointer: coarse)").matches
     dpr = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2)
     w = stage.offsetWidth
     h = stage.offsetHeight
@@ -298,9 +301,12 @@ export function createScene(opts: {
   // next exposure (15 a second). Drawing the full screen every frame for nothing is what loaded phones down.
   let dirty = true
   let lastSeed = -1
+  let moved = 0
   const loop = (now: number) => {
     raf = requestAnimationFrame(loop)
-    const seed = Math.floor(((now - t0) / 1000) * 15)
+    // (touch screens: the grain holds still while you scroll, and starts moving again when you stop. Re-exposing it
+    // on top of a scroll frame is the extra work a phone's GPU can't always fit in)
+    const seed = coarse && now - moved < 220 ? lastSeed : Math.floor(((now - t0) / 1000) * 15)
     if (!dirty && seed === lastSeed) return
     dirty = false
     lastSeed = seed
@@ -309,6 +315,7 @@ export function createScene(opts: {
 
   return {
     setZoom: (z) => {
+      if (z !== s) moved = performance.now()
       s = z
       dirty = true
       if (!running) draw()

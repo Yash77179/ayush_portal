@@ -85,17 +85,17 @@ export function StatFigure({ n, suffix, unit, label }: { n: number; suffix: stri
 
   const INK = "text-[oklch(0.25_0.12_283)] group-hover/stat:text-white group-data-[on]/stat:text-white"
   return (
-    // phones: a row (the number, then its word and two lines beside it); desktop: a tall cell, the word tucked at the
-    // number's top right and the lines underneath
+    // phones & tablets: a square, the number at the top and its word and two lines at the bottom; desktop: a tall
+    // cell, the word tucked at the number's top right and the lines underneath
     <div
       ref={root}
       onPointerUp={light}
-      className="@container relative flex h-full cursor-default items-center gap-5 px-5 py-6 text-left select-none sm:px-8 lg:flex-col lg:items-start lg:gap-0 lg:px-[1.6vw] lg:pt-[9svh] lg:pb-[2.4svh]"
+      className="@container relative flex aspect-square h-full cursor-default flex-col justify-between p-[max(1rem,5cqw)] text-left select-none lg:aspect-auto lg:justify-start lg:flex-col lg:items-start lg:gap-0 lg:px-[1.6vw] lg:pt-[9svh] lg:pb-[2.4svh]"
     >
       {/* the fill: violet, with grain laid over it */}
       <span aria-hidden className="stat-fill pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300" />
-      <div className="relative w-[44%] shrink-0 lg:w-auto">
-        <div data-fig className={`font-display flex w-fit items-start text-[clamp(3.4rem,17vw,5.5rem)] leading-none tracking-[-0.04em] italic transition-colors duration-300 lg:text-[min(clamp(4rem,9.4vw,11.5rem),38cqw)] ${INK}`}>
+      <div className="relative shrink-0">
+        <div data-fig className={`font-display flex w-fit items-start text-[clamp(3.2rem,16vw,7rem)] leading-none tracking-[-0.04em] italic transition-colors duration-300 lg:text-[min(clamp(4rem,9.4vw,11.5rem),38cqw)] ${INK}`}>
           <span role="img" aria-label={`${n}${suffix} ${unit}`} className="inline-flex">
             {digits.map((_, i) => (
               <span key={i} aria-hidden className="relative -mx-[0.045em] inline-block h-[1.04em] overflow-hidden px-[0.04em] text-center">

@@ -5,7 +5,7 @@ import { preload } from "react-dom"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
-import { getLenis } from "@/lib/lenis-instance"
+import { goToSection } from "@/lib/landing-scroll"
 
 import { IntroFreedom } from "./intro-freedom"
 import { NightSky } from "./night-sky"
@@ -112,7 +112,6 @@ export function IntroWindow() {
         const h = r.height || 1
         return Math.max(110, ((stage.offsetHeight - (r.top - stage.getBoundingClientRect().top)) / h) * 100 + 20)
       }
-      const nav = (dark: boolean) => window.dispatchEvent(new CustomEvent("cb:nav-dark", { detail: dark }))
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
@@ -122,7 +121,6 @@ export function IntroWindow() {
           end: "bottom bottom",
           scrub: 0.6, // a little catch-up on top of the smooth scrolling, so the zoom glides instead of tugging
           invalidateOnRefresh: true,
-          onToggle: (self) => nav(self.isActive), // the nav steps aside during the scene, like wiro's
           onUpdate: (self) => {
             const gone = self.progress * 1 > 0.53 // the room has faded out (timeline units, see below)
             if (gone !== roomGone) {
@@ -165,6 +163,7 @@ export function IntroWindow() {
         .fromTo(q("[data-them='left']"), { x: 0, autoAlpha: 1 }, { x: () => -window.innerWidth * 0.08, autoAlpha: 0, duration: 0.22, ease: "power1.in" }, 0)
         .fromTo(q("[data-them='right']"), { x: 0, autoAlpha: 1 }, { x: () => window.innerWidth * 0.08, autoAlpha: 0, duration: 0.22, ease: "power1.in" }, 0)
         .fromTo(q("[data-them='top']"), { y: 0, autoAlpha: 1 }, { y: -36, autoAlpha: 0, duration: 0.2, ease: "power1.in" }, 0)
+        .fromTo(q("[data-them='bottom']"), { y: 0, autoAlpha: 1 }, { y: 36, autoAlpha: 0, duration: 0.2, ease: "power1.in" }, 0)
         // ...and once you're through, beside him (below him on phones and tablets): what it's like on this side. It rises
         // in as the sky turns to night, drifts up with him, and has gone before the hero arrives.
         // it rises in as you come up to the window (before you're through), drifts up the whole time, slowly, and on
@@ -181,25 +180,18 @@ export function IntroWindow() {
         .to(q("[data-us='phone']"), { x: () => window.innerWidth * 0.4, y: 28, autoAlpha: 0, duration: 0.05, ease: "power2.in" }, 0.57)
         .set({}, {}, 1)
 
-      if (window.scrollY < section.offsetTop + section.offsetHeight - window.innerHeight) nav(true)
 
 
       return () => {
         io.disconnect()
         scene.destroy()
-        nav(false)
       }
     })
     return () => mm.revert()
   }, [])
 
-  const skip = () => {
-    const hero = document.querySelector<HTMLElement>("[data-hero]")
-    if (!hero) return
-    const lenis = getLenis()
-    if (lenis) lenis.scrollTo(hero, { duration: 1.8 })
-    else hero.scrollIntoView({ behavior: "smooth" })
-  }
+  // straight to the hero, in place (the nav appears as it lands)
+  const skip = () => goToSection("hero", 1.8)
 
   return (
     <section ref={root} aria-label="Intro" className="relative h-[420svh] bg-[#0a132a] motion-reduce:hidden">
@@ -215,7 +207,7 @@ export function IntroWindow() {
 
           {/* the mountains far below him (public/intro/mountains.webp): they grow with the zoom like the rest of the view,
               and once you're through they sink slowly away, so he seems to keep rising, high above them */}
-          <div data-peaks className="absolute inset-0 origin-[50%_var(--cy)]" style={{ transform: "scale(0.62)" }}>
+          <div data-peaks className="absolute inset-0 origin-[50%_var(--cy)] will-change-transform" style={{ transform: "scale(0.62)" }}>
             <div data-peaks-sink className="absolute inset-x-[-100%] bottom-[8%] [mask-image:linear-gradient(#000_45%,transparent_96%)] sm:inset-x-[-45%] sm:bottom-[6%] lg:inset-x-[-6%] lg:bottom-[-16%] lg:[mask-image:linear-gradient(#000_70%,transparent)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/intro/mountains.webp" alt="" draggable={false} className="block h-auto w-full" />
@@ -224,7 +216,7 @@ export function IntroWindow() {
 
           {/* beyond the window: a student floating free, a stream of light drifting round him (intro-freedom.tsx).
               Just beyond the glass; as you pass through he soars up past you and out of view */}
-          <div data-free className="absolute inset-0 flex origin-[50%_var(--cy)] items-center justify-center" style={{ transform: "scale(0.34)" }}>
+          <div data-free className="absolute inset-0 flex origin-[50%_var(--cy)] items-center justify-center will-change-transform" style={{ transform: "scale(0.34)" }}>
             <div data-free-rise className="aspect-square h-[min(86svh,120vw)] shrink-0">
               <IntroFreedom />
             </div>
@@ -320,11 +312,18 @@ export function IntroWindow() {
           </p>
         </div>
         {/* phones: both, above the window */}
-        <div data-them="top" className={`${THEM} inset-x-5 top-[max(5svh,28px)] text-center sm:hidden`}>
+        <div data-them="top" className={`${THEM} inset-x-5 top-[max(4.5svh,24px)] text-center sm:hidden`}>
           <Shade />
-          <p className={`font-display text-[1.16rem] leading-[1.15] whitespace-nowrap italic ${HEAVY}`}>
-            <span className={LINE}>Bury you under <span className={RED}>a thousand listings</span>,</span>
-            <span className={LINE}>then leave you in <span className={STING}>silence.</span></span>
+          <p className={`font-display text-[1.42rem] leading-[1.12] whitespace-nowrap italic ${HEAVY}`}>
+            <span className={LINE}>Bury you under <span className={RED}>a thousand</span></span>
+            <span className={LINE}><span className={RED}>listings</span>, all <span className={STING}>the same.</span></span>
+          </p>
+        </div>
+        <div data-them="bottom" className={`${THEM} inset-x-5 bottom-[max(4.5svh,24px)] text-center sm:hidden`}>
+          <Shade />
+          <p className={`font-display text-[1.42rem] leading-[1.12] whitespace-nowrap italic ${HEAVY}`}>
+            <span className={LINE}><span className={STING}>Silence.</span> No status,</span>
+            <span className={LINE}>no reason, <span className={RED}>no reply.</span></span>
           </p>
         </div>
 

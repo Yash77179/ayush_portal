@@ -177,16 +177,16 @@ export default function HomePage() {
         </svg>
         <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 h-[70%] w-[140%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(closest-side,oklch(0.9_0.07_300/0.55),transparent)] lg:hidden" />
 
-        <div className="relative mx-auto flex min-h-svh max-w-[1400px] flex-col justify-center px-6 py-20 sm:px-10 lg:sticky lg:top-0 lg:h-svh lg:flex-row lg:items-center lg:py-0">
-          <p className="mb-8 flex items-center gap-4 text-[12px] font-semibold tracking-[0.22em] text-[oklch(0.22_0.06_280/0.6)] uppercase lg:hidden">
+        <div className="relative mx-auto flex min-h-svh max-w-[1400px] flex-col justify-center py-20 lg:sticky lg:px-10 lg:top-0 lg:h-svh lg:flex-row lg:items-center lg:py-0">
+          <p className="mx-6 mb-8 flex items-center gap-4 text-[12px] sm:mx-10 font-semibold tracking-[0.22em] text-[oklch(0.22_0.06_280/0.6)] uppercase lg:hidden">
             <span aria-hidden className="h-px w-8 bg-[oklch(0.2_0.05_280/0.3)]" />
             By the numbers
           </p>
           {/* four cells between hairlines; pointing at one floods it with violet and grain (cloned from kstoimenov.com's
-              metrics, see .reanimate/metrics). On phones one row each, and a tap lights a cell the same way */}
-          <ul className="grid w-full grid-cols-1 lg:grid-cols-4">
+              metrics, see .reanimate/metrics). Phones & tablets: four squares, edge to edge, and a tap lights one the same way */}
+          <ul className="grid w-full grid-cols-2 lg:grid-cols-4">
             {STATS.map((s) => (
-              <li key={s.unit} className="stat-cell group/stat relative">
+              <li key={s.unit} className="stat-cell group/stat @container relative">
                 <StatFigure n={s.n} suffix={s.suffix} unit={s.unit} label={s.label} />
               </li>
             ))}
