@@ -123,22 +123,25 @@ export function LandingMotion() {
         const cleanups: Array<() => void> = []
 
         // ── Horizontal scroll: the page pins, the track slides sideways, layers drift at their own speed ──
-        if (wide) {
+        // (every screen size: on phones the numbers band rises over it at the end, on desktop the fog does)
+        {
           gsap.utils.toArray<HTMLElement>("[data-hscroll]").forEach((section) => {
             const track = section.querySelector<HTMLElement>(".h-track")
             if (!track) return
             const steps = Array.from(section.querySelectorAll<HTMLElement>(".h-step"))
             const dist = () => Math.max(0, track.scrollWidth - window.innerWidth)
-            // CSS-sticky pin (no JS pin, so no flicker); a short hold at each end makes the hand-off to vertical scrolling calm
-            const travel = () => Math.max(1, dist() * 1.75)
+            // CSS-sticky pin (no JS pin, so no flicker). The track moves one pixel across for each pixel of scroll
+            // (as zzdp.nl's values row does); the lead and the hold below give the calm hand-offs at each end
+            const travel = () => Math.max(1, dist())
             // Once the track has finished the stage stays pinned for HOLD more scroll while the next section
             // (pulled up by the same 220svh in page.tsx) rises over it, fog first.
-            const hold = () => window.innerHeight * 2.2
+            // (phones: the numbers band is pulled up 100svh in page.tsx, so it holds one screen there)
+            const hold = () => window.innerHeight * (wide ? 2.2 : 1)
             // it sits under the band above until that has gone: the journey only starts moving after that much scroll
             // …and then a short pause once it's uncovered, so the scene sinks in before it starts to travel
             const lead = () => {
               const under = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--under")) || 0
-              return under ? under + window.innerHeight * 0.7 : 0
+              return under ? under + window.innerHeight * 0.22 : 0
             }
             const setHeight = () => {
               section.style.height = `${lead() + travel() + window.innerHeight + hold()}px`
@@ -150,8 +153,14 @@ export function LandingMotion() {
             let vw = window.innerWidth
             let layers: { el: HTMLElement; mid: number; k: number }[] = []
             let scenes: { left: number; width: number }[] = []
+            // the progress line over the row, and the "01 / 03" counter beside it
+            const prog = section.querySelector<HTMLElement>("[data-hprog]")
+            const count = section.querySelector<HTMLElement>("[data-hcount]")
+            const cards = track.children.length
+            let span = 1
             const measure = () => {
               vw = window.innerWidth
+              span = Math.max(1, dist())
               layers = []
               section.querySelectorAll<HTMLElement>(".h-panel").forEach((pn) => {
                 const mid = pn.offsetLeft + pn.offsetWidth / 2
@@ -177,6 +186,12 @@ export function LandingMotion() {
                 invalidateOnRefresh: true,
                 onUpdate: () => {
                   const x = -(gsap.getProperty(track, "x") as number)
+                  const p = Math.max(0, Math.min(1, x / span))
+                  if (prog) prog.style.transform = `scaleX(${p.toFixed(4)})`
+                  if (count) {
+                    const n = `0${Math.round(p * (cards - 1)) + 1}`
+                    if (count.textContent !== n) count.textContent = n
+                  }
                   // parallax: each layer drifts by how far its panel is from the middle of the screen — one cheap transform each
                   for (const l of layers) l.el.style.transform = `translate3d(${(((l.mid - x - vw / 2) / vw) * l.k).toFixed(1)}px,0,0)`
                   // progress: how far through each scene we are, and which step is lit (written only when it changes)

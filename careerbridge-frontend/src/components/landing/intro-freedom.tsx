@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import gsap from "gsap"
 
 /**
  * What waits beyond the intro's window: a student floating free, eyes closed (public/intro/freedom-anim.webp, an
@@ -89,8 +90,10 @@ export function IntroFreedom() {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       if (!w) return
-      // how much the scroll is scaling us right now, so specks can stay 1–2 px on screen
-      const shown = el.getBoundingClientRect().width / w || 1
+      // how much the scroll is scaling us right now, so specks can stay 1–2 px on screen (read from GSAP's own
+      // record of the scale, not from the layout, which would force the browser to lay out the page every frame)
+      const holder = el.closest<HTMLElement>("[data-free]")
+      const shown = (holder ? Number(gsap.getProperty(holder, "scale")) : 1) || 1
       const k = w / 300 // box units → css px
       const t = now / 1000
       ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -133,14 +136,15 @@ export function IntroFreedom() {
 
   return (
     <div ref={box} className="relative size-full">
-      {/* a faint violet aura behind him */}
-      <div className="absolute inset-[22%_26%] rounded-full bg-[radial-gradient(closest-side,oklch(0.78_0.16_300/0.32),transparent)] blur-2xl" />
+      {/* a faint violet aura behind him: a soft gradient, no blur filter (a blur under a scaling layer is redrawn on
+          every frame of the scroll, which is what made phones stutter here) */}
+      <div className="absolute inset-[14%_18%] rounded-full bg-[radial-gradient(closest-side,oklch(0.78_0.16_300/0.3),oklch(0.78_0.16_300/0.12)_55%,transparent)]" />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/intro/freedom-anim.webp"
         alt=""
         draggable={false}
-        className="absolute top-[6%] left-1/2 h-[88%] w-auto -translate-x-1/2 drop-shadow-[0_0_22px_oklch(0.75_0.16_300/0.35)]"
+        className="absolute top-[6%] left-1/2 h-[88%] w-auto -translate-x-1/2"
       />
       <canvas ref={cv} aria-hidden className="pointer-events-none absolute inset-0 size-full" />
     </div>
