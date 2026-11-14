@@ -753,16 +753,16 @@ a:hover > .roll > .roll-track, a:hover .roll .roll-track, .group\/roll:hover .ro
 
 /* Numbers row (page.tsx / stat-figure.tsx): cells between hairlines; pointing at one floods it with a violet
    gradient with grain blended over it, and its edges go dark. Cloned from kstoimenov.com's metrics (.reanimate/metrics). */
-/* phones: one row each, a hairline between rows; desktop: four tall cells side by side */
+/* phones & tablets: a 2 × 2 grid of squares, edge to edge, with hairlines between; desktop: four tall cells side by side */
 .stat-cell { border-color: oklch(0.2 0.05 280 / 0.16); border-style: solid; border-width: 0 0 1px; transition: border-color 0.3s; }
-.stat-cell:first-child { border-top-width: 1px; }
+.stat-cell:nth-child(odd) { border-right-width: 1px; }
+.stat-cell:nth-child(-n + 2) { border-top-width: 1px; }
 @media (min-width: 1024px) {
-  .stat-cell, .stat-cell:first-child { border-width: 0 1px 0 0; }
+  .stat-cell, .stat-cell:nth-child(n) { border-width: 0 1px 0 0; }
   .stat-cell:first-child { border-left-width: 1px; }
 }
 /* phones have no hover: a tap lights a cell instead (data-on, set by stat-figure.tsx) */
 .stat-cell[data-on] { border-color: oklch(0.2 0.05 280 / 0.9); }
-.stat-cell[data-on] + .stat-cell { border-top-color: transparent; }
 .stat-cell[data-on] .stat-fill { opacity: 1; }
 .stat-fill {
   background-image:

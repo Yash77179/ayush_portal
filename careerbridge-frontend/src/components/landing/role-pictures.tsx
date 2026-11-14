@@ -7,7 +7,7 @@ import { PlateArt, type ArtKind } from "@/components/landing/plate-art"
 function Plate({ hue, art, figure, unit, label }: { hue: number; art: ArtKind; figure: string; unit?: string; label: string }) {
   return (
     <div
-      className="@container relative h-[52%] w-full shrink-0 overflow-hidden text-[oklch(0.2_0.05_280)] lg:h-full lg:w-[22.4vw]"
+      className="@container relative h-[46%] w-full shrink-0 overflow-hidden text-[oklch(0.2_0.05_280)] lg:h-full lg:w-[22.4vw]"
       style={{ background: `linear-gradient(158deg, oklch(0.999 0.002 285), oklch(0.955 0.03 ${hue}))` }}
     >
       <PlateArt kind={art} hue={hue} id={`side-${art}`} />

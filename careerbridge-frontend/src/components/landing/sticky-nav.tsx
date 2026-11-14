@@ -27,6 +27,8 @@ const TEXT_DARK = "text-[oklch(0.94_0.02_85/0.85)] hover:text-white focus-visibl
 
 export function StickyNav() {
   const [scrolled, setShow] = React.useState(false) // past the hero
+  // the hero hasn't reached the top yet (the opening scene is on screen): no nav at all until it has
+  const [beforeHero, setBeforeHero] = React.useState(true)
   const [overFooter, setOverFooter] = React.useState(false) // over the dark footer
   const [overDark, setOverDark] = React.useState(false) // over the story's dark takeover (it tells us: cb:nav-dark)
   // a coloured section under the nav (data-nav-tone="<colour>") tints the nav's wash to match, with light text
@@ -34,7 +36,7 @@ export function StickyNav() {
   const overHero = !scrolled
   const dark = overHero || overFooter || overDark || !!tone // light-on-dark over the violet hero, the dark star and the footer
   // the story's dark star scene is full-screen and immersive: the nav steps aside for it, and comes back at the footer
-  const show = !overDark || overFooter
+  const show = !beforeHero && (!overDark || overFooter)
   // no blur over the moving backdrops (the hero's slats, the dark star): re-blurring a strip of a WebGL canvas every
   // frame is costly, and the dark wash alone reads there
   const blur = !overDark && !overHero
@@ -55,6 +57,7 @@ export function StickyNav() {
       const max = document.documentElement.scrollHeight - vh
       // past the hero: its bottom is above the top 18% of the screen (the hero may sit below the opening scene)
       const hero = document.querySelector("[data-hero]")
+      setBeforeHero(hero ? hero.getBoundingClientRect().top > 2 : false)
       setShow(hero ? hero.getBoundingClientRect().bottom < vh * 0.18 : window.scrollY > vh * 0.82)
       // once the footer behind the page is mostly uncovered, the nav switches to light-on-dark instead of vanishing
       setOverFooter(window.scrollY > max - vh * 0.55)

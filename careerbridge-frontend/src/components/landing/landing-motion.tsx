@@ -6,6 +6,7 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 import { setLenis } from "@/lib/lenis-instance"
+import { goToSection } from "@/lib/landing-scroll"
 import { SMOOTH_SCROLL } from "@/lib/smooth-scroll-config"
 
 /**
@@ -52,7 +53,19 @@ export function LandingMotion() {
 
   React.useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
+    // the phone's address bar showing or hiding changes the screen height mid-scroll: don't re-measure every
+    // scroll animation for it (that caused jumps)
+    ScrollTrigger.config({ ignoreMobileResize: true })
     const root = document.documentElement
+
+    // in-page links (#internships, #roles…) glide to where their section can be seen, not just its top edge
+    const onLink = (e: MouseEvent) => {
+      const a = (e.target as Element | null)?.closest?.("a[href^='#']") as HTMLAnchorElement | null
+      if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return
+      const id = a.getAttribute("href")!.slice(1)
+      if (id && goToSection(id)) e.preventDefault()
+    }
+    document.addEventListener("click", onLink)
     const mm = gsap.matchMedia()
 
     mm.add(
@@ -61,7 +74,11 @@ export function LandingMotion() {
         const { wide } = ctx.conditions as { motion: boolean; wide: boolean }
 
         // ── Smooth scrolling (Lenis) wired to GSAP's clock ──
-        const lenis = new Lenis(SMOOTH_SCROLL)
+        // syncTouch: on phones and tablets the finger drives Lenis too, so the scroll and every scroll-linked animation
+        // move on one clock. (Left to the browser, touch scrolling runs ahead on its own thread and the animations,
+        // updated a frame or more later, trail behind it: that was the stutter on phones.)
+        // anchors are handled below, so in-page links land where each section can actually be seen.
+        const lenis = new Lenis({ ...SMOOTH_SCROLL, anchors: false, syncTouch: true, syncTouchLerp: 0.085, touchInertiaExponent: 1.6 })
         setLenis(lenis)
         lenis.on("scroll", ScrollTrigger.update)
         const tick = (t: number) => lenis.raf(t * 1000)
@@ -274,7 +291,10 @@ export function LandingMotion() {
       return () => root.classList.remove("motion-ready", "reduced-motion")
     })
 
-    return () => mm.revert()
+    return () => {
+      document.removeEventListener("click", onLink)
+      mm.revert()
+    }
   }, [])
 
   return null
