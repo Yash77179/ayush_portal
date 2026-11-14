@@ -71,6 +71,7 @@ export function HeroLetters() {
     <div
       ref={root}
       aria-hidden
+      data-build="letters"
       className={`${anton.className} pointer-events-none absolute inset-0 -z-10 overflow-hidden select-none lg:[mask-image:linear-gradient(90deg,transparent,#000_14%,#000_86%,transparent)]`}
     >
       {ROWS.map((r, ri) => (

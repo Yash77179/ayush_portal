@@ -279,7 +279,7 @@ export function JobMoments() {
         </div>
 
         {/* the way to every role */}
-        <div className="absolute right-[clamp(1.5rem,4vw,4rem)] bottom-[4svh] z-10 max-sm:hidden">
+        <div data-build="browse" className="absolute right-[clamp(1.5rem,4vw,4rem)] bottom-[4svh] z-10 max-sm:hidden">
           <RollLink href="/internships">Browse all internships</RollLink>
         </div>
       </div>

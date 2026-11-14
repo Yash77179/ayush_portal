@@ -80,7 +80,7 @@ function SideCard({ side }: { side: Side }) {
   const { Pic } = side
   return (
     // h-panel: its picture's layers drift relative to where the card is on screen (landing-motion)
-    <article className="h-panel flex h-full w-[76vw] max-w-[30rem] shrink-0 flex-col gap-3 border border-[oklch(0.2_0.05_280/0.12)] p-3 lg:w-[66vw] lg:max-w-none lg:flex-row lg:gap-[1.7vw] lg:p-[0.9vw]">
+    <article data-build="roles-card" className="h-panel flex h-full w-[76vw] max-w-[30rem] shrink-0 flex-col gap-3 border border-[oklch(0.2_0.05_280/0.12)] p-3 lg:w-[66vw] lg:max-w-none lg:flex-row lg:gap-[1.7vw] lg:p-[0.9vw]">
       <Pic />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col px-1.5 lg:px-0 lg:pt-[0.6vw]">
         <h3 className="flex items-baseline gap-3 text-[clamp(1.6rem,3.1vw,3rem)] leading-[0.95] tracking-[-0.01em] uppercase lg:gap-4">
@@ -135,24 +135,24 @@ export function RolesScroll() {
 
         {/* heading: the title, then (beside it on desktop) its pitch and the way in */}
         <div className="relative mx-5 grid shrink-0 grid-cols-1 gap-4 sm:mx-10 lg:absolute lg:mx-0 lg:inset-x-[3.1vw] lg:top-[13svh] lg:grid-cols-2 lg:gap-[3.1vw]">
-          <h2 data-mask className="font-display text-[clamp(3.1rem,14vw,5.2rem)] leading-[0.88] tracking-[-0.015em] uppercase italic lg:text-[clamp(3.4rem,7.4vw,7.6rem)]">
+          <h2 data-mask data-build="roles-title" className="font-display text-[clamp(3.1rem,14vw,5.2rem)] leading-[0.88] tracking-[-0.015em] uppercase italic lg:text-[clamp(3.4rem,7.4vw,7.6rem)]">
             <span className="mask-line pr-[0.12em]"><span>One portal,</span></span>
             <span className="mask-line pr-[0.12em]"><span>three <span className="text-[oklch(0.45_0.18_282)]">sides</span></span></span>
           </h2>
           <div className="lg:pt-[0.6vw]">
-            <p className="max-w-[40rem] text-[16.5px] leading-[1.42] text-[oklch(0.22_0.06_280/0.85)] sm:text-[18px] lg:text-[clamp(18px,1.65vw,24px)] lg:leading-[1.35]">
+            <p data-build="roles-pitch" className="max-w-[40rem] text-[16.5px] leading-[1.42] text-[oklch(0.22_0.06_280/0.85)] sm:text-[18px] lg:text-[clamp(18px,1.65vw,24px)] lg:leading-[1.35]">
               <span className={ACCENT}>Students</span> looking for a first step, <span className={ACCENT}>companies</span> looking for people who fit,
               and <span className={ACCENT}>universities</span> keeping track of both.{" "}
               Everyone works in the same place, on the same live record, from first application to placement.
             </p>
-            <div className="mt-[2.4svh] -ml-3 hidden lg:block">
+            <div data-build="roles-cta" className="mt-[2.4svh] -ml-3 hidden lg:block">
               <OvalLink href="/register">Create free account</OvalLink>
             </div>
           </div>
         </div>
 
         {/* the label over the row, a line that fills as the row goes by, and which card you are on */}
-        <div className="relative mx-5 flex shrink-0 items-center gap-4 sm:mx-10 lg:absolute lg:mx-0 text-[12px] font-semibold tracking-[0.22em] text-[oklch(0.22_0.06_280/0.6)] uppercase sm:inset-x-10 lg:inset-x-[3.1vw] lg:top-[44.5svh] lg:text-[13px]">
+        <div data-build="roles-label" className="relative mx-5 flex shrink-0 items-center gap-4 sm:mx-10 lg:absolute lg:mx-0 text-[12px] font-semibold tracking-[0.22em] text-[oklch(0.22_0.06_280/0.6)] uppercase sm:inset-x-10 lg:inset-x-[3.1vw] lg:top-[44.5svh] lg:text-[13px]">
           <span className="whitespace-nowrap">Who it&rsquo;s for</span>
           <span aria-hidden className="relative h-[2px] flex-1 rounded-full bg-[oklch(0.2_0.05_280/0.12)]">
             <span data-hprog className="absolute inset-0 origin-left scale-x-0 bg-[oklch(0.45_0.18_282)]" />
