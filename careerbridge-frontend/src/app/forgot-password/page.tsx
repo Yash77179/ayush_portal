@@ -161,7 +161,7 @@ export default function ForgotPasswordPage() {
                 disabled={loading}
                 invalid={otpError}
               />
-              <p className="text-center text-[14px] text-muted-foreground">
+              <p className="text-center text-[0.875rem] text-muted-foreground">
                 {resendIn > 0 ? (
                   <>Didn&apos;t get it? You can ask again in <span className="tabular-nums">{Math.floor(resendIn / 60)}:{String(resendIn % 60).padStart(2, "0")}</span></>
                 ) : (

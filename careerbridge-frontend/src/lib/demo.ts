@@ -41,6 +41,8 @@ export interface UniversityStats {
   in_interviews?: number
   offers_pending?: number
   recent_activity?: { id: number; student_name: string; internship_title: string; company: string; status: string; updated_at: string }[]
+  /** Last 12 weeks, oldest first (students is a running total). */
+  trends?: { students: number[]; verified: number[]; interviews: number[]; placements: number[] }
 }
 
 export const DEMO_ENABLED = process.env.NEXT_PUBLIC_DEMO_DATA !== "off"

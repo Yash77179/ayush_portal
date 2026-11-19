@@ -36,14 +36,14 @@ function RoleCard({ j, i }: { j: ShowcaseJob; i: number }) {
   return (
     <Link
       href="/internships"
-      className="group/r relative block w-[clamp(270px,22vw,330px)] rounded-[30px] outline-none [--rc:oklch(0.62_0.17_var(--h))]"
+      className="group/r relative block w-[clamp(270px,22vw,330px)] rounded-[1.875rem] outline-none [--rc:oklch(0.62_0.17_var(--h))]"
       style={{ "--h": look.hue } as React.CSSProperties}
     >
 
-      <div className="relative overflow-hidden rounded-[30px] bg-white p-2 text-[oklch(0.2_0.05_280)] shadow-[0_0_0_1px_oklch(0.25_0.06_285/0.07),0_12px_28px_-18px_oklch(0.3_0.1_285/0.28)] transition-transform duration-500 ease-(--ease-out) group-hover/r:-translate-y-1.5 group-focus-visible/r:ring-2 group-focus-visible/r:ring-(--rc) dark:bg-[oklch(0.19_0.03_285)] dark:text-white dark:shadow-[0_0_0_1px_oklch(1_0_0/0.07),0_14px_30px_-18px_rgb(0_0_0/0.6)]">
+      <div className="relative overflow-hidden rounded-[1.875rem] bg-white p-2 text-[oklch(0.2_0.05_280)] shadow-[0_0_0_1px_oklch(0.25_0.06_285/0.07),0_12px_28px_-18px_oklch(0.3_0.1_285/0.28)] transition-transform duration-500 ease-(--ease-out) group-hover/r:-translate-y-1.5 group-focus-visible/r:ring-2 group-focus-visible/r:ring-(--rc) dark:bg-[oklch(0.19_0.03_285)] dark:text-white dark:shadow-[0_0_0_1px_oklch(1_0_0/0.07),0_14px_30px_-18px_rgb(0_0_0/0.6)]">
         {/* the plate: the card's colour, its line figure, the logo, the mode and the pay */}
         <div
-          className="relative aspect-[16/12] overflow-hidden rounded-[23px] p-4 [--pa:oklch(0.99_0.012_var(--h))] [--pb:oklch(0.86_0.09_var(--h))] dark:[--pa:oklch(0.4_0.13_var(--h))] dark:[--pb:oklch(0.24_0.07_var(--h))]"
+          className="relative aspect-[16/12] overflow-hidden rounded-[1.4375rem] p-4 [--pa:oklch(0.99_0.012_var(--h))] [--pb:oklch(0.86_0.09_var(--h))] dark:[--pa:oklch(0.4_0.13_var(--h))] dark:[--pb:oklch(0.24_0.07_var(--h))]"
           style={{ background: "radial-gradient(120% 90% at 85% 0%, var(--pa), var(--pb))" }}
         >
           <div className="absolute inset-0 transition-transform duration-[1.2s] ease-(--ease-out) group-hover/r:scale-110 dark:opacity-70 dark:mix-blend-screen">
@@ -57,13 +57,13 @@ function RoleCard({ j, i }: { j: ShowcaseJob; i: number }) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`/logos/${j.logo}.svg`} alt={`${j.company} logo`} className="size-[56%] object-contain" loading="lazy" />
             </span>
-            <span className="rounded-full bg-white/85 px-3 py-1.5 text-[12px] font-medium ring-1 ring-black/5 dark:bg-black/45 dark:text-white/90 dark:ring-white/10">
+            <span className="rounded-full bg-white/85 px-3 py-1.5 text-[0.75rem] font-medium ring-1 ring-black/5 dark:bg-black/45 dark:text-white/90 dark:ring-white/10">
               {MODE_LABEL[j.work_mode] ?? j.work_mode}
             </span>
           </div>
 
           <div className="absolute bottom-3.5 left-4">
-            <p className="text-[11px] font-medium tracking-[0.18em] uppercase opacity-60">Stipend</p>
+            <p className="text-[0.6875rem] font-medium tracking-[0.18em] uppercase opacity-60">Stipend</p>
             <p className="font-display mt-0.5 text-[3.3rem] leading-[0.9] tracking-[-0.03em] italic [text-shadow:0_0_26px_oklch(1_0_0/0.9)] dark:[text-shadow:0_2px_22px_rgb(0_0_0/0.45)]">
               <span className="mr-0.5 align-top text-[1.5rem] not-italic">₹</span>
               {short(j.stipend)}
@@ -74,13 +74,13 @@ function RoleCard({ j, i }: { j: ShowcaseJob; i: number }) {
 
         {/* the role */}
         <div className="px-3 pt-4">
-          <p className="flex items-center gap-2 text-[12px] font-medium tracking-[0.14em] uppercase opacity-55">
+          <p className="flex items-center gap-2 text-[0.75rem] font-medium tracking-[0.14em] uppercase opacity-55">
             {j.company}
             <span aria-hidden className="size-1 rounded-full bg-current" />
             {j.duration_months} months
           </p>
-          <h3 className="mt-1.5 text-[19.5px] leading-[1.2] font-medium tracking-[-0.025em] text-balance">{j.title}</h3>
-          <p className="mt-1 text-[14px] opacity-60">{j.location}</p>
+          <h3 className="mt-1.5 text-[1.2188rem] leading-[1.2] font-medium tracking-[-0.025em] text-balance">{j.title}</h3>
+          <p className="mt-1 text-[0.875rem] opacity-60">{j.location}</p>
         </div>
 
         {/* days left: the same tick bar as the internships page (30 days = full), coral when a week or less is left */}
@@ -94,11 +94,11 @@ function RoleCard({ j, i }: { j: ShowcaseJob; i: number }) {
         </div>
 
         <div className="flex items-center justify-between px-3 pt-2 pb-3">
-          <p className={`text-[13.5px] ${urgent ? "text-[oklch(0.58_0.1_28)] dark:text-[oklch(0.8_0.09_30)]" : "opacity-55"}`}>
+          <p className={`text-[0.8438rem] ${urgent ? "text-[oklch(0.58_0.1_28)] dark:text-[oklch(0.8_0.09_30)]" : "opacity-55"}`}>
             {left > 0 ? `${left} day${left === 1 ? "" : "s"} left to apply` : "Deadline passed"}
           </p>
           <span className="flex size-10 items-center justify-center rounded-full bg-[oklch(0.2_0.05_280)] text-white transition-[transform,background-color] duration-500 ease-(--ease-out) group-hover/r:-rotate-45 group-hover/r:bg-(--rc) dark:bg-white dark:text-[oklch(0.2_0.04_285)] dark:group-hover/r:bg-(--rc) dark:group-hover/r:text-white">
-            <ArrowRightIcon className="size-[18px]" />
+            <ArrowRightIcon className="size-[1.125rem]" />
           </span>
         </div>
       </div>

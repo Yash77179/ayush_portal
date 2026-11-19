@@ -51,11 +51,11 @@ function PortalPreview({ form, company, now }: { form: Form; company: string; no
   const blocks = parseDescription(form.description || "Describe the role and it will appear here.");
 
   return (
-    <div className="scene rise overflow-hidden rounded-[34px] border border-(--hairline) p-5 sm:p-6 lg:sticky lg:top-24" style={stagger(2)}>
+    <div className="scene rise overflow-hidden rounded-[2.125rem] border border-(--hairline) p-5 sm:p-6 lg:sticky lg:top-24" style={stagger(2)}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <p className="text-[15px] font-medium">Portal preview</p>
-          <p className="text-[12.5px] text-foreground/60">How students will see this listing</p>
+          <p className="text-[0.9375rem] font-medium">Portal preview</p>
+          <p className="text-[0.7813rem] text-foreground/60">How students will see this listing</p>
         </div>
         <div className="flex gap-1 rounded-full border border-white/60 bg-white/45 p-1 backdrop-blur-md" role="tablist" aria-label="Preview type">
           {(["card", "details"] as const).map((v) => (
@@ -66,7 +66,7 @@ function PortalPreview({ form, company, now }: { form: Form; company: string; no
               type="button"
               onClick={() => setView(v)}
               className={cn(
-                "rounded-full px-3.5 py-1.5 text-[13px] font-medium capitalize transition-[background-color,color,transform] duration-200 ease-(--ease-out) active:scale-95",
+                "rounded-full px-3.5 py-1.5 text-[0.8125rem] font-medium capitalize transition-[background-color,color,transform] duration-200 ease-(--ease-out) active:scale-95",
                 view === v ? "bg-card text-foreground shadow-sm" : "text-foreground/60 hover:text-foreground"
               )}
             >
@@ -82,16 +82,16 @@ function PortalPreview({ form, company, now }: { form: Form; company: string; no
         </div>
       ) : (
         <div key="details" className="rise space-y-3">
-          <div className="frost rounded-[26px] p-5">
+          <div className="frost rounded-[1.625rem] p-5">
             <div className="flex items-center gap-3">
               <OrgAvatar name={company} className="size-11" />
-              <p className="truncate text-[14px] font-medium">{company}</p>
+              <p className="truncate text-[0.875rem] font-medium">{company}</p>
               <Badge variant={form.status === "published" ? "success" : "warning"} className="ml-auto">
                 {form.status === "published" ? "Live" : form.status === "closed" ? "Closed" : "Draft"}
               </Badge>
             </div>
             <h2 className="mt-4 text-[1.6rem] leading-tight break-words">{form.title || "Internship title"}</h2>
-            <p className="mt-2 text-[13px] text-muted-foreground">
+            <p className="mt-2 text-[0.8125rem] text-muted-foreground">
               {form.location || "Location"} · {MODE_LABEL[form.work_mode]} · {form.duration_months || 0} months
             </p>
           </div>
@@ -101,9 +101,9 @@ function PortalPreview({ form, company, now }: { form: Form; company: string; no
             <FrostStat label="Openings" value={Number(form.openings) || 0} caption={`${days > 0 ? days : 0} days left`} className="!p-4" />
           </div>
 
-          <div className="frost rounded-[26px] p-5">
-            <p className="text-[13px] text-muted-foreground">Who can apply</p>
-            <p className="mt-1.5 text-[14px] leading-relaxed">
+          <div className="frost rounded-[1.625rem] p-5">
+            <p className="text-[0.8125rem] text-muted-foreground">Who can apply</p>
+            <p className="mt-1.5 text-[0.875rem] leading-relaxed">
               {[
                 form.min_cgpa && `CGPA ${form.min_cgpa}+`,
                 form.allowed_branches && form.allowed_branches,
@@ -115,24 +115,24 @@ function PortalPreview({ form, company, now }: { form: Form; company: string; no
             </p>
           </div>
 
-          <div className="frost rounded-[26px] p-5">
-            <p className="text-[13px] text-muted-foreground">Apply before</p>
+          <div className="frost rounded-[1.625rem] p-5">
+            <p className="text-[0.8125rem] text-muted-foreground">Apply before</p>
             <p className="mt-1.5 text-[1.1rem] font-medium">
               {form.deadline ? new Date(form.deadline).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Pick a deadline"}
             </p>
             <TickProgress className="mt-3 h-6" value={Math.max(0, Math.min(100, (days / 30) * 100))} ticks={24} />
           </div>
 
-          <div className="frost rounded-[26px] p-5">
-            <p className="text-[13px] text-muted-foreground">About the role</p>
-            <div className="mt-2 space-y-2 text-[13.5px] leading-relaxed">
+          <div className="frost rounded-[1.625rem] p-5">
+            <p className="text-[0.8125rem] text-muted-foreground">About the role</p>
+            <div className="mt-2 space-y-2 text-[0.8438rem] leading-relaxed">
               {blocks.slice(0, 2).map((b, i) =>
                 b.kind === "p" ? (
                   <p key={i} className="line-clamp-4">{b.text}</p>
                 ) : (
                   <ul key={i} className="space-y-1">
                     {b.items.slice(0, 3).map((it) => (
-                      <li key={it} className="flex gap-2"><span className="mt-[7px] size-1.5 shrink-0 rounded-full bg-current opacity-40" />{it}</li>
+                      <li key={it} className="flex gap-2"><span className="mt-[0.4375rem] size-1.5 shrink-0 rounded-full bg-current opacity-40" />{it}</li>
                     ))}
                   </ul>
                 )
@@ -160,12 +160,12 @@ function SkillPicker({ value, onChange }: { value: SkillPick[]; onChange: (v: Sk
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {value.length === 0 && <p className="text-[15px] text-muted-foreground">No skills yet — they power the match score that students and your team see.</p>}
+        {value.length === 0 && <p className="text-[0.9375rem] text-muted-foreground">No skills yet — they power the match score that students and your team see.</p>}
         {value.map((s) => (
           <span
             key={s.id}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border py-1 pr-1.5 pl-3 text-[14.5px]",
+              "inline-flex items-center gap-1.5 rounded-full border py-1 pr-1.5 pl-3 text-[0.9063rem]",
               s.is_required ? "border-foreground/20 bg-card" : "border-dashed border-border bg-secondary"
             )}
           >
@@ -173,7 +173,7 @@ function SkillPicker({ value, onChange }: { value: SkillPick[]; onChange: (v: Sk
             <button
               type="button"
               onClick={() => onChange(value.map((x) => (x.id === s.id ? { ...x, is_required: !x.is_required } : x)))}
-              className="rounded-full px-1.5 text-[12.5px] text-muted-foreground hover:text-foreground"
+              className="rounded-full px-1.5 text-[0.7813rem] text-muted-foreground hover:text-foreground"
               title="Switch between required and nice to have"
             >
               {s.is_required ? "required" : "nice to have"}
@@ -197,7 +197,7 @@ function SkillPicker({ value, onChange }: { value: SkillPick[]; onChange: (v: Sk
               key={h.id}
               type="button"
               onClick={() => onChange([...value, { id: h.id, name: h.name, is_required: true }])}
-              className="rounded-full bg-secondary px-2.5 py-1 text-[13.5px] transition-colors hover:bg-foreground hover:text-background"
+              className="rounded-full bg-secondary px-2.5 py-1 text-[0.8438rem] transition-colors hover:bg-foreground hover:text-background"
             >
               + {h.name}
             </button>
@@ -211,7 +211,7 @@ function QuestionEditor({ q, onChange, onRemove }: { q: Question; onChange: (q: 
   const choices = q.kind === "yesno" ? ["Yes", "No"] : q.choices;
   const knockoutItems = { none: "No knockout", ...Object.fromEntries(choices.filter(Boolean).map((c) => [c, `Must answer “${c}”`])) };
   return (
-    <div className="space-y-3 rounded-[22px] border border-(--hairline) p-4">
+    <div className="space-y-3 rounded-[1.375rem] border border-(--hairline) p-4">
       <div className="flex gap-2">
         <Input value={q.text} onChange={(e) => onChange({ ...q, text: e.target.value })} placeholder="e.g. Can you join full-time from January?" />
         <Button type="button" size="icon" variant="ghost" aria-label="Remove question" onClick={onRemove}>
@@ -235,7 +235,7 @@ function QuestionEditor({ q, onChange, onRemove }: { q: Question; onChange: (q: 
             ))}
           </SelectContent>
         </Select>
-        <label className="flex items-center gap-2 text-[15px]">
+        <label className="flex items-center gap-2 text-[0.9375rem]">
           <input type="checkbox" checked={q.required} onChange={(e) => onChange({ ...q, required: e.target.checked })} className="size-4 accent-foreground" />
           Required
         </label>
@@ -379,7 +379,7 @@ export function InternshipForm({ initial }: { initial?: ManagedInternship }) {
                 </SelectContent>
               </Select>
             </Field>
-            <p className="text-[14.5px] leading-relaxed text-muted-foreground">{MODE_NOTE[form.work_mode]}</p>
+            <p className="text-[0.9063rem] leading-relaxed text-muted-foreground">{MODE_NOTE[form.work_mode]}</p>
           </Panel>
 
           <Panel title="Compensation" tone="sage" style={stagger(3)} contentClassName="space-y-5">
@@ -402,7 +402,7 @@ export function InternshipForm({ initial }: { initial?: ManagedInternship }) {
         </Panel>
 
         <Panel title="Eligibility" style={stagger(5)} contentClassName="space-y-5">
-          <p className="text-[14.5px] text-muted-foreground">Students who don’t meet these can’t apply, and they’re told exactly why. Leave a field blank for no rule.</p>
+          <p className="text-[0.9063rem] text-muted-foreground">Students who don’t meet these can’t apply, and they’re told exactly why. Leave a field blank for no rule.</p>
           <div className="grid gap-5 sm:grid-cols-3">
             <Field label="Minimum CGPA">
               <Input type="number" step="0.01" min="0" max="10" placeholder="e.g. 7.0" value={form.min_cgpa} onChange={(e) => set("min_cgpa", e.target.value)} />
@@ -437,7 +437,7 @@ export function InternshipForm({ initial }: { initial?: ManagedInternship }) {
           }
           contentClassName="space-y-3"
         >
-          {questions.length === 0 && <p className="text-[15px] text-muted-foreground">Optional. Ask a few quick questions when students apply — availability, relocation, a portfolio link.</p>}
+          {questions.length === 0 && <p className="text-[0.9375rem] text-muted-foreground">Optional. Ask a few quick questions when students apply — availability, relocation, a portfolio link.</p>}
           {questions.map((q) => (
             <QuestionEditor
               key={q.key}

@@ -15,10 +15,16 @@ urlpatterns = [
     path("drives/<int:pk>/", views.DriveDetailView.as_view(), name="campus-drive-detail"),
     path("drives/<int:drive_id>/registrations/<int:pk>/", views.update_registration, name="campus-registration"),
     path("announcements/", views.AnnouncementListView.as_view(), name="campus-announcements"),
+    path("announcements/audience/", views.announcement_audience, name="campus-announcement-audience"),
+    path("announcements/attachments/", views.announcement_attachment_upload, name="campus-announcement-attachment"),
+    path("announcements/attachments/<int:pk>/", views.announcement_attachment_delete, name="campus-announcement-attachment-delete"),
+    path("announcements/<int:pk>/acks/", views.announcement_acks, name="campus-announcement-acks"),
+    path("announcements/<int:pk>/remind/", views.announcement_remind, name="campus-announcement-remind"),
     path("announcements/<int:pk>/", views.AnnouncementDetailView.as_view(), name="campus-announcement-detail"),
     path("reports/", views.placement_report, name="campus-report"),
     path("reports/export/", views.report_csv, name="campus-report-csv"),
     # students
     path("student/", views.student_campus, name="student-campus"),
     path("student/drives/<int:pk>/register/", views.drive_register, name="student-drive-register"),
+    path("student/announcements/<int:pk>/ack/", views.announcement_ack, name="student-announcement-ack"),
 ]

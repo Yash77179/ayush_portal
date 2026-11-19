@@ -9,14 +9,14 @@ function Table({ className, containerClassName, ...props }: React.ComponentProps
     <div
       data-slot="table-container"
       className={cn(
-        "relative w-full overflow-x-auto overscroll-contain rounded-[6px] border border-(--line-soft) [&_thead_th]:sticky [&_thead_th]:top-0 [&_thead_th]:z-10",
+        "relative w-full overflow-x-auto overscroll-contain rounded-[0.375rem] border border-(--line-soft) [&_thead_th]:sticky [&_thead_th]:top-0 [&_thead_th]:z-10",
         containerClassName && "overflow-y-auto",
         containerClassName
       )}
     >
       <table
         data-slot="table"
-        className={cn("w-full border-separate border-spacing-0 caption-bottom text-[16px]", className)}
+        className={cn("w-full border-separate border-spacing-0 caption-bottom text-[1rem]", className)}
         {...props}
       />
     </div>
@@ -74,7 +74,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-16 border-r border-b border-(--line-soft) px-7 text-left align-middle text-[14.5px] font-medium whitespace-nowrap last:border-r-0 [&:has([role=checkbox])]:pr-0 nth-[6n+1]:bg-(--blue-bg) nth-[6n+1]:text-(--blue-fg) nth-[6n+2]:bg-(--violet-bg) nth-[6n+2]:text-(--violet-fg) nth-[6n+3]:bg-(--mint-bg) nth-[6n+3]:text-(--mint-fg) nth-[6n+4]:bg-(--peach-bg) nth-[6n+4]:text-(--peach-fg) nth-[6n+5]:bg-(--pink-bg) nth-[6n+5]:text-(--pink-fg) nth-[6n]:bg-secondary nth-[6n]:text-muted-foreground",
+        "h-16 border-r border-b border-(--line-soft) px-7 text-left align-middle text-[0.9063rem] font-medium whitespace-nowrap last:border-r-0 [&:has([role=checkbox])]:pr-0 nth-[6n+1]:bg-(--blue-bg) nth-[6n+1]:text-(--blue-fg) nth-[6n+2]:bg-(--violet-bg) nth-[6n+2]:text-(--violet-fg) nth-[6n+3]:bg-(--mint-bg) nth-[6n+3]:text-(--mint-fg) nth-[6n+4]:bg-(--peach-bg) nth-[6n+4]:text-(--peach-fg) nth-[6n+5]:bg-(--pink-bg) nth-[6n+5]:text-(--pink-fg) nth-[6n]:bg-secondary nth-[6n]:text-muted-foreground",
         className
       )}
       {...props}

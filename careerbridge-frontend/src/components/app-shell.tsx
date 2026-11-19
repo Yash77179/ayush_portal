@@ -17,7 +17,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SidebarInset className="min-w-0 bg-background">
         <AppHeader />
         <ViewTransition key={pathname} name="page" enter="page-enter" exit="page-exit" default="none">
-          <main className="mx-auto w-full max-w-[1880px] px-5 pt-8 pb-20 sm:px-8 lg:px-10 lg:pt-10 2xl:px-14">{children}</main>
+          <main className="mx-auto w-full max-w-[117.5rem] px-5 pt-8 pb-20 sm:px-8 lg:px-10 lg:pt-10 2xl:px-14">{children}</main>
         </ViewTransition>
       </SidebarInset>
     </SidebarProvider>

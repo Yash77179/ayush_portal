@@ -76,18 +76,18 @@ export function ActionCenter({ apps, demo, onChanged }: { apps: AppLike[]; demo?
         {offers.length > 0 && (
           <Panel title="Offers to answer" tone="mint" style={stagger(1)} contentClassName="space-y-3">
             {offers.map(({ app, offer }) => (
-              <div key={offer.id} className="flex flex-col gap-3 rounded-[22px] bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div key={offer.id} className="flex flex-col gap-3 rounded-[1.375rem] bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                 <div className="flex items-center gap-3">
                   <OrgAvatar name={app.internship.company_name} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[17px] font-medium">{offer.role_title}</p>
-                    <p className="truncate text-[14.5px] text-muted-foreground">
+                    <p className="truncate text-[1.0625rem] font-medium">{offer.role_title}</p>
+                    <p className="truncate text-[0.9063rem] text-muted-foreground">
                       {app.internship.company_name} · {fmtMoney(offer.stipend)}/mo · starts {fmtDate(offer.start_date)}
                     </p>
                   </div>
                 </div>
-                <p className="mt-2 text-[14.5px] text-muted-foreground">Reply by {fmtDate(offer.expires_on)}</p>
+                <p className="mt-2 text-[0.9063rem] text-muted-foreground">Reply by {fmtDate(offer.expires_on)}</p>
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Button disabled={busy} onClick={() => run(() => respondToOffer(offer.id, "accept"), "Offer accepted — congratulations! 🎉")}>
@@ -107,20 +107,20 @@ export function ActionCenter({ apps, demo, onChanged }: { apps: AppLike[]; demo?
         {interviews.length > 0 && (
           <Panel title="Upcoming interviews" tone="blue" style={stagger(2)} contentClassName="space-y-3">
             {interviews.map(({ app, i }) => (
-              <div key={i.id} className="rounded-[22px] bg-card p-4">
+              <div key={i.id} className="rounded-[1.375rem] bg-card p-4">
                 <div className="flex items-start gap-3">
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-secondary">
                     <ModeIcon mode={i.mode} />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[17px] font-medium">
+                    <p className="truncate text-[1.0625rem] font-medium">
                       {i.round_name} · {app.internship.company_name}
                     </p>
-                    <p className="text-[14.5px] text-muted-foreground">
+                    <p className="text-[0.9063rem] text-muted-foreground">
                       {fmtDateTime(i.scheduled_at)} · {i.duration_minutes} min
                     </p>
-                    {i.location && <p className="text-[14.5px]">{i.location}</p>}
-                    {i.instructions && <p className="mt-1 text-[14.5px] whitespace-pre-wrap text-muted-foreground">{i.instructions}</p>}
+                    {i.location && <p className="text-[0.9063rem]">{i.location}</p>}
+                    {i.instructions && <p className="mt-1 text-[0.9063rem] whitespace-pre-wrap text-muted-foreground">{i.instructions}</p>}
                   </div>
                   {i.candidate_response !== "pending" && (
                     <Badge variant={i.candidate_response === "confirmed" ? "success" : "warning"}>
@@ -155,7 +155,7 @@ export function ActionCenter({ apps, demo, onChanged }: { apps: AppLike[]; demo?
       </div>
 
       <Dialog open={!!reschedule} onOpenChange={(o) => !o && setReschedule(null)}>
-        <DialogContent className="max-w-md rounded-[32px] p-7">
+        <DialogContent className="max-w-md rounded-[2rem] p-7">
           <DialogHeader>
             <DialogTitle className="text-2xl font-medium tracking-tight">Ask to reschedule</DialogTitle>
             <DialogDescription>Tell the recruiter which days and times work for you.</DialogDescription>
@@ -178,7 +178,7 @@ export function ActionCenter({ apps, demo, onChanged }: { apps: AppLike[]; demo?
       </Dialog>
 
       <Dialog open={!!decline} onOpenChange={(o) => !o && setDecline(null)}>
-        <DialogContent className="max-w-md rounded-[32px] p-7">
+        <DialogContent className="max-w-md rounded-[2rem] p-7">
           <DialogHeader>
             <DialogTitle className="text-2xl font-medium tracking-tight">Decline this offer?</DialogTitle>
             <DialogDescription>This can’t be undone. A short note helps the company (optional).</DialogDescription>
@@ -223,7 +223,7 @@ export function ApplicationSheet({ id, onClose }: { id: number | null; onClose: 
 
   return (
     <Sheet open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-lg">
+      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-xl">
         {!app ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -235,7 +235,7 @@ export function ApplicationSheet({ id, onClose }: { id: number | null; onClose: 
                 <OrgAvatar name={app.internship.company_name} className="size-14" />
                 <div className="min-w-0">
                   <SheetTitle className="text-2xl font-medium">{app.internship.title}</SheetTitle>
-                  <p className="text-[15px] text-muted-foreground">{app.internship.company_name}</p>
+                  <p className="text-[0.9375rem] text-muted-foreground">{app.internship.company_name}</p>
                 </div>
               </div>
             </SheetHeader>
@@ -244,8 +244,8 @@ export function ApplicationSheet({ id, onClose }: { id: number | null; onClose: 
               {app.source === "drive" && <Badge variant="violet">Campus drive</Badge>}
             </div>
             {app.offer && (
-              <div className="rounded-2xl bg-secondary p-4 text-[15px]">
-                <p className="text-[17px] font-medium">Offer · {app.offer.is_expired ? "expired" : app.offer.status}</p>
+              <div className="rounded-2xl bg-secondary p-4 text-[0.9375rem]">
+                <p className="text-[1.0625rem] font-medium">Offer · {app.offer.is_expired ? "expired" : app.offer.status}</p>
                 <p className="mt-1 text-muted-foreground">
                   {fmtMoney(app.offer.stipend)}/mo · starts {fmtDate(app.offer.start_date)} · {app.offer.duration_months} months
                 </p>
@@ -260,8 +260,8 @@ export function ApplicationSheet({ id, onClose }: { id: number | null; onClose: 
                 {(app.timeline ?? []).map((e) => (
                   <li key={e.id} className="relative">
                     <span className="absolute top-1.5 -left-[1.6rem] size-2.5 rounded-full border-2 border-background bg-foreground/40" />
-                    <p className="text-[15px]">{TIMELINE_TEXT(e)}</p>
-                    <p className="text-[13.5px] text-muted-foreground">{fmtDateTime(e.created_at)}</p>
+                    <p className="text-[0.9375rem]">{TIMELINE_TEXT(e)}</p>
+                    <p className="text-[0.8438rem] text-muted-foreground">{fmtDateTime(e.created_at)}</p>
                   </li>
                 ))}
               </ol>

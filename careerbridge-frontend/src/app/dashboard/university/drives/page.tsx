@@ -74,15 +74,15 @@ export default function DrivesPage() {
       />
 
       <div className="grid gap-5 sm:grid-cols-3">
-        <StatTile index={1} tone="blue" icon={<CalendarIcon />} title="Upcoming" value={upcoming.length} caption="Scheduled drives" />
+        <StatTile index={1} tone="blue" icon={<CalendarIcon />} title="Upcoming" value={upcoming.length} meter={{ value: upcoming.length, max: drives.length }} caption="Scheduled drives" />
         <StatTile index={2} tone="amber" icon={<PeopleIcon />} title="Registrations" value={regs} caption="Across all drives" />
-        <StatTile index={3} tone="mint" icon={<TrophyIcon />} title="Completed" value={completed} caption="Drives run" />
+        <StatTile index={3} tone="mint" icon={<TrophyIcon />} title="Completed" value={completed} meter={{ value: completed, max: drives.length }} caption="Drives run" />
       </div>
 
       <Panel title="All drives" style={stagger(4)} contentClassName="space-y-3">
         {drives.length === 0 && (
           <div className="py-12 text-center">
-            <p className="text-[15px] text-muted-foreground">No drives yet. Create one to invite eligible students.</p>
+            <p className="text-[0.9375rem] text-muted-foreground">No drives yet. Create one to invite eligible students.</p>
             <Button className="mt-4" onClick={() => setEditing("new")}>
               New drive
             </Button>
@@ -93,25 +93,25 @@ export default function DrivesPage() {
             key={d.id}
             type="button"
             onClick={() => setOpenId(d.id)}
-            className={cn("flex w-full flex-wrap items-center gap-4 rounded-[22px] border border-(--hairline) p-4 text-left transition-colors hover:bg-secondary/50", d.status === "cancelled" && "opacity-60")}
+            className={cn("flex w-full flex-wrap items-center gap-4 rounded-[1.375rem] border border-(--hairline) p-4 text-left transition-colors hover:bg-secondary/50", d.status === "cancelled" && "opacity-60")}
           >
             <div className="flex w-16 shrink-0 flex-col items-center rounded-2xl bg-secondary py-2">
-              <span className="text-[13.5px] text-muted-foreground uppercase">{new Date(d.drive_date).toLocaleDateString("en-IN", { month: "short" })}</span>
+              <span className="text-[0.8438rem] text-muted-foreground uppercase">{new Date(d.drive_date).toLocaleDateString("en-IN", { month: "short" })}</span>
               <span className="text-2xl leading-none font-light tabular-nums">{new Date(d.drive_date).getDate()}</span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[17px] font-medium">{d.title}</p>
-              <p className="text-[14.5px] text-muted-foreground">
+              <p className="text-[1.0625rem] font-medium">{d.title}</p>
+              <p className="text-[0.9063rem] text-muted-foreground">
                 {d.company_display}
                 {d.internship_title && ` · ${d.internship_title}`} · {fmtDateTime(d.drive_date)}
               </p>
               {d.venue && (
-                <p className="mt-0.5 flex items-center gap-1 text-[14.5px] text-muted-foreground">
+                <p className="mt-0.5 flex items-center gap-1 text-[0.9063rem] text-muted-foreground">
                   <LocationIcon className="size-3.5" /> {d.venue}
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-4 text-[15px]">
+            <div className="flex items-center gap-4 text-[0.9375rem]">
               <span className="text-muted-foreground tabular-nums">
                 {d.registrations_count} registered{d.eligible_count !== undefined && ` / ${d.eligible_count} eligible`}
               </span>
@@ -146,7 +146,7 @@ export default function DrivesPage() {
 function DriveForm({ open, drive, onClose, onSaved }: { open: boolean; drive: Drive | null; onClose: () => void; onSaved: () => void }) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[92svh] max-w-2xl overflow-y-auto rounded-[32px] p-7">
+      <DialogContent className="max-h-[92svh] max-w-2xl overflow-y-auto rounded-[2rem] p-7">
         {open && <DriveFormBody key={drive?.id ?? "new"} drive={drive} onClose={onClose} onSaved={onSaved} />}
       </DialogContent>
     </Dialog>
@@ -370,7 +370,7 @@ function DriveSheet({ id, onClose, onEdit, onChanged }: { id: number | null; onC
 
   return (
     <Sheet open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-2xl">
+      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-2xl xl:max-w-3xl">
         {!d ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -382,7 +382,7 @@ function DriveSheet({ id, onClose, onEdit, onChanged }: { id: number | null; onC
                 <OrgAvatar name={d.company_display} className="size-14" />
                 <div className="min-w-0">
                   <SheetTitle className="text-2xl font-medium">{d.title}</SheetTitle>
-                  <p className="text-[15px] text-muted-foreground">
+                  <p className="text-[0.9375rem] text-muted-foreground">
                     {d.company_display} · {fmtDateTime(d.drive_date)}
                   </p>
                 </div>
@@ -390,11 +390,11 @@ function DriveSheet({ id, onClose, onEdit, onChanged }: { id: number | null; onC
             </SheetHeader>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={STATUS[d.status].variant}>{STATUS[d.status].label}</Badge>
-              <span className="text-[15px] text-muted-foreground tabular-nums">
+              <span className="text-[0.9375rem] text-muted-foreground tabular-nums">
                 {d.registrations.length} registered · {d.eligible_count} eligible
               </span>
             </div>
-            {d.description && <p className="text-[15px] whitespace-pre-wrap text-muted-foreground">{d.description}</p>}
+            {d.description && <p className="text-[0.9375rem] whitespace-pre-wrap text-muted-foreground">{d.description}</p>}
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" onClick={() => onEdit(d)}>
                 Edit
@@ -423,7 +423,7 @@ function DriveSheet({ id, onClose, onEdit, onChanged }: { id: number | null; onC
             </div>
 
             {d.registrations.length === 0 ? (
-              <p className="rounded-2xl bg-secondary p-6 text-center text-[15px] text-muted-foreground">Nobody has registered yet.</p>
+              <p className="rounded-2xl bg-secondary p-6 text-center text-[0.9375rem] text-muted-foreground">Nobody has registered yet.</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -438,8 +438,8 @@ function DriveSheet({ id, onClose, onEdit, onChanged }: { id: number | null; onC
                   {d.registrations.map((r) => (
                     <TableRow key={r.id} className="border-border/60">
                       <TableCell className="py-3">
-                        <p className="text-[17px] font-medium">{r.name}</p>
-                        <p className="text-[13.5px] text-muted-foreground">{r.branch || r.email}</p>
+                        <p className="text-[1.0625rem] font-medium">{r.name}</p>
+                        <p className="text-[0.8438rem] text-muted-foreground">{r.branch || r.email}</p>
                       </TableCell>
                       <TableCell className="hidden tabular-nums sm:table-cell">{r.cgpa ?? "—"}</TableCell>
                       <TableCell>

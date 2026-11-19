@@ -123,7 +123,7 @@ export default function StudentProfilePage() {
           contentClassName="space-y-5"
         >
           {profile.verification_status === "rejected" && profile.verification_note && (
-            <p className="rounded-2xl bg-(--pink-bg) p-3 text-[13.5px] text-(--pink-fg)">Placement cell: “{profile.verification_note}”</p>
+            <p className="rounded-2xl bg-(--pink-bg) p-3 text-[0.8438rem] text-(--pink-fg)">Placement cell: “{profile.verification_note}”</p>
           )}
           <Field label="University">
             <UniversityCombobox

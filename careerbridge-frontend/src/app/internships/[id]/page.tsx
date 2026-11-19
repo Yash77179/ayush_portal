@@ -151,10 +151,10 @@ export default function InternshipDetailPage() {
   if (loading || now === 0) {
     return (
       <div className="space-y-5">
-        <Skeleton className="h-44 rounded-[32px]" />
+        <Skeleton className="h-44 rounded-[2rem]" />
         <div className="grid gap-5 lg:grid-cols-12">
-          <Skeleton className="h-96 rounded-[32px] lg:col-span-8" />
-          <Skeleton className="h-96 rounded-[32px] lg:col-span-4" />
+          <Skeleton className="h-96 rounded-[2rem] lg:col-span-8" />
+          <Skeleton className="h-96 rounded-[2rem] lg:col-span-4" />
         </div>
       </div>
     );
@@ -163,7 +163,7 @@ export default function InternshipDetailPage() {
   if (!detail) {
     return (
       <div className="py-24 text-center">
-        <p className="text-[26px] font-medium">Internship not found</p>
+        <p className="text-[1.625rem] font-medium">Internship not found</p>
         <p className="mt-2 text-muted-foreground">It may have been closed or removed.</p>
         <Button className="mt-6" size="lg" render={<Link href="/internships" />} nativeButton={false}>
           Browse internships
@@ -197,7 +197,7 @@ export default function InternshipDetailPage() {
     const known = !!match;
     const has = matchedSet.has(name);
     return (
-      <span className="inline-flex items-center gap-2 rounded-full bg-foreground/[0.045] px-3 py-1.5 text-[13px] text-foreground/80">
+      <span className="inline-flex items-center gap-2 rounded-full bg-foreground/[0.045] px-3 py-1.5 text-[0.8125rem] text-foreground/80">
         {known && (
           <span
             className="size-1.5 rounded-full"
@@ -212,7 +212,7 @@ export default function InternshipDetailPage() {
 
   const skillRow = (label: string, items: typeof req, required: boolean) => (
     <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:gap-4">
-      <span className="w-28 shrink-0 pt-1.5 text-[12.5px] text-muted-foreground">{label}</span>
+      <span className="w-28 shrink-0 pt-1.5 text-[0.7813rem] text-muted-foreground">{label}</span>
       <div className="flex flex-wrap gap-2">
         {items.map((s) => (
           <SkillChip key={s.skill.id} name={s.skill.name} required={required} />
@@ -224,10 +224,10 @@ export default function InternshipDetailPage() {
   return (
     <div className="space-y-5">
       {/* ── Compact banner: who and what ── */}
-      <section className="scene rise overflow-hidden rounded-[32px] border border-(--hairline) p-5 sm:p-7">
+      <section className="scene rise overflow-hidden rounded-[2rem] border border-(--hairline) p-5 sm:p-7">
         <Link
           href="/internships"
-          className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card/60 px-3.5 py-1.5 text-[13px] font-medium text-foreground backdrop-blur-md transition-[background-color,transform] duration-150 hover:bg-card/90 active:scale-95"
+          className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card/60 px-3.5 py-1.5 text-[0.8125rem] font-medium text-foreground backdrop-blur-md transition-[background-color,transform] duration-150 hover:bg-card/90 active:scale-95"
         >
           <ArrowLeftIcon className="size-4" /> All internships
         </Link>
@@ -237,7 +237,7 @@ export default function InternshipDetailPage() {
             <div className="flex items-center gap-3">
               <OrgAvatar name={detail.company.name} className="size-11" />
               <div className="leading-tight">
-                <p className="flex flex-wrap items-center gap-2 text-[15px] font-medium">
+                <p className="flex flex-wrap items-center gap-2 text-[0.9375rem] font-medium">
                   {isDemo ? (
                     detail.company.name
                   ) : (
@@ -248,11 +248,11 @@ export default function InternshipDetailPage() {
                   {detail.company.is_verified && <Badge variant="success">Verified</Badge>}
                   {isDemo && <Badge variant="lime">Sample data</Badge>}
                 </p>
-                <p className="mt-0.5 text-[13px] text-foreground/60">{detail.company.industry || "Company"}</p>
+                <p className="mt-0.5 text-[0.8125rem] text-foreground/60">{detail.company.industry || "Company"}</p>
               </div>
             </div>
             <h1 className="mt-4 max-w-2xl text-[clamp(1.9rem,3.4vw,2.6rem)]">{detail.title}</h1>
-            <p className="mt-2 text-[15px] text-foreground/65">
+            <p className="mt-2 text-[0.9375rem] text-foreground/65">
               {detail.location || "Remote"} · {MODE_LABEL[detail.work_mode] ?? detail.work_mode} · {detail.duration_months} months
             </p>
           </div>
@@ -280,14 +280,14 @@ export default function InternshipDetailPage() {
           <Panel title="About the role" style={stagger(1)} contentClassName="space-y-8">
             {blocks.map((b, i) =>
               b.kind === "p" ? (
-                <p key={i} className={cn("leading-relaxed text-foreground/80", i === 0 ? "text-[18px] text-foreground" : "text-[16px]")}>{b.text}</p>
+                <p key={i} className={cn("leading-relaxed text-foreground/80", i === 0 ? "text-[1.125rem] text-foreground" : "text-[1rem]")}>{b.text}</p>
               ) : (
                 <div key={i}>
-                  {b.heading && <h3 className="mb-3.5 text-[18px] font-medium">{b.heading}</h3>}
+                  {b.heading && <h3 className="mb-3.5 text-[1.125rem] font-medium">{b.heading}</h3>}
                   <ul className="space-y-3">
                     {b.items.map((it) => (
-                      <li key={it} className="flex gap-3.5 text-[15.5px] leading-relaxed text-foreground/80">
-                        <span className="mt-[10px] size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                      <li key={it} className="flex gap-3.5 text-[0.9688rem] leading-relaxed text-foreground/80">
+                        <span className="mt-[0.625rem] size-1.5 shrink-0 rounded-full bg-foreground/40" />
                         {it}
                       </li>
                     ))}
@@ -303,12 +303,12 @@ export default function InternshipDetailPage() {
               title="Skills"
               style={stagger(2)}
               contentClassName="space-y-4"
-              action={match ? <span className="text-[13px] text-muted-foreground tabular-nums">{match.score}% match with your profile</span> : undefined}
+              action={match ? <span className="text-[0.8125rem] text-muted-foreground tabular-nums">{match.score}% match with your profile</span> : undefined}
             >
               {req.length > 0 && skillRow("Required", req, true)}
               {pref.length > 0 && skillRow("Nice to have", pref, false)}
               {match && (
-                <p className="flex flex-wrap gap-x-5 gap-y-1 border-t border-border pt-4 text-[12px] text-muted-foreground">
+                <p className="flex flex-wrap gap-x-5 gap-y-1 border-t border-border pt-4 text-[0.75rem] text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full" style={{ background: "var(--c-mint)" }} /> You have this</span>
                   <span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full" style={{ background: "var(--c-red)" }} /> Required, missing</span>
                 </p>
@@ -320,10 +320,10 @@ export default function InternshipDetailPage() {
             <dl className="grid grid-cols-3 divide-x divide-border pb-7">
               {big.map((x) => (
                 <div key={x.label} className="px-3 text-center first:pl-0 last:pr-0">
-                  <dt className="text-[13px] text-muted-foreground">{x.label}</dt>
+                  <dt className="text-[0.8125rem] text-muted-foreground">{x.label}</dt>
                   <dd className="mt-2.5 text-[2.1rem] leading-none font-light tracking-[-0.045em] tabular-nums">
                     {x.value}
-                    <span className="ml-1.5 text-[14px] tracking-normal text-muted-foreground">{x.unit}</span>
+                    <span className="ml-1.5 text-[0.875rem] tracking-normal text-muted-foreground">{x.unit}</span>
                   </dd>
                 </div>
               ))}
@@ -331,8 +331,8 @@ export default function InternshipDetailPage() {
             <dl className="grid grid-cols-2 gap-y-6 border-t border-border pt-6 sm:grid-cols-4 sm:divide-x sm:divide-border">
               {meta.map((x) => (
                 <div key={x.label} className="px-3 text-center first:pl-0 last:pr-0">
-                  <dt className="text-[13px] text-muted-foreground">{x.label}</dt>
-                  <dd className="mt-1.5 text-[15px] font-medium">{x.value}</dd>
+                  <dt className="text-[0.8125rem] text-muted-foreground">{x.label}</dt>
+                  <dd className="mt-1.5 text-[0.9375rem] font-medium">{x.value}</dd>
                 </div>
               ))}
             </dl>
@@ -351,16 +351,16 @@ export default function InternshipDetailPage() {
                   <li key={st.title} className="relative flex gap-4 sm:flex-col sm:items-center sm:gap-0 sm:text-center">
                     <span
                       className={cn(
-                        "relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border shadow-sm [&_svg]:size-[18px]",
+                        "relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border shadow-sm [&_svg]:size-[1.125rem]",
                         i === 0 ? "border-transparent bg-primary text-primary-foreground" : "border-(--hairline) bg-card text-foreground"
                       )}
                     >
                       <Icon />
                     </span>
                     <div className="sm:mt-5">
-                      <p className="text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">Step {i + 1}</p>
-                      <p className="mt-1 text-[17px] font-medium tracking-tight">{st.title}</p>
-                      <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground sm:mx-auto sm:max-w-[13rem]">{st.text}</p>
+                      <p className="text-[0.6875rem] font-medium tracking-[0.08em] text-muted-foreground uppercase">Step {i + 1}</p>
+                      <p className="mt-1 text-[1.0625rem] font-medium tracking-tight">{st.title}</p>
+                      <p className="mt-2 text-[0.8438rem] leading-relaxed text-muted-foreground sm:mx-auto sm:max-w-[13rem]">{st.text}</p>
                     </div>
                   </li>
                 );
@@ -371,10 +371,10 @@ export default function InternshipDetailPage() {
 
         <div className="min-w-0 space-y-5 lg:sticky lg:top-24 lg:col-span-4">
           {/* key facts: frosted cards over a colourful scene */}
-          <div className="scene rise space-y-3 overflow-hidden rounded-[32px] border border-(--hairline) p-4" style={stagger(1)}>
+          <div className="scene rise space-y-3 overflow-hidden rounded-[2rem] border border-(--hairline) p-4" style={stagger(1)}>
             <FrostStat
               label="Stipend"
-              value={<>₹{Number(detail.stipend).toLocaleString("en-IN")}<span className="ml-1 text-[14px] tracking-normal text-muted-foreground">/mo</span></>}
+              value={<>₹{Number(detail.stipend).toLocaleString("en-IN")}<span className="ml-1 text-[0.875rem] tracking-normal text-muted-foreground">/mo</span></>}
               caption={`${detail.duration_months} months · ₹${totalStipend.toLocaleString("en-IN")} total`}
             />
             <FrostStat label="Openings" value={detail.openings} caption={`${req.length} required skill${req.length === 1 ? "" : "s"}`} />
@@ -384,10 +384,10 @@ export default function InternshipDetailPage() {
           </div>
 
           {isStudent && match && (
-            <div className="rise tone-lime tint dbl rounded-[32px] border p-7 [--r:32px]" style={stagger(2)}>
-              <p className="text-[17px] font-medium">Your skill match</p>
+            <div className="rise tone-lime tint dbl rounded-[2rem] border p-7 [--r:32px]" style={stagger(2)}>
+              <p className="text-[1.0625rem] font-medium">Your skill match</p>
               <Gauge className="my-6" value={match.score} label="Match score" />
-              <p className="text-[13px] text-muted-foreground">
+              <p className="text-[0.8125rem] text-muted-foreground">
                 {match.missing_required.length === 0
                   ? "You meet every required skill."
                   : `Missing: ${match.missing_required.join(", ")}.`}
@@ -403,11 +403,11 @@ export default function InternshipDetailPage() {
               <OrgAvatar name={detail.company.name} className="size-11" />
               <div className="leading-tight">
                 <p className="font-medium">{detail.company.name}</p>
-                <p className="text-[13px] text-muted-foreground">{detail.company.location || detail.location}</p>
+                <p className="text-[0.8125rem] text-muted-foreground">{detail.company.location || detail.location}</p>
               </div>
             </div>
-            {detail.company.description && <p className="text-[14px] leading-relaxed text-foreground/75">{detail.company.description}</p>}
-            <dl className="space-y-3 border-t border-border pt-4 text-[14px]">
+            {detail.company.description && <p className="text-[0.875rem] leading-relaxed text-foreground/75">{detail.company.description}</p>}
+            <dl className="space-y-3 border-t border-border pt-4 text-[0.875rem]">
               {detail.company.industry && (
                 <div className="flex justify-between gap-4"><dt className="text-muted-foreground">Industry</dt><dd>{detail.company.industry}</dd></div>
               )}
@@ -425,9 +425,9 @@ export default function InternshipDetailPage() {
           <Panel title="Where & how" tone="mist" style={stagger(4)} contentClassName="space-y-3">
             <div className="flex items-center gap-2">
               <Badge variant="info">{MODE_LABEL[detail.work_mode] ?? detail.work_mode}</Badge>
-              <span className="text-[14px] font-medium">{detail.location || "Remote"}</span>
+              <span className="text-[0.875rem] font-medium">{detail.location || "Remote"}</span>
             </div>
-            <p className="text-[13px] leading-relaxed text-muted-foreground">{MODE_NOTE[detail.work_mode]}</p>
+            <p className="text-[0.8125rem] leading-relaxed text-muted-foreground">{MODE_NOTE[detail.work_mode]}</p>
           </Panel>
         </div>
       </div>
@@ -444,13 +444,13 @@ export default function InternshipDetailPage() {
       )}
 
       <Dialog open={applyOpen} onOpenChange={setApplyOpen}>
-        <DialogContent className="rounded-[32px] p-7">
+        <DialogContent className="rounded-[2rem] p-7">
           <DialogHeader>
             <DialogTitle className="text-2xl font-medium tracking-tight">Apply for {detail.title}</DialogTitle>
             <DialogDescription>{detail.company.name} will see your profile and skills with this application.</DialogDescription>
           </DialogHeader>
           {elig && !elig.eligible ? (
-            <div className="space-y-3 rounded-2xl bg-(--pink-bg) p-4 text-[14px] text-(--pink-fg)">
+            <div className="space-y-3 rounded-2xl bg-(--pink-bg) p-4 text-[0.875rem] text-(--pink-fg)">
               <p className="font-medium">You can’t apply to this one yet:</p>
               <ul className="list-disc space-y-1 pl-5">
                 {elig.reasons.map((r) => (
@@ -476,7 +476,7 @@ export default function InternshipDetailPage() {
                           aria-pressed={answers[q.id] === c}
                           onClick={() => setAnswers((a) => ({ ...a, [q.id]: c }))}
                           className={cn(
-                            "rounded-full border px-4 py-2 text-[14px] transition-colors",
+                            "rounded-full border px-4 py-2 text-[0.875rem] transition-colors",
                             answers[q.id] === c ? "border-foreground bg-foreground text-background" : "border-border hover:bg-secondary"
                           )}
                         >

@@ -122,7 +122,7 @@ export default function HomePage() {
 
       {/* ───────────────────────── Marquee: real logos ───────────────────────── */}
       <section aria-label="Teams students apply to" className="marquee overflow-hidden pt-16 pb-6">
-        <p className="mb-9 text-center text-[13px] font-medium tracking-[0.2em] text-muted-foreground uppercase">Teams students apply to</p>
+        <p className="mb-9 text-center text-[0.8125rem] font-medium tracking-[0.2em] text-muted-foreground uppercase">Teams students apply to</p>
         <div className="marquee-track flex items-center gap-24 whitespace-nowrap">
           {[...COMPANIES, ...COMPANIES].map((c, i) => (
             <span key={i} className="group/co flex cursor-default items-center gap-4 opacity-60 grayscale transition-[opacity,filter] duration-300 hover:opacity-100 hover:grayscale-0">
@@ -140,8 +140,8 @@ export default function HomePage() {
         <div aria-hidden className="absolute inset-0 -z-10 text-[oklch(0.4_0.14_280)]">
           <WarpGrid />
         </div>
-        <div className="curtain-inner mx-auto w-full max-w-[1180px] px-6 sm:px-10">
-          <p className="mb-10 flex items-center gap-4 text-[13px] font-medium tracking-[0.2em] text-muted-foreground uppercase">
+        <div className="curtain-inner mx-auto w-full max-w-[73.75rem] px-6 sm:px-10">
+          <p className="mb-10 flex items-center gap-4 text-[0.8125rem] font-medium tracking-[0.2em] text-muted-foreground uppercase">
             <span aria-hidden className="h-px w-10 bg-foreground/30" />
             What we do
           </p>
@@ -180,8 +180,8 @@ export default function HomePage() {
         </svg>
         <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 h-[70%] w-[140%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(closest-side,oklch(0.9_0.07_300/0.55),transparent)] lg:hidden" />
 
-        <div className="relative mx-auto flex min-h-svh max-w-[1400px] flex-col justify-center py-20 lg:sticky lg:px-10 lg:top-0 lg:h-svh lg:flex-row lg:items-center lg:py-0">
-          <p data-build="numbers-label" className="mx-6 mb-8 flex items-center gap-4 text-[12px] sm:mx-10 font-semibold tracking-[0.22em] text-[oklch(0.22_0.06_280/0.6)] uppercase lg:hidden">
+        <div className="relative mx-auto flex min-h-svh max-w-[87.5rem] flex-col justify-center py-20 lg:sticky lg:px-10 lg:top-0 lg:h-svh lg:flex-row lg:items-center lg:py-0">
+          <p data-build="numbers-label" className="mx-6 mb-8 flex items-center gap-4 text-[0.75rem] sm:mx-10 font-semibold tracking-[0.22em] text-[oklch(0.22_0.06_280/0.6)] uppercase lg:hidden">
             <span aria-hidden className="h-px w-8 bg-[oklch(0.2_0.05_280/0.3)]" />
             By the numbers
           </p>

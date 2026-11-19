@@ -18,7 +18,7 @@ export function PasswordInput(props: React.ComponentProps<typeof Input>) {
         aria-pressed={show}
         className="absolute top-1/2 right-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-xl text-muted-foreground outline-none transition-colors hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
       >
-        {show ? <EyeOff className="size-[18px]" /> : <Eye className="size-[18px]" />}
+        {show ? <EyeOff className="size-[1.125rem]" /> : <Eye className="size-[1.125rem]" />}
       </button>
     </div>
   )

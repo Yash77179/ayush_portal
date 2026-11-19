@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "cn";
@@ -18,7 +19,8 @@ import {
   type CampusStudentDetail,
 } from "@/lib/ats";
 import { useUniversity } from "@/components/org-gate";
-import { DownloadIcon, GraduateIcon, SearchIcon, TrophyIcon, VerifiedIcon } from "@/components/icons";
+import { CloseCircleIcon, DownloadIcon, GraduateIcon, PeopleIcon, SearchIcon, TrophyIcon, VerifiedIcon } from "@/components/icons";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { DashboardSkeleton, Field, OrgAvatar, PageHeader, Panel, StatTile, StatusBadge, stagger } from "@/components/kit";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,15 +34,28 @@ import { Textarea } from "@/components/ui/textarea";
 const VERIFY = { any: "Any status", unverified: "Not verified", verified: "Verified", rejected: "Needs fix" };
 const PLACED = { any: "Everyone", yes: "Placed", no: "Not placed" };
 
+// Status tags in the table and the sheet: a size up from the default badge so they read at a glance.
+const TAG = "h-8 px-3.5 text-[0.875rem] [&>svg]:size-3.5!";
+// The select column: wide enough that the checkbox isn't pressed against the row edge.
+const CHECK_COL = "w-[4.5rem] min-w-[4.5rem] px-0 text-center";
+
 function VerificationBadge({ status }: { status: string }) {
   if (status === "verified")
     return (
-      <Badge variant="success">
-        <VerifiedIcon className="size-3.5" /> Verified
+      <Badge variant="success" className={TAG}>
+        <VerifiedBadge tone="teal" className="-ml-1 size-[1.125rem]!" /> Verified
       </Badge>
     );
-  if (status === "rejected") return <Badge variant="danger">Needs fix</Badge>;
-  return <Badge variant="warning">Not verified</Badge>;
+  if (status === "rejected") return <Badge variant="danger" className={TAG}>Needs fix</Badge>;
+  return <Badge variant="warning" className={TAG}>Not verified</Badge>;
+}
+
+function RowCheckbox(props: React.ComponentProps<typeof Checkbox>) {
+  return (
+    <div className="flex justify-center">
+      <Checkbox className="size-5 rounded-[0.375rem] [&_svg]:size-4!" {...props} />
+    </div>
+  );
 }
 
 export default function UniversityStudentsPage() {
@@ -50,6 +65,7 @@ export default function UniversityStudentsPage() {
   const [filters, setFilters] = React.useState({ q: "", branch: "any", year: "", verification: "any", placed: "any" });
   const [selected, setSelected] = React.useState<Set<number>>(new Set());
   const [openId, setOpenId] = React.useState<number | null>(null);
+  const [bulkBusy, setBulkBusy] = React.useState(false);
 
   const load = React.useCallback(async () => {
     try {
@@ -82,7 +98,11 @@ export default function UniversityStudentsPage() {
   const placed = rows.filter((r) => r.placed).length;
   const active = rows.filter((r) => r.active > 0).length;
 
+  // Only the selected students who aren't verified yet need the bulk action.
+  const toVerify = rows.filter((r) => selected.has(r.id) && r.verification_status !== "verified").length;
+
   const bulkVerify = async () => {
+    setBulkBusy(true);
     try {
       const r = await verifyStudentsBulk(ids);
       toast.success(`Verified ${r.verified} student${r.verified === 1 ? "" : "s"}`);
@@ -90,6 +110,8 @@ export default function UniversityStudentsPage() {
       load();
     } catch (err) {
       toast.error(errorMessage(err));
+    } finally {
+      setBulkBusy(false);
     }
   };
 
@@ -106,10 +128,10 @@ export default function UniversityStudentsPage() {
       />
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile index={1} tone="blue" icon={<GraduateIcon />} title="Students" value={rows.length} caption="Matching the filters" />
-        <StatTile index={2} tone="mint" icon={<VerifiedIcon />} title="Verified" value={verified} caption={`${rows.length - verified} still to check`} />
-        <StatTile index={3} tone="amber" icon={<SearchIcon />} title="Job hunting" value={active} caption="With live applications" />
-        <StatTile index={4} tone="violet" icon={<TrophyIcon />} title="Placed" value={placed} caption={rows.length ? `${Math.round((placed / rows.length) * 100)}% placed` : "—"} />
+        <StatTile index={1} tone="blue" icon={<GraduateIcon />} title="Students" value={rows.length} meter={{ value: rows.filter((r) => r.applications > 0).length, max: rows.length }} caption={`${rows.filter((r) => r.applications > 0).length} have applied`} />
+        <StatTile index={2} tone="mint" icon={<VerifiedIcon />} title="Verified" value={verified} meter={{ value: verified, max: rows.length }} caption={`${rows.length - verified} still to check`} />
+        <StatTile index={3} tone="amber" icon={<SearchIcon />} title="Job hunting" value={active} meter={{ value: active, max: rows.length }} caption="With live applications" />
+        <StatTile index={4} tone="violet" icon={<TrophyIcon />} title="Placed" value={placed} meter={{ value: placed, max: rows.length }} caption="Hired through CareerBridge" />
       </div>
 
       <Panel title="All students" style={stagger(5)} contentClassName="space-y-5">
@@ -124,28 +146,16 @@ export default function UniversityStudentsPage() {
           <FilterSelect value={filters.placed} items={PLACED} onChange={(v) => set("placed", v)} />
         </div>
 
-        {ids.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 rounded-[20px] bg-secondary p-2.5 pl-4">
-            <span className="mr-2 text-[15px] font-medium tabular-nums">{ids.length} selected</span>
-            <Button size="sm" onClick={bulkVerify}>
-              <VerifiedIcon /> Verify all
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
-              Clear
-            </Button>
-          </div>
-        )}
-
         {rows.length === 0 ? (
-          <p className="py-12 text-center text-[15px] text-muted-foreground">
+          <p className="py-12 text-center text-[0.9375rem] text-muted-foreground">
             No students found. Students appear here once they pick {uni.university.name} on their CareerBridge profile.
           </p>
         ) : (
-          <Table containerClassName="max-h-[min(42rem,70svh)]">
+          <Table containerClassName="max-h-[min(42rem,70svh)]" className="[&_td:not(:first-child)]:px-5 [&_th:not(:first-child)]:px-5">
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-10">
-                  <Checkbox aria-label="Select all" checked={allOn} onCheckedChange={(on) => setSelected(on ? new Set(rows.map((r) => r.id)) : new Set())} />
+                <TableHead className={CHECK_COL}>
+                  <RowCheckbox aria-label="Select all" checked={allOn} onCheckedChange={(on) => setSelected(on ? new Set(rows.map((r) => r.id)) : new Set())} />
                 </TableHead>
                 <TableHead>Student</TableHead>
                 <TableHead className="hidden md:table-cell">Branch · batch</TableHead>
@@ -157,8 +167,8 @@ export default function UniversityStudentsPage() {
             <TableBody>
               {rows.map((r) => (
                 <TableRow key={r.id} className={cn("cursor-pointer border-border/60", selected.has(r.id) && "bg-secondary/60")} onClick={() => setOpenId(r.id)}>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Checkbox
+                  <TableCell className={CHECK_COL} onClick={(e) => e.stopPropagation()}>
+                    <RowCheckbox
                       aria-label={`Select ${r.name}`}
                       checked={selected.has(r.id)}
                       onCheckedChange={() =>
@@ -175,8 +185,8 @@ export default function UniversityStudentsPage() {
                     <div className="flex items-center gap-3">
                       <OrgAvatar name={r.name} />
                       <div className="min-w-0">
-                        <p className="truncate text-[17px] font-medium">{r.name}</p>
-                        <p className="truncate text-[13.5px] text-muted-foreground">{r.enrollment_number || r.email}</p>
+                        <p className="truncate text-[1.0625rem] font-medium">{r.name}</p>
+                        <p className="truncate text-[0.8438rem] text-muted-foreground">{r.enrollment_number || r.email}</p>
                       </div>
                     </div>
                   </TableCell>
@@ -189,15 +199,31 @@ export default function UniversityStudentsPage() {
                     {r.offers ? ` · ${r.offers} offer` : ""}
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <VerificationBadge status={r.verification_status} />
-                      {r.placed && <Badge variant="violet">Placed</Badge>}
+                      {r.placed && (
+                        <Badge variant="violet" className={TAG}>
+                          <TrophyIcon /> Placed
+                        </Badge>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+        )}
+
+        {ids.length > 0 && (
+          <SelectionBar
+            count={ids.length}
+            toVerify={toVerify}
+            total={rows.length}
+            busy={bulkBusy}
+            onVerify={bulkVerify}
+            onSelectAll={allOn ? undefined : () => setSelected(new Set(rows.map((r) => r.id)))}
+            onClear={() => setSelected(new Set())}
+          />
         )}
       </Panel>
 
@@ -221,6 +247,95 @@ function FilterSelect({ value, items, onChange }: { value: string; items: Record
           ))}
         </SelectContent>
       </Select>
+    </div>
+  );
+}
+
+/** Floats at the bottom of the screen while students are selected, so the bulk action is always in reach. */
+function SelectionBar({
+  count,
+  toVerify,
+  total,
+  busy,
+  onVerify,
+  onSelectAll,
+  onClear,
+}: {
+  count: number;
+  toVerify: number;
+  total: number;
+  busy: boolean;
+  onVerify: () => void;
+  onSelectAll?: () => void;
+  onClear: () => void;
+}) {
+  const already = count - toVerify;
+  // Fixed to the viewport (the panel clips overflow, so sticky can't work), lined up with the page's content column
+  // rather than the whole window so it sits centred under the table, not under the sidebar.
+  const [box, setBox] = React.useState<{ left: number; width: number } | null>(null);
+  React.useLayoutEffect(() => {
+    const main = document.querySelector("main");
+    if (!main) return;
+    const measure = () => {
+      const r = main.getBoundingClientRect();
+      setBox({ left: r.left, width: r.width });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(main);
+    return () => ro.disconnect();
+  }, []);
+  if (!box) return null;
+  // Portalled to <body>: the page animates in with a transform, which would make `fixed` relative to it.
+  return createPortal(
+    <div
+      className="pointer-events-none fixed bottom-24 z-40 flex justify-center px-4 sm:bottom-6"
+      style={{ left: box.left, width: box.width }}
+    >
+      <div
+        role="toolbar"
+        aria-label="Selected students"
+        className="pointer-events-auto flex w-full max-w-2xl animate-in flex-wrap items-center gap-x-4 gap-y-3 rounded-[1.75rem] bg-popover p-2.5 pl-3 shadow-[0_2px_6px_oklch(0.2_0.02_280/0.06),0_24px_60px_-20px_oklch(0.2_0.04_280/0.4)] ring-1 ring-(--hairline) duration-300 ease-(--ease-out) fade-in-0 slide-in-from-bottom-4 sm:flex-nowrap sm:rounded-full"
+      >
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-lime text-(--on-lime)">
+          <PeopleIcon className="size-[1.375rem]" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[1rem] font-medium">
+            {count} {count === 1 ? "student" : "students"} selected
+          </p>
+          <p className="truncate text-[0.8438rem] text-muted-foreground">
+            {toVerify === 0 ? "All already verified" : already > 0 ? `${toVerify} to verify · ${already} already verified` : `${toVerify} waiting for verification`}
+            {onSelectAll && (
+              <>
+                {" · "}
+                <button type="button" onClick={onSelectAll} className="font-medium text-foreground underline-offset-4 hover:underline">
+                  Select all {total}
+                </button>
+              </>
+            )}
+          </p>
+        </div>
+        <div className="flex w-full items-center gap-1.5 sm:w-auto">
+          <Button size="lg" variant="verify" className="flex-1 pl-4 sm:flex-none" onClick={onVerify} disabled={busy || toVerify === 0}>
+            {busy ? <Loader2 className="animate-spin" /> : <VerifiedBadge tone="inverse" className="size-5!" />}
+            Verify {toVerify > 0 ? toVerify : ""}
+          </Button>
+          <Button size="icon-lg" variant="ghost" aria-label="Clear selection" title="Clear selection" onClick={onClear}>
+            <CloseCircleIcon className="size-[1.375rem]" />
+          </Button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function InfoTile({ label, value, className }: { label: string; value: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn("min-w-0 rounded-[1.25rem] bg-secondary p-4", className)}>
+      <dt className="text-[0.8438rem] text-muted-foreground">{label}</dt>
+      <dd className="mt-1 truncate text-[1.0625rem] font-medium">{value}</dd>
     </div>
   );
 }
@@ -258,43 +373,70 @@ function StudentSheet({ id, onClose, onChanged }: { id: number | null; onClose: 
 
   return (
     <Sheet open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-xl">
+      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-2xl xl:max-w-3xl">
         {!s ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className="space-y-6 p-6">
-            <SheetHeader className="p-0">
-              <div className="flex items-center gap-4">
-                <OrgAvatar name={s.name} className="size-14" />
+          <div className="space-y-8 p-6 sm:p-9">
+            <SheetHeader className="p-0 pr-10">
+              <div className="flex items-center gap-4 sm:gap-5">
+                <OrgAvatar name={s.name} className="size-14 sm:size-16 [&_[data-slot=avatar-fallback]]:text-[1rem]" />
                 <div className="min-w-0">
-                  <SheetTitle className="truncate text-2xl font-medium">{s.name}</SheetTitle>
-                  <p className="truncate text-[15px] text-muted-foreground">{s.email}{s.phone && ` · ${s.phone}`}</p>
+                  <SheetTitle className="truncate text-2xl font-medium tracking-[-0.02em] sm:text-[1.75rem]">{s.name}</SheetTitle>
+                  <p className="truncate text-[0.9375rem] text-muted-foreground">{s.email}</p>
+                  {s.phone && <p className="truncate text-[0.9375rem] text-muted-foreground">{s.phone}</p>}
                 </div>
               </div>
             </SheetHeader>
 
             <div className="flex flex-wrap items-center gap-2">
               <VerificationBadge status={s.verification_status} />
-              {s.placed && <Badge variant="violet">Placed</Badge>}
-              <span className="text-[15px] text-muted-foreground">Profile {s.profile_completion}% complete</span>
+              {s.placed && (
+                <Badge variant="violet" className={TAG}>
+                  <TrophyIcon /> Placed
+                </Badge>
+              )}
+              <Badge variant="secondary" className={TAG}>
+                Profile {s.profile_completion}% complete
+              </Badge>
             </div>
 
-            <dl className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-2xl bg-secondary p-4 text-[15px]">
-              <dt className="text-muted-foreground">Degree</dt>
-              <dd>{[s.degree, s.branch].filter(Boolean).join(" · ") || "—"}</dd>
-              <dt className="text-muted-foreground">Graduates</dt>
-              <dd>{s.graduation_year ?? "—"}</dd>
-              <dt className="text-muted-foreground">Resume</dt>
-              <dd>{s.resume ? <a href={s.resume} target="_blank" rel="noreferrer" className="underline-offset-4 hover:underline">Open</a> : "—"}</dd>
-              <dt className="text-muted-foreground">Skills</dt>
-              <dd>{s.skill_list.map((k) => k.name).join(", ") || "—"}</dd>
+            <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <InfoTile className="col-span-2 sm:col-span-1" label="Degree" value={[s.degree, s.branch].filter(Boolean).join(" · ") || "—"} />
+              <InfoTile label="Graduates" value={s.graduation_year ?? "—"} />
+              <InfoTile
+                label="Resume"
+                value={
+                  s.resume ? (
+                    <a href={s.resume} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-muted-foreground">
+                      Open resume
+                    </a>
+                  ) : (
+                    "Not uploaded"
+                  )
+                }
+              />
+              <div className="col-span-2 rounded-[1.25rem] bg-secondary p-4 sm:col-span-3">
+                <dt className="text-[0.8438rem] text-muted-foreground">Skills · {s.skill_list.length}</dt>
+                <dd className="mt-2.5 flex flex-wrap gap-2">
+                  {s.skill_list.length === 0 && <span className="text-[1rem]">—</span>}
+                  {s.skill_list.map((k) => (
+                    <span key={k.name} className="rounded-full bg-card px-3.5 py-1.5 text-[0.875rem] font-medium">
+                      {k.name}
+                    </span>
+                  ))}
+                </dd>
+              </div>
             </dl>
 
-            <section className="space-y-4 rounded-[24px] border border-(--hairline) p-5">
-              <h3 className="text-lg font-medium">Verify enrolment & grades</h3>
-              <div className="grid grid-cols-2 gap-4">
+            <section className="space-y-5 rounded-[1.625rem] border border-(--hairline) p-5 sm:p-7">
+              <div>
+                <h3 className="text-[1.25rem] font-medium tracking-[-0.01em]">Verify enrolment & grades</h3>
+                <p className="mt-1 text-[0.9063rem] text-muted-foreground">Check these against your records, then verify or send back with a note.</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Enrollment no.">
                   <Input value={form.enrollment_number} onChange={(e) => setForm({ ...form, enrollment_number: e.target.value })} />
                 </Field>
@@ -303,34 +445,35 @@ function StudentSheet({ id, onClose, onChanged }: { id: number | null; onClose: 
                 </Field>
               </div>
               <Field label="Note to student" hint="Required when sending back for a fix.">
-                <Textarea rows={2} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="e.g. CGPA doesn't match our records — please update." />
+                <Textarea rows={3} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="e.g. CGPA doesn't match our records — please update." />
               </Field>
-              <div className="flex flex-wrap gap-2">
-                <Button onClick={() => verify("verified")} disabled={busy}>
-                  {busy && <Loader2 className="animate-spin" />} <VerifiedIcon /> Verify
+              <div className="flex flex-wrap gap-2.5">
+                <Button size="lg" variant="verify" className="pl-4" onClick={() => verify("verified")} disabled={busy}>
+                  {busy ? <Loader2 className="animate-spin" /> : <VerifiedBadge tone="inverse" className="size-5!" />}
+                  {s.verification_status === "verified" ? "Verify again" : "Verify student"}
                 </Button>
-                <Button variant="outline" onClick={() => verify("rejected")} disabled={busy || !form.note.trim()}>
+                <Button size="lg" variant="outline" onClick={() => verify("rejected")} disabled={busy || !form.note.trim()}>
                   Needs a fix
                 </Button>
                 {s.verification_status !== "unverified" && (
-                  <Button variant="ghost" onClick={() => verify("unverified")} disabled={busy}>
+                  <Button size="lg" variant="ghost" onClick={() => verify("unverified")} disabled={busy}>
                     Clear
                   </Button>
                 )}
               </div>
-              <p className="text-[13.5px] text-muted-foreground">Recruiters see a “Verified” mark next to verified students. If the student edits these details later, verification resets.</p>
+              <p className="text-[0.8438rem] text-muted-foreground">Recruiters see a “Verified” mark next to verified students. If the student edits these details later, verification resets.</p>
             </section>
 
             <section className="space-y-3">
-              <h3 className="text-lg font-medium">Applications · {s.application_list.length}</h3>
-              {s.application_list.length === 0 && <p className="text-[15px] text-muted-foreground">No applications yet.</p>}
+              <h3 className="text-[1.25rem] font-medium tracking-[-0.01em]">Applications · {s.application_list.length}</h3>
+              {s.application_list.length === 0 && <p className="rounded-[1.25rem] bg-secondary/60 p-5 text-[0.9375rem] text-muted-foreground">No applications yet.</p>}
               {s.application_list.map((a) => (
-                <div key={a.id} className="flex items-center gap-3 rounded-2xl bg-secondary/60 p-3">
-                  <OrgAvatar name={a.company} className="size-9" />
+                <div key={a.id} className="flex items-center gap-4 rounded-[1.25rem] bg-secondary/60 p-4">
+                  <OrgAvatar name={a.company} className="size-11" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[15px] font-medium">{a.internship}</p>
-                    <p className="truncate text-[13.5px] text-muted-foreground">
-                      {a.company} · {fmtMoney(a.stipend)}/mo · {fmtDate(a.applied_at)}
+                    <p className="truncate text-[1.0313rem] font-medium">{a.internship}</p>
+                    <p className="truncate text-[0.875rem] text-muted-foreground">
+                      {a.company} · {fmtMoney(a.stipend)}/mo · applied {fmtDate(a.applied_at)}
                     </p>
                   </div>
                   <StatusBadge status={a.status} />
@@ -340,11 +483,20 @@ function StudentSheet({ id, onClose, onChanged }: { id: number | null; onClose: 
 
             {s.drives.length > 0 && (
               <section className="space-y-3">
-                <h3 className="text-lg font-medium">Campus drives</h3>
+                <h3 className="text-[1.25rem] font-medium tracking-[-0.01em]">Campus drives</h3>
                 {s.drives.map((d) => (
-                  <p key={d.id} className="text-[15px]">
-                    {d.title} · {fmtDate(d.date)} · <span className="capitalize text-muted-foreground">{d.outcome.replace("_", " ")}</span>
-                  </p>
+                  <div key={d.id} className="flex items-center gap-4 rounded-[1.25rem] bg-secondary/60 p-4">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-card">
+                      <GraduateIcon className="size-5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[1.0313rem] font-medium">{d.title}</p>
+                      <p className="text-[0.875rem] text-muted-foreground">{fmtDate(d.date)}</p>
+                    </div>
+                    <Badge variant={d.outcome === "selected" ? "success" : "secondary"} className={cn(TAG, "capitalize")}>
+                      {d.outcome.replace("_", " ")}
+                    </Badge>
+                  </div>
                 ))}
               </section>
             )}

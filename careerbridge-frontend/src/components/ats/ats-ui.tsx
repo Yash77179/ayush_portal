@@ -71,13 +71,13 @@ export function StarRating({
 
 export function MatchPill({ score }: { score: number }) {
   const tone = score >= 75 ? "bg-(--mint-bg) text-(--mint-fg)" : score >= 40 ? "bg-(--peach-bg) text-(--peach-fg)" : "bg-secondary text-muted-foreground"
-  return <span className={cn("rounded-full px-2 py-0.5 text-[12.5px] font-semibold tabular-nums", tone)}>{score}% match</span>
+  return <span className={cn("rounded-full px-2 py-0.5 text-[0.7813rem] font-semibold tabular-nums", tone)}>{score}% match</span>
 }
 
 export function VerifiedChip({ status }: { status: string }) {
   if (status !== "verified") return null
   return (
-    <span title="Enrolment and grades verified by the university" className="inline-flex items-center gap-1 text-[13.5px] font-medium text-(--mint-fg)">
+    <span title="Enrolment and grades verified by the university" className="inline-flex items-center gap-1 text-[0.8438rem] font-medium text-(--mint-fg)">
       <VerifiedIcon className="size-3.5" /> Verified
     </span>
   )
@@ -93,7 +93,7 @@ export function TagEditor({ tags, onChange, disabled }: { tags: string[]; onChan
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {tags.map((t) => (
-        <span key={t} className="inline-flex items-center gap-1 rounded-full bg-secondary py-1 pr-1.5 pl-2.5 text-[13.5px]">
+        <span key={t} className="inline-flex items-center gap-1 rounded-full bg-secondary py-1 pr-1.5 pl-2.5 text-[0.8438rem]">
           {t}
           {!disabled && (
             <button type="button" aria-label={`Remove ${t}`} onClick={() => onChange(tags.filter((x) => x !== t))} className="text-muted-foreground hover:text-foreground">
@@ -114,7 +114,7 @@ export function TagEditor({ tags, onChange, disabled }: { tags: string[]; onChan
           }}
           onBlur={add}
           placeholder={tags.length ? "Add tag" : "Add a tag, e.g. strong DSA"}
-          className="h-7 min-w-28 flex-1 rounded-full bg-transparent px-2 text-[14.5px] outline-none placeholder:text-muted-foreground"
+          className="h-7 min-w-28 flex-1 rounded-full bg-transparent px-2 text-[0.9063rem] outline-none placeholder:text-muted-foreground"
         />
       )}
     </div>
@@ -161,7 +161,7 @@ export function EmailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl rounded-[32px] p-7">
+      <DialogContent className="max-w-xl rounded-[2rem] p-7">
         <DialogHeader>
           <DialogTitle className="text-2xl font-medium tracking-tight">Email {recipients}</DialogTitle>
           <DialogDescription>Placeholders are filled in per person: {PLACEHOLDERS.join(" ")}</DialogDescription>
@@ -236,7 +236,7 @@ interface InterviewDialogProps {
 export function InterviewDialog(props: InterviewDialogProps) {
   return (
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
-      <DialogContent className="max-h-[92svh] max-w-xl overflow-y-auto rounded-[32px] p-7">
+      <DialogContent className="max-h-[92svh] max-w-xl overflow-y-auto rounded-[2rem] p-7">
         {props.open && <InterviewForm key={props.existing?.id ?? "new"} {...props} />}
       </DialogContent>
     </Dialog>
@@ -353,7 +353,7 @@ function InterviewForm({ onOpenChange, applicationId, candidateName, existing, o
                     aria-pressed={on}
                     onClick={() => set("interviewer_ids", on ? form.interviewer_ids.filter((x) => x !== m.user_id) : [...form.interviewer_ids, m.user_id])}
                     className={cn(
-                      "rounded-full border px-3 py-1.5 text-[14.5px] transition-colors",
+                      "rounded-full border px-3 py-1.5 text-[0.9063rem] transition-colors",
                       on ? "border-foreground bg-foreground text-background" : "border-border hover:bg-secondary"
                     )}
                   >
@@ -399,7 +399,7 @@ interface FeedbackDialogProps {
 export function FeedbackDialog(props: FeedbackDialogProps) {
   return (
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
-      <DialogContent className="max-w-lg rounded-[32px] p-7">
+      <DialogContent className="max-w-lg rounded-[2rem] p-7">
         {props.open && <FeedbackForm key={`${props.interview?.id}-${props.mine?.id ?? "new"}`} {...props} />}
       </DialogContent>
     </Dialog>
@@ -439,7 +439,7 @@ function FeedbackForm({ onOpenChange, interview, mine, onSaved }: FeedbackDialog
       <div className="space-y-4 py-1">
         {(["technical", "communication", "culture"] as const).map((k) => (
           <div key={k} className="flex items-center justify-between gap-4 rounded-2xl bg-secondary px-4 py-3">
-            <span className="text-[15px] capitalize">{k === "culture" ? "Culture & attitude" : k}</span>
+            <span className="text-[0.9375rem] capitalize">{k === "culture" ? "Culture & attitude" : k}</span>
             <StarRating value={form[k] || null} onChange={(v) => setForm((f) => ({ ...f, [k]: v }))} />
           </div>
         ))}
@@ -452,7 +452,7 @@ function FeedbackForm({ onOpenChange, interview, mine, onSaved }: FeedbackDialog
                 aria-pressed={form.recommendation === k}
                 onClick={() => setForm((f) => ({ ...f, recommendation: k }))}
                 className={cn(
-                  "h-11 rounded-2xl border text-[15px] font-medium transition-colors",
+                  "h-11 rounded-2xl border text-[0.9375rem] font-medium transition-colors",
                   form.recommendation === k ? "border-foreground bg-foreground text-background" : "border-border hover:bg-secondary"
                 )}
               >
@@ -490,7 +490,7 @@ interface OfferDialogProps {
 export function OfferDialog(props: OfferDialogProps) {
   return (
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
-      <DialogContent className="max-h-[92svh] max-w-xl overflow-y-auto rounded-[32px] p-7">
+      <DialogContent className="max-h-[92svh] max-w-xl overflow-y-auto rounded-[2rem] p-7">
         {props.open && <OfferForm {...props} />}
       </DialogContent>
     </Dialog>
@@ -595,7 +595,7 @@ export function RejectDialog({
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-[32px] p-7">
+      <DialogContent className="max-w-md rounded-[2rem] p-7">
         <DialogHeader>
           <DialogTitle className="text-2xl font-medium tracking-tight">Reject {count === 1 ? "this candidate" : `${count} candidates`}?</DialogTitle>
           <DialogDescription>A kind, standard rejection email goes out so nobody is left waiting. You can move them back later.</DialogDescription>

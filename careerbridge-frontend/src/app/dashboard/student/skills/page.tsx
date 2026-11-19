@@ -147,14 +147,14 @@ export default function StudentSkillsPage() {
           ) : (
             Object.entries(grouped).map(([category, skills]) => (
               <div key={category}>
-                <p className="mb-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">{category}</p>
+                <p className="mb-3 text-[0.6875rem] font-medium tracking-[0.08em] text-muted-foreground uppercase">{category}</p>
                 <div className="flex flex-wrap gap-2.5">
                   {skills.map((s) => (
                     <span
                       key={s.id}
                       className={cn(
                         LEVEL_TONE[s.proficiency] ?? "tone-blue",
-                        "tint dbl inline-flex items-center gap-2 rounded-full border py-1.5 pr-2 pl-4 text-[14px] font-medium [--r:999px]"
+                        "tint dbl inline-flex items-center gap-2 rounded-full border py-1.5 pr-2 pl-4 text-[0.875rem] font-medium [--r:999px]"
                       )}
                     >
                       <span className="text-(--t-fg)">{s.skill.name}</span>
@@ -177,7 +177,7 @@ export default function StudentSkillsPage() {
         <Panel className="lg:col-span-4" title="Add a skill" tone="sage" style={stagger(3)} contentClassName="space-y-5">
           <Field label="Skill">
             <div className="relative">
-              <SearchIcon className="pointer-events-none absolute top-1/2 left-4 size-[18px] -translate-y-1/2 text-muted-foreground" />
+              <SearchIcon className="pointer-events-none absolute top-1/2 left-4 size-[1.125rem] -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-11"
                 placeholder="Search the skill library…"

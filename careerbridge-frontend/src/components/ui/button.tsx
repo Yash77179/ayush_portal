@@ -4,12 +4,15 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-transparent bg-clip-padding text-[14px] font-medium whitespace-nowrap outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]",
+  "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-transparent bg-clip-padding text-[0.875rem] font-medium whitespace-nowrap outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[1.125rem]",
   {
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/85",
         accent: "bg-lime text-(--on-lime) hover:brightness-95",
+        // Approve / verify: plain solid blue-green, no glow. The seal inside turns a notch on hover (see VerifiedBadge).
+        verify:
+          "bg-(--verify) text-(--verify-ink) transition-[background-color,transform] duration-200 ease-out hover:bg-[color-mix(in_oklab,var(--verify)_86%,black)] active:scale-[0.97]",
         outline:
           "border-(--hairline) bg-card text-foreground hover:bg-secondary aria-expanded:bg-secondary",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/70",
@@ -20,8 +23,8 @@ const buttonVariants = cva(
       size: {
         default: "h-10 px-5",
         xs: "h-7 px-3 text-xs [&_svg:not([class*='size-'])]:size-3.5",
-        sm: "h-9 px-4 text-[13px]",
-        lg: "h-12 px-7 text-[15px]",
+        sm: "h-9 px-4 text-[0.8125rem]",
+        lg: "h-12 px-7 text-[0.9375rem]",
         icon: "size-10",
         "icon-xs": "size-7",
         "icon-sm": "size-9",

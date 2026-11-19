@@ -115,12 +115,12 @@ export function InternshipsView() {
       {loading || now === 0 ? (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-80 rounded-[32px]" />
+            <Skeleton key={i} className="h-80 rounded-[2rem]" />
           ))}
         </div>
       ) : shown.length === 0 ? (
         <div className="py-20 text-center">
-          <p className="text-[22px] font-medium">No internships found</p>
+          <p className="text-[1.375rem] font-medium">No internships found</p>
           <p className="mt-2 text-muted-foreground">Try adjusting your search or filters.</p>
         </div>
       ) : (
@@ -132,7 +132,7 @@ export function InternshipsView() {
       )}
 
       <Dialog open={!!applyTarget} onOpenChange={(o) => !o && setApplyTarget(null)}>
-        <DialogContent className="rounded-[32px] p-7">
+        <DialogContent className="rounded-[2rem] p-7">
           <DialogHeader>
             <DialogTitle className="text-2xl font-medium tracking-tight">Apply for {applyTarget?.title}</DialogTitle>
             <DialogDescription>

@@ -50,19 +50,19 @@ export default function CompanyPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rise flex flex-col gap-6 rounded-[34px] border border-(--hairline) bg-card p-6 sm:flex-row sm:items-center sm:p-9">
+      <section className="rise flex flex-col gap-6 rounded-[2.125rem] border border-(--hairline) bg-card p-6 sm:flex-row sm:items-center sm:p-9">
         {data.logo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={mediaUrl(data.logo) ?? ""} alt="" className="size-24 shrink-0 rounded-[28px] object-cover" />
+          <img src={mediaUrl(data.logo) ?? ""} alt="" className="size-24 shrink-0 rounded-[1.75rem] object-cover" />
         ) : (
-          <OrgAvatar name={data.name} className="size-24 rounded-[28px] text-3xl" />
+          <OrgAvatar name={data.name} className="size-24 rounded-[1.75rem] text-3xl" />
         )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-[clamp(2rem,4vw,3rem)] leading-tight font-medium tracking-tight">{data.name}</h1>
             {data.is_verified && <VerifiedBadge />}
           </div>
-          <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1.5 text-[15px] text-muted-foreground">
+          <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1.5 text-[0.9375rem] text-muted-foreground">
             {facts.map((f) => (
               <span key={f.text} className="inline-flex items-center gap-1.5">
                 {f.icon}
@@ -88,16 +88,16 @@ export default function CompanyPage() {
       <div className="grid items-start gap-5 lg:grid-cols-12">
         <div className="space-y-5 lg:col-span-5">
           <Panel title="About" style={stagger(1)}>
-            <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-muted-foreground">{data.description || "This company hasn't written about itself yet."}</p>
+            <p className="text-[0.9375rem] leading-relaxed whitespace-pre-wrap text-muted-foreground">{data.description || "This company hasn't written about itself yet."}</p>
           </Panel>
           {data.culture && (
             <Panel title="Life here" tone="sage" style={stagger(2)}>
-              <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{data.culture}</p>
+              <p className="text-[0.9375rem] leading-relaxed whitespace-pre-wrap">{data.culture}</p>
             </Panel>
           )}
         </div>
         <Panel className="lg:col-span-7" title={`Open roles · ${data.open_roles.length}`} style={stagger(3)} contentClassName="grid gap-4 sm:grid-cols-2">
-          {data.open_roles.length === 0 && <p className="text-[15px] text-muted-foreground sm:col-span-2">No open internships right now — check back soon.</p>}
+          {data.open_roles.length === 0 && <p className="text-[0.9375rem] text-muted-foreground sm:col-span-2">No open internships right now — check back soon.</p>}
           {now > 0 &&
             data.open_roles.map((r, i) => (
               <InternshipCard key={r.id} internship={{ ...r, company_logo: null, duration_months: (r as { duration_months?: number }).duration_months ?? 0 }} now={now} index={i} onApply={() => router.push(`/internships/${r.id}`)} />

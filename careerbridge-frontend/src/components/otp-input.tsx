@@ -99,7 +99,7 @@ export function OtpInput({
               }
             }}
             className={cn(
-              "field-surface h-14 w-full min-w-0 rounded-[14px] text-center text-[22px] sm:h-16 sm:rounded-[16px] sm:text-[26px] font-semibold tabular-nums caret-transparent outline-none transition-[box-shadow,border-color] disabled:opacity-50",
+              "field-surface h-14 w-full min-w-0 rounded-[0.875rem] text-center text-[1.375rem] sm:h-16 sm:rounded-[1rem] sm:text-[1.625rem] font-semibold tabular-nums caret-transparent outline-none transition-[box-shadow,border-color] disabled:opacity-50",
               focused === i && "ring-2 ring-ring",
               invalid && "ring-2 ring-destructive/70"
             )}

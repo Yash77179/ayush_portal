@@ -126,8 +126,8 @@ export default function CompanyDashboard() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile index={2} tone="amber" icon={<InternshipsIcon />} title="Internships" value={stats?.total_internships ?? 0} pill={{ text: `${published} live`, variant: "lime" }} caption="Posted by you" />
         <StatTile index={3} tone="blue" icon={<PeopleIcon />} title="Applicants" value={applicants} caption="Across all listings" />
-        <StatTile index={4} tone="violet" icon={<StarIcon />} title="Shortlisted" value={shortlisted} caption="Moving forward" />
-        <StatTile index={5} tone="mint" icon={<TrophyIcon />} title="Selected" value={selected} href="/dashboard/company/applicants" caption="Offers made" />
+        <StatTile index={4} tone="violet" icon={<StarIcon />} title="Shortlisted" value={shortlisted} meter={{ value: shortlisted, max: applicants }} caption="Moving forward" />
+        <StatTile index={5} tone="mint" icon={<TrophyIcon />} title="Selected" value={selected} href="/dashboard/company/applicants" meter={{ value: selected, max: applicants }} caption="Offers made" />
       </div>
 
       {now > 0 && (
@@ -143,7 +143,7 @@ export default function CompanyDashboard() {
             title="Recent applicants"
             style={stagger(6)}
             action={
-              <Link href="/dashboard/company/applicants" className="text-[16px] font-medium underline-offset-4 hover:underline">
+              <Link href="/dashboard/company/applicants" className="text-[1rem] font-medium underline-offset-4 hover:underline">
                 View all
               </Link>
             }

@@ -54,7 +54,7 @@ function BookmarkButton({ id }: { id: number }) {
         saved ? "text-foreground" : "text-muted-foreground"
       )}
     >
-      {saved ? <BookmarkSolidIcon className="size-[18px]" /> : <BookmarkIcon className="size-[18px]" />}
+      {saved ? <BookmarkSolidIcon className="size-[1.125rem]" /> : <BookmarkIcon className="size-[1.125rem]" />}
     </button>
   )
 }
@@ -71,7 +71,7 @@ export function RecommendedJobs({ jobs, isDemo, className }: { jobs: BrowseInter
       className={className}
       title="Recommended for you"
       style={stagger(6)}
-      action={<Link href="/internships" className="text-[16px] font-medium underline-offset-4 hover:underline">See all</Link>}
+      action={<Link href="/internships" className="text-[1rem] font-medium underline-offset-4 hover:underline">See all</Link>}
       contentClassName="-mx-3"
     >
       {rows.length === 0 ? (
@@ -79,22 +79,22 @@ export function RecommendedJobs({ jobs, isDemo, className }: { jobs: BrowseInter
       ) : (
         <ul className="stagger">
           {rows.map((j) => (
-            <li key={j.id} className="flex items-center gap-4 rounded-[20px] px-3 py-3 transition-colors duration-150 hover:bg-secondary/70">
+            <li key={j.id} className="flex items-center gap-4 rounded-[1.25rem] px-3 py-3 transition-colors duration-150 hover:bg-secondary/70">
               <OrgAvatar name={j.company_name} className="size-11" />
               <Link href={`/internships/${j.id}`} className="min-w-0 flex-1">
-                <p className="truncate text-[17px] font-medium">{j.title}</p>
-                <p className="mt-0.5 truncate text-[15px] text-muted-foreground">
+                <p className="truncate text-[1.0625rem] font-medium">{j.title}</p>
+                <p className="mt-0.5 truncate text-[0.9375rem] text-muted-foreground">
                   {j.company_name} · {j.location || "Remote"} · {MODE_LABEL[j.work_mode] ?? j.work_mode}
                 </p>
               </Link>
               <p className="hidden text-right sm:block">
-                <span className="text-[16px] font-medium tabular-nums">{rupees(j.stipend)}</span>
-                <span className="block text-[13.5px] text-muted-foreground">per month</span>
+                <span className="text-[1rem] font-medium tabular-nums">{rupees(j.stipend)}</span>
+                <span className="block text-[0.8438rem] text-muted-foreground">per month</span>
               </p>
               {j.match !== undefined && (
                 <p className="w-12 text-right">
-                  <span className="text-[17px] font-medium tabular-nums">{j.match}%</span>
-                  <span className="block text-[13.5px] text-muted-foreground">match</span>
+                  <span className="text-[1.0625rem] font-medium tabular-nums">{j.match}%</span>
+                  <span className="block text-[0.8438rem] text-muted-foreground">match</span>
                 </p>
               )}
               <BookmarkButton id={j.id} />
@@ -122,14 +122,14 @@ export function ClosingSoon({ jobs, now, className }: { jobs: BrowseInternship[]
         <ul className="stagger">
           {rows.map((j) => (
             <li key={j.id}>
-              <Link href={`/internships/${j.id}`} className="flex items-center gap-4 rounded-[20px] px-3 py-3 transition-colors duration-150 hover:bg-secondary/70">
+              <Link href={`/internships/${j.id}`} className="flex items-center gap-4 rounded-[1.25rem] px-3 py-3 transition-colors duration-150 hover:bg-secondary/70">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[17px] font-medium">{j.title}</p>
-                  <p className="mt-0.5 truncate text-[15px] text-muted-foreground">{j.company_name}</p>
+                  <p className="truncate text-[1.0625rem] font-medium">{j.title}</p>
+                  <p className="mt-0.5 truncate text-[0.9375rem] text-muted-foreground">{j.company_name}</p>
                 </div>
                 <div className="w-24 shrink-0">
                   <TickProgress className="h-5" value={Math.min(100, (j.days / 30) * 100)} color={j.days <= 7 ? "var(--c-red)" : "var(--foreground)"} ticks={14} />
-                  <p className={cn("mt-1.5 text-right text-[14px] tabular-nums", j.days <= 7 ? "font-medium text-[var(--c-red)]" : "text-muted-foreground")}>
+                  <p className={cn("mt-1.5 text-right text-[0.875rem] tabular-nums", j.days <= 7 ? "font-medium text-[var(--c-red)]" : "text-muted-foreground")}>
                     {j.days} day{j.days === 1 ? "" : "s"} left
                   </p>
                 </div>
@@ -155,13 +155,13 @@ export function SavedJobs({ jobs, className }: { jobs: BrowseInternship[]; class
       className={className}
       title="Saved jobs"
       style={stagger(9)}
-      action={saved.length > 0 ? <span className="text-[15px] text-muted-foreground tabular-nums">{saved.length} saved</span> : undefined}
+      action={saved.length > 0 ? <span className="text-[0.9375rem] text-muted-foreground tabular-nums">{saved.length} saved</span> : undefined}
     >
       {saved.length === 0 ? (
         <div className="relative h-full min-h-56">
           <ul aria-hidden className="space-y-3">
             {[0, 1, 2, 3, 4].map((i) => (
-              <li key={i} className="relative flex items-center gap-3.5 rounded-[22px] border border-dashed border-border px-4 py-3.5" style={{ opacity: 0.9 - i * 0.17 }}>
+              <li key={i} className="relative flex items-center gap-3.5 rounded-[1.375rem] border border-dashed border-border px-4 py-3.5" style={{ opacity: 0.9 - i * 0.17 }}>
                 <span className="size-11 rounded-2xl bg-foreground/[0.06]" />
                 <span className="flex-1 space-y-2">
                   <span className="block h-2.5 w-3/5 rounded-full bg-foreground/[0.08]" />
@@ -172,7 +172,7 @@ export function SavedJobs({ jobs, className }: { jobs: BrowseInternship[]; class
             ))}
           </ul>
           <p className="absolute inset-x-0 top-[38%] -translate-y-1/2 text-center">
-            <span className="mx-auto inline-block rounded-full bg-card px-5 py-2.5 text-[15.5px] text-muted-foreground shadow-[0_8px_24px_-12px_oklch(0.2_0.03_260/0.3),inset_0_0_0_1px_var(--hairline)]">
+            <span className="mx-auto inline-block rounded-full bg-card px-5 py-2.5 text-[0.9688rem] text-muted-foreground shadow-[0_8px_24px_-12px_oklch(0.2_0.03_260/0.3),inset_0_0_0_1px_var(--hairline)]">
               Tap the bookmark on any role to keep it here
             </span>
           </p>
@@ -182,11 +182,11 @@ export function SavedJobs({ jobs, className }: { jobs: BrowseInternship[]; class
           {saved.map((j, i) => {
             const left = daysUntil(j.deadline, now)
             return (
-              <li key={j.id} className="group/saved relative flex items-center gap-3.5 rounded-[22px] bg-secondary/55 py-3.5 pr-14 pl-4 transition-colors duration-200 hover:bg-secondary">
+              <li key={j.id} className="group/saved relative flex items-center gap-3.5 rounded-[1.375rem] bg-secondary/55 py-3.5 pr-14 pl-4 transition-colors duration-200 hover:bg-secondary">
                 <OrgAvatar name={j.company_name} className="size-11" />
                 <Link href={`/internships/${j.id}`} className="min-w-0 flex-1">
-                  <p className="truncate text-[17px] leading-snug font-medium">{j.title}</p>
-                  <p className="mt-0.5 flex items-center gap-2 truncate text-[14.5px] text-muted-foreground">
+                  <p className="truncate text-[1.0625rem] leading-snug font-medium">{j.title}</p>
+                  <p className="mt-0.5 flex items-center gap-2 truncate text-[0.9063rem] text-muted-foreground">
                     <span className="truncate">{j.company_name}</span>
                     <span aria-hidden>·</span>
                     <span className={cn("shrink-0", left <= 7 && left >= 0 && "font-medium text-(--pink-fg)")}>{left < 0 ? "Closed" : left === 0 ? "Closes today" : `${left}d left`}</span>
@@ -236,7 +236,7 @@ export function ActivityFeed({ items, now, title = "Activity", className }: { it
           <div>
             <div className="flex items-baseline justify-between gap-4">
               <p className="text-[3rem] leading-none font-light tracking-[-0.05em] tabular-nums">{items.length}</p>
-              <p className="text-[15px] text-muted-foreground">recent updates</p>
+              <p className="text-[0.9375rem] text-muted-foreground">recent updates</p>
             </div>
             <div className="mt-4 flex h-3 gap-1" aria-hidden>
               {kinds.map(({ k, n }, i) => (
@@ -245,7 +245,7 @@ export function ActivityFeed({ items, now, title = "Activity", className }: { it
             </div>
             <ul className="mt-3.5 flex flex-wrap gap-x-5 gap-y-1.5">
               {kinds.map(({ k, n }) => (
-                <li key={k} className="flex items-center gap-2 text-[14.5px] text-muted-foreground">
+                <li key={k} className="flex items-center gap-2 text-[0.9063rem] text-muted-foreground">
                   <span className="size-2 rounded-full" style={{ background: EVENT[k].dot }} />
                   {EVENT[k].label} <span className="font-medium text-foreground tabular-nums">{n}</span>
                 </li>
@@ -254,7 +254,7 @@ export function ActivityFeed({ items, now, title = "Activity", className }: { it
           </div>
 
           {/* timeline: date gutter · rail · tinted event card — scrolls inside the panel so neighbours don't stretch */}
-          <div className="-mr-2 max-h-[23rem] overflow-y-auto overscroll-contain pr-2 [scrollbar-width:thin]">
+          <div className="-mr-2 max-h-[23rem] overflow-y-auto overscroll-contain pr-2">
           <ol className="stagger relative space-y-3">
             <span aria-hidden className="absolute top-3 bottom-3 left-[calc(3.25rem+0.625rem)] w-px bg-border" />
             {items.map((a) => {
@@ -264,18 +264,18 @@ export function ActivityFeed({ items, now, title = "Activity", className }: { it
                 <li key={a.id} className="relative grid grid-cols-[3.25rem_1fr] gap-x-5">
                   <div className="pt-3 text-center leading-none">
                     <p className="text-[1.75rem] font-light tracking-[-0.04em] tabular-nums">{d.getDate()}</p>
-                    <p className="mt-1 text-[11.5px] font-medium tracking-[0.1em] text-muted-foreground uppercase">{d.toLocaleDateString("en-IN", { month: "short" })}</p>
+                    <p className="mt-1 text-[0.7188rem] font-medium tracking-[0.1em] text-muted-foreground uppercase">{d.toLocaleDateString("en-IN", { month: "short" })}</p>
                   </div>
-                  <span aria-hidden className="absolute top-[1.15rem] left-[calc(3.25rem+0.625rem-5px)] size-[11px] rounded-full ring-4 ring-card" style={{ background: e.dot }} />
-                  <div className={cn(e.tone, "flex items-start gap-3.5 rounded-[22px] bg-(--t-bg) p-4")}>
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] bg-card text-(--t-fg) [&_svg]:size-5">
+                  <span aria-hidden className="absolute top-[1.15rem] left-[calc(3.25rem+0.625rem-5px)] size-[0.6875rem] rounded-full ring-4 ring-card" style={{ background: e.dot }} />
+                  <div className={cn(e.tone, "flex items-start gap-3.5 rounded-[1.375rem] bg-(--t-bg) p-4")}>
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-[0.875rem] bg-card text-(--t-fg) [&_svg]:size-5">
                       <e.Icon />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-[12.5px] font-medium tracking-[0.08em] text-(--t-fg) uppercase">
+                      <p className="text-[0.7813rem] font-medium tracking-[0.08em] text-(--t-fg) uppercase">
                         {e.label} <span className="font-normal tracking-normal text-muted-foreground normal-case">· {timeAgo(a.at, now)}</span>
                       </p>
-                      <p className="mt-1 text-[16px] leading-snug">{a.text}</p>
+                      <p className="mt-1 text-[1rem] leading-snug">{a.text}</p>
                     </div>
                   </div>
                 </li>
@@ -309,7 +309,7 @@ export function SkillGap({ className }: { className?: string }) {
             {covered}
             <span className="text-[1.75rem] tracking-normal text-muted-foreground"> / {rows.length}</span>
           </p>
-          <p className="pb-1.5 text-right text-[15px] leading-snug text-muted-foreground">
+          <p className="pb-1.5 text-right text-[0.9375rem] leading-snug text-muted-foreground">
             top skills
             <br />
             you already have
@@ -332,14 +332,14 @@ export function SkillGap({ className }: { className?: string }) {
                 )}
                 style={{ width: size, height: size }}
               >
-                <span className={cn("max-w-[85%] text-[17px] leading-tight font-medium", has && "text-(--t-fg)")}>{name}</span>
-                <span className="mt-1 text-[14px] opacity-70 tabular-nums">{n} role{n === 1 ? "" : "s"}</span>
+                <span className={cn("max-w-[85%] text-[1.0625rem] leading-tight font-medium", has && "text-(--t-fg)")}>{name}</span>
+                <span className="mt-1 text-[0.875rem] opacity-70 tabular-nums">{n} role{n === 1 ? "" : "s"}</span>
               </li>
             )
           })}
         </ul>
 
-        <div className="flex items-center gap-4 text-[13.5px] text-muted-foreground">
+        <div className="flex items-center gap-4 text-[0.8438rem] text-muted-foreground">
           <span className="flex items-center gap-2"><span className="size-3 rounded-full bg-(--mint-bg) ring-1 ring-(--mint-fg)/25" /> You have it</span>
           <span className="flex items-center gap-2"><span className="size-3 rounded-full border border-dashed border-foreground/30" /> To learn</span>
           <span className="ml-auto">size = demand</span>
@@ -364,21 +364,21 @@ export function Interviews({ now, className }: { now: number; className?: string
     <Panel className={className} title="Upcoming interviews" style={stagger(11)}>
       <ul className="stagger space-y-3.5">
         {rows.map((r) => (
-          <li key={r.title} className={cn(r.tone, "relative flex overflow-hidden rounded-[26px] bg-(--t-bg)")}>
+          <li key={r.title} className={cn(r.tone, "relative flex overflow-hidden rounded-[1.625rem] bg-(--t-bg)")}>
             <div className="flex w-[5.5rem] shrink-0 flex-col items-center justify-center py-5 leading-none text-(--t-fg)">
               <span className="text-[2.25rem] font-light tracking-[-0.04em] tabular-nums">{r.date.getDate()}</span>
-              <span className="mt-1.5 text-[12.5px] font-medium tracking-[0.12em] uppercase">{r.date.toLocaleDateString("en-IN", { month: "short" })}</span>
+              <span className="mt-1.5 text-[0.7813rem] font-medium tracking-[0.12em] uppercase">{r.date.toLocaleDateString("en-IN", { month: "short" })}</span>
             </div>
             <div aria-hidden className="relative w-0 self-stretch border-l-2 border-dashed border-foreground/15">
               <span className="absolute -top-3 -left-3 size-6 rounded-full bg-card" />
               <span className="absolute -bottom-3 -left-3 size-6 rounded-full bg-card" />
             </div>
             <div className="min-w-0 flex-1 px-5 py-4">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-card/80 px-2.5 py-1 text-[12.5px] font-medium text-(--t-fg)">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-card/80 px-2.5 py-1 text-[0.7813rem] font-medium text-(--t-fg)">
                 <ClockIcon className="size-3.5" /> In {r.in} days · {r.time}
               </span>
-              <p className="mt-2.5 truncate text-[17px] leading-snug font-medium text-foreground">{r.title}</p>
-              <p className="mt-0.5 truncate text-[14.5px] text-muted-foreground">
+              <p className="mt-2.5 truncate text-[1.0625rem] leading-snug font-medium text-foreground">{r.title}</p>
+              <p className="mt-0.5 truncate text-[0.9063rem] text-muted-foreground">
                 {r.company} · {r.mode}
               </p>
             </div>
@@ -397,7 +397,7 @@ export function YourListings({ items, now, className }: { items: InternshipRow[]
       className={className}
       title="Your listings"
       style={stagger(6)}
-      action={<Link href="/dashboard/company/internships" className="text-[16px] font-medium underline-offset-4 hover:underline">Manage</Link>}
+      action={<Link href="/dashboard/company/internships" className="text-[1rem] font-medium underline-offset-4 hover:underline">Manage</Link>}
       contentClassName="-mx-3"
     >
       {rows.length === 0 ? (
@@ -408,17 +408,17 @@ export function YourListings({ items, now, className }: { items: InternshipRow[]
             const days = daysUntil(i.deadline, now)
             return (
               <li key={i.id}>
-                <Link href={`/internships/${i.id}`} className="flex items-center gap-4 rounded-[20px] px-3 py-3 transition-colors duration-150 hover:bg-secondary/70">
+                <Link href={`/internships/${i.id}`} className="flex items-center gap-4 rounded-[1.25rem] px-3 py-3 transition-colors duration-150 hover:bg-secondary/70">
                   <OrgAvatar name={i.title} className="size-11" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[17px] font-medium">{i.title}</p>
-                    <p className="mt-0.5 truncate text-[15px] text-muted-foreground capitalize">
+                    <p className="truncate text-[1.0625rem] font-medium">{i.title}</p>
+                    <p className="mt-0.5 truncate text-[0.9375rem] text-muted-foreground capitalize">
                       {i.status} · {i.openings} opening{i.openings === 1 ? "" : "s"} · {rupees(i.stipend)}/mo
                     </p>
                   </div>
                   <div className="hidden w-24 shrink-0 sm:block">
                     <TickProgress className="h-5" value={i.status === "published" ? Math.max(0, Math.min(100, (days / 30) * 100)) : 0} ticks={14} />
-                    <p className="mt-1.5 text-right text-[14px] text-muted-foreground tabular-nums">
+                    <p className="mt-1.5 text-right text-[0.875rem] text-muted-foreground tabular-nums">
                       {i.status !== "published" ? "—" : days > 0 ? `${days} days left` : "Closed"}
                     </p>
                   </div>

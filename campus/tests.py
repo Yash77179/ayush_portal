@@ -38,7 +38,13 @@ class PlacementCellTests(TestCase):
         self.api.force_authenticate(self.officer)
         r = self.api.post("/api/campus/my-university/", {"university_id": self.uni.id, "title": "TPO"}, format="json")
         self.assertEqual(r.status_code, 201, r.content)
-        self.assertTrue(r.json()["is_admin"])
+        # the first person to link a university waits for a CareerBridge admin; approve them as one would
+        admin = make_user("cbadmin", "admin")
+        self.api.force_authenticate(admin)
+        req = self.api.get("/api/admin/university-requests/").json()[0]
+        self.assertEqual(self.api.post(f"/api/admin/university-requests/{req['id']}/").status_code, 200)
+        self.api.force_authenticate(self.officer)
+        self.assertTrue(self.api.get("/api/campus/my-university/").json()["is_admin"])
 
     def test_students_are_scoped_and_verifiable(self):
         self.assertEqual(self.client.get("/api/campus/students/").status_code, 401)
@@ -101,6 +107,86 @@ class PlacementCellTests(TestCase):
         self.assertGreaterEqual(n["unread"], 1)
         self.api.post("/api/notifications/read/", {}, format="json")
         self.assertEqual(self.api.get("/api/notifications/").json()["unread"], 0)
+
+    def test_targeted_announcements_reach_only_their_audience(self):
+        from campus.models import DriveRegistration, PlacementDrive
+
+        self.link()
+        drive = PlacementDrive.objects.create(university=self.uni, title="Acme drive", drive_date=timezone.now())
+        DriveRegistration.objects.create(drive=drive, student=self.good, attended=True, outcome="selected")
+        DriveRegistration.objects.create(drive=drive, student=self.weak, attended=False)
+
+        # the composer's preview counts every segment of the drive
+        p = self.api.post("/api/campus/announcements/audience/", {"audience": "drive", "drive": drive.id, "segment": "missed"}, format="json").json()
+        self.assertEqual(p["count"], 1)
+        self.assertEqual(p["segments"]["registered"], 2)
+        self.assertEqual(p["segments"]["selected"], 1)
+
+        # next round: only the selected student is told, and only they see it on their campus page
+        r = self.api.post("/api/campus/announcements/", {"title": "Round 2 on Monday", "body": "Room 4", "kind": "round",
+                                                         "audience": "drive", "drive": drive.id, "segment": "selected"}, format="json")
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(r.json()["recipient_count"], 1)
+        self.assertIn("Moving to the next round", r.json()["audience_label"])
+        self.assertEqual(list(Notification.objects.filter(kind="announcement").values_list("user__username", flat=True)), ["asha"])
+        self.api.force_authenticate(self.weak.user)
+        self.assertEqual(self.api.get("/api/campus/student/").json()["announcements"], [])
+        self.api.force_authenticate(self.good.user)
+        self.assertEqual(len(self.api.get("/api/campus/student/").json()["announcements"]), 1)
+
+        # branch & batch, and an audience nobody matches is refused
+        self.api.force_authenticate(self.officer)
+        r = self.api.post("/api/campus/announcements/", {"title": "Civil", "body": "x", "audience": "cohort", "branches": "civil"}, format="json")
+        self.assertEqual(r.json()["recipient_count"], 1)
+        r = self.api.post("/api/campus/announcements/", {"title": "Nobody", "body": "x", "audience": "cohort", "branches": "Mech"}, format="json")
+        self.assertEqual(r.status_code, 400)
+
+        # editing can't widen who it was sent to
+        a = self.api.post("/api/campus/announcements/", {"title": "Hi", "body": "x", "audience": "students", "student_ids": [self.good.id]}, format="json").json()
+        self.api.patch(f"/api/campus/announcements/{a['id']}/", {"title": "Hello", "audience": "everyone"}, format="json")
+        from campus.models import Announcement
+        self.assertEqual(Announcement.objects.get(pk=a["id"]).audience, "students")
+
+    @override_settings(MEDIA_ROOT=__import__("tempfile").mkdtemp())
+    def test_attachments_acknowledgements_and_expiry(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        self.link()
+        # files are uploaded while composing, then attached on send; odd types are refused
+        bad = self.api.post("/api/campus/announcements/attachments/", {"file": SimpleUploadedFile("x.exe", b"MZ")}, format="multipart")
+        self.assertEqual(bad.status_code, 400)
+        up = self.api.post("/api/campus/announcements/attachments/", {"file": SimpleUploadedFile("JD.pdf", b"%PDF-1.4 test", content_type="application/pdf")}, format="multipart")
+        self.assertEqual(up.status_code, 201, up.content)
+        r = self.api.post("/api/campus/announcements/", {
+            "title": "Offer letters", "body": "Read the attached policy", "require_ack": True, "attachment_ids": [up.json()["id"]],
+            "link_url": "https://example.com/form", "link_label": "Fill the form", "venue": "Hall A",
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content)
+        a = r.json()
+        self.assertEqual([x["name"] for x in a["attachments"]], ["JD.pdf"])
+        self.assertEqual(a["recipient_count"], 2)
+
+        # a student acknowledges; the placement cell sees who still hasn't and can nudge only them
+        self.api.force_authenticate(self.good.user)
+        mine = self.api.get("/api/campus/student/").json()["announcements"][0]
+        self.assertFalse(mine["acknowledged"])
+        self.assertEqual(mine["attachments"][0]["name"], "JD.pdf")
+        self.assertEqual(self.api.post(f"/api/campus/student/announcements/{a['id']}/ack/").status_code, 200)
+        self.assertTrue(self.api.get("/api/campus/student/").json()["announcements"][0]["acknowledged"])
+
+        self.api.force_authenticate(self.officer)
+        acks = self.api.get(f"/api/campus/announcements/{a['id']}/acks/").json()
+        self.assertEqual([x["name"] for x in acks["acknowledged"]], ["Asha"])
+        self.assertEqual([x["name"] for x in acks["pending"]], ["Bala"])
+        before = Notification.objects.filter(user=self.weak.user).count()
+        self.assertEqual(self.api.post(f"/api/campus/announcements/{a['id']}/remind/").json()["reminded"], 1)
+        self.assertEqual(Notification.objects.filter(user=self.weak.user).count(), before + 1)
+
+        # once it expires, students no longer see it
+        from campus.models import Announcement
+        Announcement.objects.filter(pk=a["id"]).update(expires_at=timezone.now() - timedelta(hours=1))
+        self.api.force_authenticate(self.good.user)
+        self.assertEqual(self.api.get("/api/campus/student/").json()["announcements"], [])
 
 
 class AdminChainTests(TestCase):

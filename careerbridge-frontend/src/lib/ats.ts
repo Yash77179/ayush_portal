@@ -446,13 +446,69 @@ export interface DriveRegistration {
   attended: boolean
   outcome: "pending" | "selected" | "not_selected"
 }
+export type AnnouncementKind = "update" | "urgent" | "reminder" | "round"
+export type AnnouncementAudience = "everyone" | "cohort" | "drive" | "students"
+export type DriveSegment = "registered" | "attended" | "missed" | "selected" | "not_selected" | "pending"
 export interface Announcement {
   id: number
   title: string
   body: string
   pinned: boolean
+  kind: AnnouncementKind
+  audience: AnnouncementAudience
+  drive: number | null
+  drive_title: string
+  segment: DriveSegment | ""
+  branches: string
+  graduation_year: number | null
+  recipient_count: number
+  audience_label: string
   author_name: string
+  link_url: string
+  link_label: string
+  event_at: string | null
+  venue: string
+  expires_at: string | null
+  require_ack: boolean
+  attachments: AnnouncementFile[]
+  /** placement cell: how many recipients tapped "Got it" */
+  ack_count: number
+  /** student: whether I tapped "Got it" */
+  acknowledged: boolean
   created_at: string
+}
+export interface AnnouncementFile {
+  id: number
+  name: string
+  size: number
+  content_type: string
+  url: string
+}
+/** What the composer sends: the message plus who it is for. */
+export interface AnnouncementDraft {
+  title: string
+  body: string
+  pinned?: boolean
+  kind?: AnnouncementKind
+  audience?: AnnouncementAudience
+  drive?: number | null
+  segment?: DriveSegment | ""
+  branches?: string
+  graduation_year?: number | null
+  student_ids?: number[]
+  attachment_ids?: number[]
+  link_url?: string
+  link_label?: string
+  event_at?: string | null
+  venue?: string
+  expires_at?: string | null
+  require_ack?: boolean
+}
+export interface AudiencePreview {
+  count: number
+  sample: string[]
+  error: string
+  segments?: Record<DriveSegment, number>
 }
 export interface PlacementReport {
   university: string
@@ -499,9 +555,21 @@ export const getDriveOptions = () =>
 export const updateRegistration = (driveId: number, id: number, data: { attended?: boolean; outcome?: string }) =>
   apiFetch<DriveRegistration>(`/campus/drives/${driveId}/registrations/${id}/`, { method: "PATCH", body: data })
 export const getAnnouncements = async () => list<Announcement>(await apiFetch("/campus/announcements/"))
-export const saveAnnouncement = (data: { title: string; body: string; pinned?: boolean }, id?: number) =>
+export const previewAudience = (data: Partial<AnnouncementDraft>) =>
+  apiFetch<AudiencePreview>("/campus/announcements/audience/", { method: "POST", body: data })
+export const saveAnnouncement = (data: AnnouncementDraft, id?: number) =>
   id ? apiFetch<Announcement>(`/campus/announcements/${id}/`, { method: "PATCH", body: data }) : apiFetch<Announcement>("/campus/announcements/", { method: "POST", body: data })
 export const deleteAnnouncement = (id: number) => apiFetch(`/campus/announcements/${id}/`, { method: "DELETE" })
+export const uploadAnnouncementFile = (file: File) => {
+  const body = new FormData()
+  body.append("file", file)
+  return apiFetch<AnnouncementFile>("/campus/announcements/attachments/", { method: "POST", body })
+}
+export const deleteAnnouncementFile = (id: number) => apiFetch(`/campus/announcements/attachments/${id}/`, { method: "DELETE" })
+export const getAnnouncementAcks = (id: number) =>
+  apiFetch<{ acknowledged: { id: number; name: string; at: string }[]; pending: { id: number; name: string }[] }>(`/campus/announcements/${id}/acks/`)
+export const remindAnnouncement = (id: number) => apiFetch<{ reminded: number }>(`/campus/announcements/${id}/remind/`, { method: "POST" })
+export const acknowledgeAnnouncement = (id: number) => apiFetch<{ acknowledged: boolean }>(`/campus/student/announcements/${id}/ack/`, { method: "POST" })
 export const getPlacementReport = () => apiFetch<PlacementReport>("/campus/reports/")
 export const exportPlacementReport = () => downloadFile("/campus/reports/export/", "placement-report.csv")
 
@@ -509,6 +577,8 @@ export interface StudentCampus {
   university: { id: number; name: string } | null
   verification_status?: string
   verification_note?: string
+  verified_at?: string | null
+  checklist?: { key: string; label: string; done: boolean }[]
   drives: (Drive & { registered: boolean; outcome: string | null; eligible: boolean; reasons: string[]; registration_open: boolean })[]
   announcements: Announcement[]
 }

@@ -117,9 +117,9 @@ export default function CompanyApplicantsPage() {
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile index={1} tone="blue" icon={<PeopleIcon />} title="Total" value={apps.length} caption="All applications" />
-        <StatTile index={2} tone="amber" icon={<ClockIcon />} title="New" value={count("applied")} caption="Waiting for screening" />
-        <StatTile index={3} tone="violet" icon={<StarIcon />} title="In process" value={count("shortlisted") + count("interview") + count("offered")} caption="Shortlisted to offer" />
-        <StatTile index={4} tone="mint" icon={<TrophyIcon />} title="Hired" value={count("selected")} caption="Accepted offers" />
+        <StatTile index={2} tone="amber" icon={<ClockIcon />} title="New" value={count("applied")} meter={{ value: count("applied"), max: apps.length }} caption="Waiting for screening" />
+        <StatTile index={3} tone="violet" icon={<StarIcon />} title="In process" value={count("shortlisted") + count("interview") + count("offered")} meter={{ value: count("shortlisted") + count("interview") + count("offered"), max: apps.length }} caption="Shortlisted to offer" />
+        <StatTile index={4} tone="mint" icon={<TrophyIcon />} title="Hired" value={count("selected")} meter={{ value: count("selected"), max: apps.length }} caption="Accepted offers" />
       </div>
 
       <Panel title="All applicants" style={stagger(5)} contentClassName="space-y-5">
@@ -187,8 +187,8 @@ export default function CompanyApplicantsPage() {
         </Tabs>
 
         {canManage && ids.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 rounded-[20px] bg-secondary p-2.5 pl-4">
-            <span className="mr-2 text-[15px] font-medium tabular-nums">{ids.length} selected</span>
+          <div className="flex flex-wrap items-center gap-2 rounded-[1.25rem] bg-secondary p-2.5 pl-4">
+            <span className="mr-2 text-[0.9375rem] font-medium tabular-nums">{ids.length} selected</span>
             <Select
               value=""
               items={Object.fromEntries(ALL_STAGES.filter((s) => s !== "offered").map((s) => [s, STAGE_LABEL[s]]))}
@@ -223,7 +223,7 @@ export default function CompanyApplicantsPage() {
         )}
 
         {visible.length === 0 ? (
-          <p className="py-12 text-center text-[15px] text-muted-foreground">{apps.length ? "Nobody matches these filters." : "No applicants yet. Share your listings to get started."}</p>
+          <p className="py-12 text-center text-[0.9375rem] text-muted-foreground">{apps.length ? "Nobody matches these filters." : "No applicants yet. Share your listings to get started."}</p>
         ) : (
           <Table containerClassName="max-h-[min(42rem,70svh)]">
             <TableHeader>
@@ -255,18 +255,18 @@ export default function CompanyApplicantsPage() {
                     <Link href={`/dashboard/company/applicants/${a.id}`} className="flex items-center gap-3 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring">
                       <OrgAvatar name={a.student.user_name} />
                       <div className="min-w-0">
-                        <p className="flex items-center gap-2 truncate text-[17px] font-medium">
+                        <p className="flex items-center gap-2 truncate text-[1.0625rem] font-medium">
                           {a.student.user_name}
                           {!a.viewed_at && <span title="Not opened yet" className="size-1.5 rounded-full bg-sky-500" />}
                         </p>
-                        <p className="flex flex-wrap items-center gap-x-2 text-[14.5px] text-muted-foreground">
+                        <p className="flex flex-wrap items-center gap-x-2 text-[0.9063rem] text-muted-foreground">
                           <span className="max-w-[16rem] truncate">{a.student.university?.name || a.student.user_email}</span>
                           <VerifiedChip status={a.student.verification_status} />
                         </p>
                         {a.tags.length > 0 && (
                           <p className="mt-1 flex flex-wrap gap-1">
                             {a.tags.slice(0, 3).map((t) => (
-                              <span key={t} className="rounded-full bg-secondary px-1.5 py-px text-[12.5px]">
+                              <span key={t} className="rounded-full bg-secondary px-1.5 py-px text-[0.7813rem]">
                                 {t}
                               </span>
                             ))}
@@ -277,7 +277,7 @@ export default function CompanyApplicantsPage() {
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <p className="text-muted-foreground">{a.internship.title}</p>
-                    <p className="mt-0.5 text-[13.5px] text-muted-foreground/80">Applied {timeAgo(a.applied_at)}</p>
+                    <p className="mt-0.5 text-[0.8438rem] text-muted-foreground/80">Applied {timeAgo(a.applied_at)}</p>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div className="flex flex-col items-start gap-1.5">
@@ -308,7 +308,7 @@ export default function CompanyApplicantsPage() {
         onConfirm={(notify) => runBulk({ ids, action: "move", status: "rejected", notify }, "Rejected")}
       />
       <Dialog open={dialog === "tag"} onOpenChange={(o) => !o && setDialog(null)}>
-        <DialogContent className="max-w-md rounded-[32px] p-7">
+        <DialogContent className="max-w-md rounded-[2rem] p-7">
           <DialogHeader>
             <DialogTitle className="text-2xl font-medium tracking-tight">Tag {ids.length} candidates</DialogTitle>
           </DialogHeader>

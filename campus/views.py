@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import generics, permissions, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,8 +24,8 @@ from internships.eligibility import check_rules, internship_reasons
 from internships.models import Internship
 from notifications.service import notify
 
-from .models import Announcement, DriveRegistration, PlacementDrive
-from .serializers import AnnouncementSerializer, DriveSerializer, RegistrationSerializer, UniversityEditSerializer
+from .models import Announcement, AnnouncementAck, AnnouncementAttachment, DriveRegistration, PlacementDrive
+from .serializers import AnnouncementSerializer, AttachmentSerializer, DriveSerializer, RegistrationSerializer, UniversityEditSerializer
 
 IsUniversity = role_required("university")
 IsStudent = role_required("student")
@@ -372,7 +372,7 @@ class DriveListView(generics.ListCreateAPIView):
         drive = serializer.save(university=staff.university, created_by=self.request.user)
         when = timezone.localtime(drive.drive_date).strftime("%d %b, %I:%M %p")
         notify([p.user for p in _eligible_students(drive)], "drive", f"New campus drive: {drive.display_company}",
-               f"{drive.title} · {when}. You're eligible — register from Campus.", "/dashboard/student/campus")
+               f"{drive.title} · {when}. You're eligible — register from Campus.", f"/dashboard/student/campus?drive={drive.id}")
         if drive.company:
             team = [m.user for m in drive.company.memberships.filter(is_active=True).select_related("user")]
             notify(team, "drive", f"{staff.university.name} scheduled a campus drive with you", f"{drive.title} · {when}",
@@ -402,7 +402,7 @@ class DriveDetailView(generics.RetrieveUpdateDestroyAPIView):
         drive = serializer.save()
         if drive.status == "cancelled" and old != "cancelled":
             students = [r.student.user for r in drive.registrations.select_related("student__user")]
-            notify(students, "drive", f"Drive cancelled: {drive.display_company}", drive.title, "/dashboard/student/campus", email=True)
+            notify(students, "drive", f"Drive cancelled: {drive.display_company}", drive.title, f"/dashboard/student/campus?drive={drive.id}", email=True)
 
 
 @api_view(["PATCH"])
@@ -419,7 +419,7 @@ def update_registration(request, drive_id, pk):
         if outcome not in DriveRegistration.Outcome.values:
             return Response({"outcome": "Unknown outcome."}, status=400)
         if outcome != reg.outcome and outcome == "selected":
-            notify(reg.student.user, "drive", f"Selected at {reg.drive.display_company}! 🎉", reg.drive.title, "/dashboard/student/campus", email=True)
+            notify(reg.student.user, "drive", f"Selected at {reg.drive.display_company}! 🎉", reg.drive.title, f"/dashboard/student/campus?drive={reg.drive.id}", email=True)
         reg.outcome = outcome
     reg.save()
     return Response(RegistrationSerializer(reg).data)
@@ -439,19 +439,102 @@ def drive_options(request):
 
 # ── Announcements ───────────────────────────────────────────────────────────
 
+SEGMENT_FILTERS = {
+    "registered": {},
+    "attended": {"attended": True},
+    "missed": {"attended": False},
+    "selected": {"outcome": "selected"},
+    "not_selected": {"outcome": "not_selected"},
+    "pending": {"outcome": "pending"},
+}
+
+
+def _audience(staff, data):
+    """The students an announcement reaches, from its audience fields. Raises ValueError with a readable reason."""
+    base = StudentProfile.objects.filter(university=staff.university)
+    audience = data.get("audience") or "everyone"
+    if audience == "everyone":
+        return base
+    if audience == "cohort":
+        branches = [b.strip() for b in str(data.get("branches") or "").split(",") if b.strip()]
+        year = data.get("graduation_year")
+        if not branches and not year:
+            raise ValueError("Pick at least one branch or a batch.")
+        qs = base
+        if branches:
+            q = Q()
+            for b in branches:
+                q |= Q(branch__iexact=b)
+            qs = qs.filter(q)
+        if year:
+            qs = qs.filter(graduation_year=int(year))
+        return qs
+    if audience == "drive":
+        drive = PlacementDrive.objects.filter(pk=data.get("drive"), university=staff.university).first()
+        if drive is None:
+            raise ValueError("Pick one of your drives.")
+        seg = data.get("segment") or "registered"
+        if seg not in SEGMENT_FILTERS:
+            raise ValueError("Pick who in the drive should get it.")
+        regs = DriveRegistration.objects.filter(drive=drive, **SEGMENT_FILTERS[seg])
+        return base.filter(pk__in=regs.values("student_id"))
+    if audience == "students":
+        ids = [int(i) for i in data.get("student_ids") or []]
+        if not ids:
+            raise ValueError("Choose at least one student.")
+        return base.filter(pk__in=ids)
+    raise ValueError("Unknown audience.")
+
+
+@api_view(["POST"])
+@permission_classes([IsUniversity])
+def announcement_audience(request):
+    """Live preview for the composer: how many students the chosen audience reaches, a few names, and (for a drive)
+    the size of every segment so each choice can show its count before it's picked."""
+    staff = require_staff(request.user)
+    out = {"count": 0, "sample": [], "error": ""}
+    try:
+        qs = _audience(staff, request.data)
+        out["count"] = qs.count()
+        out["sample"] = [p.user.get_full_name() or p.user.username for p in qs.select_related("user")[:5]]
+    except (ValueError, TypeError) as e:
+        out["error"] = str(e)
+    drive_id = request.data.get("drive")
+    if drive_id and PlacementDrive.objects.filter(pk=drive_id, university=staff.university).exists():
+        regs = DriveRegistration.objects.filter(drive_id=drive_id)
+        out["segments"] = {k: regs.filter(**f).count() for k, f in SEGMENT_FILTERS.items()}
+    return Response(out)
+
+
 class AnnouncementListView(generics.ListCreateAPIView):
     serializer_class = AnnouncementSerializer
     permission_classes = [IsUniversity]
     pagination_class = None
 
     def get_queryset(self):
-        return Announcement.objects.filter(university=require_staff(self.request.user).university).select_related("author")
+        return (Announcement.objects.filter(university=require_staff(self.request.user).university)
+                .select_related("author", "drive").prefetch_related("attachments"))
 
-    def perform_create(self, serializer):
-        staff = require_staff(self.request.user)
-        a = serializer.save(university=staff.university, author=self.request.user)
-        students = [p.user for p in StudentProfile.objects.filter(university=staff.university).select_related("user")]
-        notify(students, "announcement", a.title, a.body[:200], "/dashboard/student/campus")
+    def create(self, request, *args, **kwargs):
+        staff = require_staff(request.user)
+        try:
+            people = list(_audience(staff, request.data).select_related("user"))
+        except (ValueError, TypeError) as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if not people:
+            return Response({"detail": "Nobody matches this audience yet, so there's no one to send it to."}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data.pop("student_ids", None)
+        attachment_ids = serializer.validated_data.pop("attachment_ids", None) or []
+        with transaction.atomic():
+            a = serializer.save(university=staff.university, author=request.user, recipient_count=len(people))
+            # kept for every audience: read receipts and reminders need to know exactly who received it
+            a.recipients.set(people)
+            AnnouncementAttachment.objects.filter(pk__in=attachment_ids, university=staff.university, announcement__isnull=True).update(announcement=a)
+        tag = {"urgent": "Urgent: ", "reminder": "Reminder: "}.get(a.kind, "")
+        notify([p.user for p in people], "announcement", f"{tag}{a.title}", a.body[:200], f"/dashboard/student/campus?a={a.id}")
+        return Response(self.get_serializer(a).data, status=status.HTTP_201_CREATED)
 
 
 class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -459,7 +542,102 @@ class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsUniversity]
 
     def get_queryset(self):
-        return Announcement.objects.filter(university=require_staff(self.request.user).university)
+        return (Announcement.objects.filter(university=require_staff(self.request.user).university)
+                .select_related("author", "drive").prefetch_related("attachments"))
+
+    def perform_update(self, serializer):
+        # who received it can't change after sending: the wording, type, pin and extras can be edited
+        for f in ("audience", "drive", "segment", "branches", "graduation_year", "student_ids"):
+            serializer.validated_data.pop(f, None)
+        attachment_ids = serializer.validated_data.pop("attachment_ids", None)
+        a = serializer.save()
+        if attachment_ids is not None:
+            staff = require_staff(self.request.user)
+            AnnouncementAttachment.objects.filter(pk__in=attachment_ids, university=staff.university, announcement__isnull=True).update(announcement=a)
+
+
+ATTACHMENT_TYPES = {".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".csv", ".txt", ".png", ".jpg", ".jpeg", ".webp", ".zip"}
+ATTACHMENT_MAX = 10 * 1024 * 1024
+
+
+@api_view(["POST"])
+@permission_classes([IsUniversity])
+@parser_classes([MultiPartParser, FormParser])
+def announcement_attachment_upload(request):
+    """Upload one file while composing; it's linked to the announcement when it's sent (attachment_ids)."""
+    import os
+
+    staff = require_staff(request.user)
+    f = request.FILES.get("file")
+    if f is None:
+        return Response({"detail": "Choose a file."}, status=status.HTTP_400_BAD_REQUEST)
+    ext = os.path.splitext(f.name)[1].lower()
+    if ext not in ATTACHMENT_TYPES:
+        return Response({"detail": "Attach a PDF, Word, Excel, PowerPoint, image, CSV, text or ZIP file."}, status=status.HTTP_400_BAD_REQUEST)
+    if f.size > ATTACHMENT_MAX:
+        return Response({"detail": "Files can be up to 10 MB."}, status=status.HTTP_400_BAD_REQUEST)
+    att = AnnouncementAttachment.objects.create(
+        university=staff.university, file=f, name=f.name[:200], size=f.size,
+        content_type=(getattr(f, "content_type", "") or "")[:100], uploaded_by=request.user,
+    )
+    return Response(AttachmentSerializer(att, context={"request": request}).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsUniversity])
+def announcement_attachment_delete(request, pk):
+    staff = require_staff(request.user)
+    att = get_object_or_404(AnnouncementAttachment, pk=pk, university=staff.university)
+    att.file.delete(save=False)
+    att.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def _ack_split(a):
+    acked = {k.student_id: k.acknowledged_at for k in a.acks.all()}
+    people = a.recipients.select_related("user").order_by("user__first_name")
+
+    def name(p):
+        return p.user.get_full_name() or p.user.username
+
+    done = [{"id": p.id, "name": name(p), "at": acked[p.id]} for p in people if p.id in acked]
+    pending = [{"id": p.id, "name": name(p)} for p in people if p.id not in acked]
+    return done, pending
+
+
+@api_view(["GET"])
+@permission_classes([IsUniversity])
+def announcement_acks(request, pk):
+    """Who has tapped 'Got it' and who hasn't."""
+    a = get_object_or_404(Announcement, pk=pk, university=require_staff(request.user).university)
+    done, pending = _ack_split(a)
+    return Response({"acknowledged": done, "pending": pending})
+
+
+@api_view(["POST"])
+@permission_classes([IsUniversity])
+def announcement_remind(request, pk):
+    """Nudge only the recipients who haven't acknowledged yet."""
+    a = get_object_or_404(Announcement, pk=pk, university=require_staff(request.user).university)
+    if not a.require_ack:
+        return Response({"detail": "This announcement doesn't ask students to acknowledge it."}, status=status.HTTP_400_BAD_REQUEST)
+    _, pending = _ack_split(a)
+    users = [p.user for p in StudentProfile.objects.filter(pk__in=[x["id"] for x in pending]).select_related("user")]
+    if users:
+        notify(users, "announcement", f"Reminder: {a.title}", "Please open it and tap Got it.", f"/dashboard/student/campus?a={a.id}")
+    return Response({"reminded": len(users)})
+
+
+@api_view(["POST"])
+@permission_classes([IsStudent])
+def announcement_ack(request, pk):
+    """A student confirms they've read an announcement that asked for it."""
+    p = _my_profile(request.user)
+    a = Announcement.objects.filter(pk=pk, require_ack=True, recipients=p).first() if p else None
+    if a is None:
+        return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+    AnnouncementAck.objects.get_or_create(announcement=a, student=p)
+    return Response({"acknowledged": True})
 
 
 # ── Reports ─────────────────────────────────────────────────────────────────
@@ -592,8 +770,26 @@ def student_campus(request):
         "university": {"id": p.university.id, "name": p.university.name},
         "verification_status": p.verification_status,
         "verification_note": p.verification_note,
+        "verified_at": p.verified_at,
+        # what the placement cell checks before verifying, and whether the student has filled it in
+        "checklist": [
+            {"key": "enrollment_number", "label": "Enrolment no.", "done": bool(p.enrollment_number)},
+            {"key": "branch", "label": "Branch", "done": bool(p.branch)},
+            {"key": "graduation_year", "label": "Batch", "done": p.graduation_year is not None},
+            {"key": "cgpa", "label": "CGPA", "done": p.cgpa is not None},
+            {"key": "resume", "label": "Resume", "done": bool(p.resume_file or p.resume_url)},
+        ],
         "drives": rows,
-        "announcements": AnnouncementSerializer(Announcement.objects.filter(university=p.university).select_related("author")[:30], many=True).data,
+        # only what was sent to everyone, or to this student by name
+        # sent to this student (or, for posts from before recipients were kept, to everyone), until it expires
+        "announcements": AnnouncementSerializer(
+            Announcement.objects.filter(university=p.university)
+            .filter(Q(audience="everyone", recipients__isnull=True) | Q(recipients=p))
+            .exclude(expires_at__lt=timezone.now())
+            .distinct().select_related("author", "drive").prefetch_related("attachments")[:30],
+            many=True,
+            context={"request": request, "student": p},
+        ).data,
     })
 
 

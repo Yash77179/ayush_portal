@@ -56,30 +56,56 @@ export default function UniversityDashboard() {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile index={2} tone="blue" icon={<GraduateIcon />} title="Students" value={stats?.total_students ?? 0} caption="Linked to your university" href="/dashboard/university/students" />
+        <StatTile
+          index={2}
+          tone="blue"
+          icon={<GraduateIcon />}
+          title="Students"
+          value={stats?.total_students ?? 0}
+          series={stats?.trends?.students}
+          cumulative
+          caption="Linked to your university · 12 weeks"
+          href="/dashboard/university/students"
+        />
         <StatTile
           index={3}
           tone="amber"
           icon={<VerifiedIcon />}
           title="To verify"
           value={pending}
-          pill={pending ? { text: "Action", variant: "warning" } : undefined}
-          caption={`${stats?.verified_students ?? 0} verified so far`}
+          meter={{ value: stats?.verified_students ?? 0, max: stats?.total_students ?? 0 }}
+          caption={`${stats?.verified_students ?? 0} of ${stats?.total_students ?? 0} verified so far`}
           href="/dashboard/university/students"
         />
-        <StatTile index={4} tone="violet" icon={<CalendarIcon />} title="Interviewing" value={stats?.in_interviews ?? 0} caption={`${stats?.offers_pending ?? 0} offers waiting`} />
-        <StatTile index={5} tone="mint" icon={<TrophyIcon />} title="Placed" value={stats?.total_placements ?? 0} caption={`${rate}% of students`} />
+        <StatTile
+          index={4}
+          tone="violet"
+          icon={<CalendarIcon />}
+          title="Interviewing"
+          value={stats?.in_interviews ?? 0}
+          series={stats?.trends?.interviews}
+          caption={`${stats?.offers_pending ?? 0} offers waiting · interviews per week`}
+        />
+        <StatTile
+          index={5}
+          tone="mint"
+          icon={<TrophyIcon />}
+          title="Placed"
+          value={stats?.total_placements ?? 0}
+          series={stats?.trends?.placements}
+          caption={`${rate}% of students · hires per week`}
+        />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-12">
         <Panel className="lg:col-span-7" title="Latest from your students" style={stagger(6)} contentClassName="space-y-2">
-          {(stats?.recent_activity ?? []).length === 0 && <p className="py-6 text-[15px] text-muted-foreground">Application updates for your students appear here.</p>}
+          {(stats?.recent_activity ?? []).length === 0 && <p className="py-6 text-[0.9375rem] text-muted-foreground">Application updates for your students appear here.</p>}
           {(stats?.recent_activity ?? []).map((a) => (
-            <div key={a.id} className="flex items-center gap-3 rounded-[18px] p-2.5 hover:bg-secondary/60">
+            <div key={a.id} className="flex items-center gap-3 rounded-[1.125rem] p-2.5 hover:bg-secondary/60">
               <OrgAvatar name={a.student_name} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[17px] font-medium">{a.student_name}</p>
-                <p className="truncate text-[14.5px] text-muted-foreground">
+                <p className="truncate text-[1.0625rem] font-medium">{a.student_name}</p>
+                <p className="truncate text-[0.9063rem] text-muted-foreground">
                   {a.internship_title} · {a.company} · {timeAgo(a.updated_at)}
                 </p>
               </div>

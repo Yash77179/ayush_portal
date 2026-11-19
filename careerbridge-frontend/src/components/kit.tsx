@@ -10,6 +10,7 @@ import { Portrait, hasPortrait } from "@/components/portrait"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { cn } from "cn"
+import gsap from "gsap"
 
 import { ArrowRightIcon, ArrowRightUpIcon, PlusIcon, CameraIcon
 } from "@/components/icons"
@@ -49,7 +50,7 @@ export function Panel({
     <Card className={cn("rise", tone && `tone-${tone} tint`, className)} style={style}>
       {title && (
         <CardHeader>
-          <CardTitle className="text-[28px] leading-tight font-medium tracking-[-0.02em]">{title}</CardTitle>
+          <CardTitle className="text-[1.375rem] leading-tight font-medium tracking-[-0.02em] sm:text-[1.5rem]">{title}</CardTitle>
           {action && <CardAction>{action}</CardAction>}
         </CardHeader>
       )}
@@ -89,44 +90,134 @@ export interface StatTileProps {
   icon?: React.ReactNode
   href?: string
   index?: number
+  /** A share of a whole, drawn as a tick meter with the percentage marked where the fill ends. */
+  meter?: { value: number; max: number }
+  /** Weekly counts, oldest first, drawn as mini bars; the pill shows the last 4 weeks against the 4 before. */
+  series?: number[]
+  /** `series` is a running total (e.g. students linked): the pill shows growth over the whole window instead. */
+  cumulative?: boolean
 }
 
-export function StatTile({ title, value, unit, pill, caption, tone = "blue", icon, href, index = 0 }: StatTileProps) {
+/**
+ * What changed lately: the last 4 weeks against the 4 before as a percentage, or, when the earlier window is too
+ * small for a percentage to mean anything (0-2), the plain count added in the last 4 weeks.
+ * Running totals compare the first week with the last.
+ */
+type Delta = { kind: "pct"; value: number } | { kind: "count"; value: number }
+function seriesDelta(s: number[], cumulative?: boolean): Delta | null {
+  if (s.length < 2) return null
+  const a = cumulative ? s[0] : s.slice(-8, -4).reduce((t, x) => t + x, 0)
+  const b = cumulative ? s[s.length - 1] : s.slice(-4).reduce((t, x) => t + x, 0)
+  if (a < 3) return b - (cumulative ? a : 0) > 0 ? { kind: "count", value: b - (cumulative ? a : 0) } : null
+  return { kind: "pct", value: ((b - a) / a) * 100 }
+}
+
+function TrendPill({ delta, cumulative }: { delta: Delta; cumulative?: boolean }) {
+  const up = delta.value >= 0
+  const flat = delta.kind === "pct" && Math.abs(delta.value) < 0.5
+  const text = flat ? "±0%" : delta.kind === "count" ? `+${delta.value} in 4 wks` : `${up ? "+" : ""}${Math.round(delta.value)}%`
+  return (
+    <span
+      className={cn(
+        "inline-flex h-6 shrink-0 items-center gap-1 rounded-full bg-card px-2 text-[0.75rem] font-medium tabular-nums",
+        flat ? "text-muted-foreground" : up ? "text-(--mint-fg)" : "text-(--pink-fg)"
+      )}
+      title={cumulative ? "Growth over 12 weeks" : "Last 4 weeks vs the 4 before"}
+    >
+      {!flat && <ArrowRightUpIcon className={cn("size-3", !up && "rotate-90")} />}
+      {text}
+    </span>
+  )
+}
+
+/** Weekly mini bars: older weeks soft, the last four in the tile's colour, the latest labelled. */
+export function SparkBars({ data, className }: { data: number[]; className?: string }) {
+  const max = Math.max(1, ...data)
+  return (
+    <div className={cn("relative flex h-11 items-end gap-[3px]", className)} aria-hidden>
+      {data.map((v, i) => {
+        const recent = i >= data.length - 4
+        return (
+          <span
+            key={i}
+            className="grow-y flex-1 origin-bottom rounded-full"
+            style={
+              {
+                height: `${Math.max(10, (v / max) * 100)}%`,
+                background: recent ? "var(--t-fg)" : "color-mix(in oklab, var(--t-fg) 26%, transparent)",
+                "--i": i,
+              } as React.CSSProperties
+            }
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+/** Tick meter: filled ticks are the share, with its percentage pinned above where the fill stops. */
+export function MeterTicks({ value, max, ticks = 30, className }: { value: number; max: number; ticks?: number; className?: string }) {
+  const pct = max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 0
+  const filled = Math.round((pct / 100) * ticks)
+  const at = Math.min(ticks - 1, Math.max(0, filled - 1))
+  return (
+    <div className={cn("relative pt-5", className)} role="meter" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
+      <span
+        className="absolute top-0 text-[0.75rem] font-medium tabular-nums text-foreground/80"
+        style={{ left: `${((at + 0.5) / ticks) * 100}%`, transform: `translateX(${at > ticks * 0.85 ? "-100%" : at < ticks * 0.15 ? "0" : "-50%"})` }}
+      >
+        {Math.round(pct)}%
+      </span>
+      <div className="flex h-9 items-end justify-between">
+        {Array.from({ length: ticks }).map((_, i) => (
+          <span
+            key={i}
+            className="tick w-[2px] rounded-full"
+            style={
+              {
+                height: i === at && filled > 0 ? "100%" : "72%",
+                background: i < filled ? "var(--t-fg)" : "color-mix(in oklab, var(--foreground) 13%, transparent)",
+                "--i": i,
+              } as React.CSSProperties
+            }
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function StatTile({ title, value, unit, pill, caption, tone = "blue", icon, href, index = 0, meter, series, cumulative }: StatTileProps) {
+  const delta = series ? seriesDelta(series, cumulative) : null
   const body = (
     <Card
-      className={cn(
-        "rise tint h-full min-h-[11.5rem] justify-between gap-6",
-        `tone-${tone}`,
-        href && "lift"
-      )}
+      className={cn("rise tint h-full justify-between gap-4 [--card-spacing:--spacing(5)]", `tone-${tone}`, href && "lift")}
       style={stagger(index)}
     >
       <CardHeader className="items-center">
-        <div className="flex items-center gap-3">
-          {icon && <IconChip>{icon}</IconChip>}
-          <CardTitle className="text-[24px] leading-snug font-medium tracking-[-0.02em]">{title}</CardTitle>
+        <div className="flex min-w-0 items-center gap-2.5">
+          {icon && <IconChip className="size-9 [&_svg]:size-[1.125rem]">{icon}</IconChip>}
+          <CardTitle className="truncate text-[1.0625rem] leading-snug font-medium tracking-[-0.01em]">{title}</CardTitle>
         </div>
         {href && (
           <CardAction>
-            <span className="flex size-9 items-center justify-center rounded-full bg-card text-foreground">
-              <ArrowRightUpIcon className="size-[18px]" />
+            <span className="flex size-8 items-center justify-center rounded-full bg-card text-foreground">
+              <ArrowRightUpIcon className="size-4" />
             </span>
           </CardAction>
         )}
       </CardHeader>
-      <CardContent>
-        <div className="flex items-baseline gap-2">
-          <span className={cn("text-[5rem] leading-none font-light tracking-[-0.06em] tabular-nums", false)}>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          <span className="text-[2.75rem] leading-none font-light tracking-[-0.05em] tabular-nums">
             {typeof value === "number" ? <CountUp value={value} delay={index * 40} /> : value}
           </span>
-          {unit && <span className="text-[2.25rem] font-light text-muted-foreground">{unit}</span>}
+          {unit && <span className="text-[1.25rem] font-light text-muted-foreground">{unit}</span>}
+          {delta && <TrendPill delta={delta} cumulative={cumulative} />}
+          {pill && <Badge variant={pill.variant ?? "violet"} className="h-6 shrink-0 px-2.5 text-[0.75rem]">{pill.text}</Badge>}
         </div>
-        {(caption || pill) && (
-          <div className="mt-3 flex items-center justify-between gap-2">
-            {caption && <p className="min-w-0 truncate text-[16.5px] text-muted-foreground">{caption}</p>}
-            {pill && <Badge variant={pill.variant ?? "violet"} className="shrink-0">{pill.text}</Badge>}
-          </div>
-        )}
+        {series && series.some((v) => v > 0) ? <SparkBars data={series} /> : meter ? <MeterTicks value={meter.value} max={meter.max} /> : null}
+        {caption && <p className="truncate text-[0.875rem] text-muted-foreground">{caption}</p>}
       </CardContent>
     </Card>
   )
@@ -157,7 +248,7 @@ export function ProgressBar({
       <div className={cn("h-1.5 w-full overflow-hidden rounded-full", track === "white" ? "bg-white" : "bg-foreground/10")}>
         <div className={cn("grow-x h-full rounded-full", "bg-foreground")} style={{ width: `${v}%` }} />
       </div>
-      <div className="mt-2.5 flex items-center justify-between text-[16px] text-muted-foreground">
+      <div className="mt-2.5 flex items-center justify-between text-[1rem] text-muted-foreground">
         <span>{label}</span>
         <span className="tabular-nums">{Math.round(v)}%</span>
       </div>
@@ -175,7 +266,10 @@ const PALETTE = [
 ] as const
 const HATCH = "repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.28) 0 2px, transparent 2px 6px)"
 
-/* ── Segmented bars: slim track, two small lead-in blocks, labelled fill ── */
+/* ── Segmented bars: slim track, two lead-in blocks, labelled fill ─────────
+ * GSAP: bars sweep in one after another while their numbers count up. Hovering (or focusing) a row spotlights it:
+ * it lifts forward, its share of the total slides in, and the other rows fade back. Leaving restores everyone.
+ */
 export function SegBars({
   data,
   suffix = "",
@@ -187,40 +281,104 @@ export function SegBars({
   emptyText?: string
   className?: string
 }) {
+  const ref = React.useRef<HTMLUListElement>(null)
   const max = Math.max(0, ...data.map((d) => d.value))
+  const total = data.reduce((t, d) => t + d.value, 0)
+  const key = data.map((d) => `${d.label}:${d.value}`).join("|")
+
+  // entrance
+  React.useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    const ctx = gsap.context(() => {
+      const fills = gsap.utils.toArray<HTMLElement>("[data-fill]")
+      const nums = gsap.utils.toArray<HTMLElement>("[data-num]")
+      if (reduce) return
+      gsap.fromTo(fills, { scaleX: 0 }, { scaleX: 1, duration: 1.15, ease: "expo.out", stagger: 0.075, delay: 0.15 })
+      gsap.fromTo(
+        "[data-row]",
+        { autoAlpha: 0, y: 10 },
+        { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out", stagger: 0.075, clearProps: "transform" }
+      )
+      nums.forEach((n, i) => {
+        const to = Number(n.dataset.num)
+        const o = { v: 0 }
+        gsap.to(o, {
+          v: to,
+          duration: 1.1,
+          ease: "power2.out",
+          delay: 0.15 + i * 0.075,
+          onUpdate: () => (n.textContent = String(Math.round(o.v))),
+        })
+      })
+    }, el)
+    return () => ctx.revert()
+  }, [key])
+
+  const spotlight = (i: number | null) => {
+    const el = ref.current
+    if (!el) return
+    const rows = gsap.utils.toArray<HTMLElement>("[data-row]", el)
+    rows.forEach((row, j) => {
+      const on = i === j
+      const dim = i !== null && !on
+      gsap.to(row, { opacity: dim ? 0.28 : 1, filter: dim ? "saturate(0.35)" : "saturate(1)", duration: 0.45, ease: "power3.out", overwrite: "auto" })
+      gsap.to(row.querySelector("[data-bar]"), { x: on ? 6 : 0, scaleY: on ? 1.12 : 1, duration: 0.5, ease: on ? "back.out(2.2)" : "power3.out", overwrite: "auto" })
+      gsap.to(row.querySelector("[data-share]"), { autoAlpha: on ? 1 : 0, x: on ? 0 : -8, duration: on ? 0.4 : 0.2, ease: "power3.out", overwrite: "auto" })
+      gsap.to(row.querySelector("[data-label]"), { color: on ? "var(--foreground)" : "var(--muted-foreground)", duration: 0.3, overwrite: "auto" })
+    })
+  }
+
   if (max === 0) {
     return <p className={cn("py-10 text-center text-sm text-muted-foreground", className)}>{emptyText}</p>
   }
   return (
-    <ul className={cn("space-y-3.5", className)}>
+    <ul ref={ref} className={cn("space-y-3", className)} onPointerLeave={() => spotlight(null)}>
       {data.map((d, i) => {
         const c = PALETTE[(d.tone ?? i) % PALETTE.length]
         const pct = (d.value / max) * 100
+        const share = total ? Math.round((d.value / total) * 100) : 0
         return (
-          <li key={d.label} className="grid grid-cols-[6.75rem_1fr] items-center gap-4">
-            <span className="truncate text-[15.5px] text-muted-foreground">{d.label}</span>
-            <div className="relative h-9 overflow-hidden rounded-[12px] bg-foreground/[0.045]">
+          <li
+            key={d.label}
+            data-row
+            tabIndex={0}
+            aria-label={`${d.label}: ${d.value}${suffix}, ${share}% of the total`}
+            onPointerEnter={() => spotlight(i)}
+            onFocus={() => spotlight(i)}
+            onBlur={() => spotlight(null)}
+            className="grid cursor-default grid-cols-[6.75rem_1fr] items-center gap-4 rounded-[0.875rem] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+          >
+            <span data-label className="truncate text-[0.9375rem] text-muted-foreground">{d.label}</span>
+            <div className="relative flex h-9 items-center">
+              <div className="absolute inset-0 rounded-[0.75rem] bg-foreground/[0.045]" />
               {d.value > 0 ? (
-                <div
-                  className="grow-x absolute inset-y-0 left-0 flex gap-[3px]"
-                  style={{ width: `${pct}%`, minWidth: "5.5rem", "--i": i } as React.CSSProperties}
-                >
-                  <span className="w-3.5 shrink-0 rounded-[10px]" style={{ background: c.bg, opacity: 0.4 }} />
-                  <span className="w-3.5 shrink-0 rounded-[10px]" style={{ background: c.bg, opacity: 0.7 }} />
+                <div data-bar className="relative flex h-full origin-left" style={{ width: `${pct}%`, minWidth: "5.5rem" }}>
+                  <div data-fill className="flex h-full w-full origin-left gap-[3px]">
+                    <span className="w-3.5 shrink-0 rounded-[0.625rem]" style={{ background: c.bg, opacity: 0.4 }} />
+                    <span className="w-3.5 shrink-0 rounded-[0.625rem]" style={{ background: c.bg, opacity: 0.7 }} />
+                    <span
+                      className="flex flex-1 items-center justify-end rounded-[0.625rem] px-3 text-[0.9375rem] font-medium tabular-nums"
+                      style={{ color: c.fg, backgroundColor: c.bg, backgroundImage: HATCH }}
+                    >
+                      <span data-num={d.value}>{d.value}</span>
+                      {suffix}
+                    </span>
+                  </div>
                   <span
-                    className="flex flex-1 items-center justify-end rounded-[10px] px-3 text-[15px] font-medium tabular-nums"
-                    style={{
-                      color: c.fg,
-                      backgroundColor: c.bg,
-                      backgroundImage: HATCH,
-                    }}
+                    data-share
+                    className={cn(
+                      "invisible absolute top-1/2 -translate-y-1/2 rounded-full px-2.5 py-1 text-[0.75rem] font-medium whitespace-nowrap tabular-nums opacity-0",
+                      // a near-full bar has no room after it: the chip sits inside, past the lead-in blocks
+                      pct > 72 ? "left-10 bg-card text-foreground shadow-sm" : "left-full ml-2.5 bg-foreground text-background"
+                    )}
                   >
-                    {d.value}
-                    {suffix}
+                    {share}% of all
                   </span>
                 </div>
               ) : (
-                <span className="absolute top-1/2 right-3 -translate-y-1/2 text-[13px] text-muted-foreground tabular-nums">0</span>
+                <span className="absolute top-1/2 right-3 -translate-y-1/2 text-[0.8125rem] text-muted-foreground tabular-nums">0</span>
               )}
             </div>
           </li>
@@ -270,7 +428,7 @@ export function Funnel({
     <div className={cn("grid gap-5", className)} style={{ gridTemplateColumns: `repeat(${stages.length}, minmax(0, 1fr))` }}>
       {stages.map((st) => (
         <div key={st.label} className="min-w-0 border-l-2 pl-3.5" style={{ borderColor: st.color }}>
-          <p className="truncate text-[15.5px] text-muted-foreground">{st.label}</p>
+          <p className="truncate text-[0.9688rem] text-muted-foreground">{st.label}</p>
           <p className="mt-1.5 text-[3rem] leading-none font-light tracking-[-0.05em] tabular-nums">{st.value}</p>
           <TickProgress className="mt-5 h-9" value={(st.value / max) * 100} color={st.color} ticks={10} />
         </div>
@@ -324,7 +482,7 @@ export function Gauge({ value, label, className }: { value: number; label: strin
           <CountUp value={Math.round(v)} />
           <span className="ml-1 text-[1.75rem] tracking-normal text-muted-foreground">%</span>
         </p>
-        <p className="mt-2 text-[16px] text-muted-foreground">{label}</p>
+        <p className="mt-2 text-[1rem] text-muted-foreground">{label}</p>
       </div>
     </div>
   )
@@ -374,7 +532,7 @@ export function OrgAvatar({ name, className }: { name: string; className?: strin
     .toUpperCase()
   return (
     <Avatar className={cn("size-10", className)}>
-      <AvatarFallback className={cn(`tone-${tone}`, "bg-(--t-bg) text-[13px] font-medium text-(--t-fg)")}>
+      <AvatarFallback className={cn(`tone-${tone}`, "bg-(--t-bg) text-[0.8125rem] font-medium text-(--t-fg)")}>
         {initials || "?"}
       </AvatarFallback>
     </Avatar>
@@ -446,7 +604,7 @@ function StepRing({ value, color, size = 52 }: { value: number; color: string; s
           style={{ transition: "stroke-dashoffset 800ms var(--ease-out)" }}
         />
       </svg>
-      <span className="absolute text-[12px] font-semibold tabular-nums">{Math.round(v * 100)}</span>
+      <span className="absolute text-[0.75rem] font-semibold tabular-nums">{Math.round(v * 100)}</span>
     </span>
   )
 }
@@ -460,13 +618,13 @@ export function TaskList({ items, highlight = 0 }: { items: TaskItem[]; highligh
     <div className="flex h-full flex-col">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-[16px] text-muted-foreground">Plan progress</p>
+          <p className="text-[1rem] text-muted-foreground">Plan progress</p>
           <p className="mt-1.5 text-[4rem] leading-none font-light tracking-[-0.06em] tabular-nums">
             {Math.round(overall)}
-            <span className="ml-1 text-[22px] tracking-normal text-muted-foreground">%</span>
+            <span className="ml-1 text-[1.375rem] tracking-normal text-muted-foreground">%</span>
           </p>
         </div>
-        <p className="pb-2 text-[15px] text-muted-foreground tabular-nums">
+        <p className="pb-2 text-[0.9375rem] text-muted-foreground tabular-nums">
           {doneCount} of {items.length} complete
         </p>
       </div>
@@ -484,13 +642,13 @@ export function TaskList({ items, highlight = 0 }: { items: TaskItem[]; highligh
               >
                 <StepRing value={t.progress} color={STEP_COLORS[i % STEP_COLORS.length]} size={48} />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[17px] leading-snug font-medium tracking-[-0.01em]">{t.title}</span>
-                  <span className="mt-0.5 flex items-center gap-2 text-[14.5px] text-muted-foreground">
-                    {next && <span className="shrink-0 rounded-full bg-lime px-2.5 py-0.5 text-[12px] font-medium text-(--on-lime)">Up next</span>}
+                  <span className="block truncate text-[1.0625rem] leading-snug font-medium tracking-[-0.01em]">{t.title}</span>
+                  <span className="mt-0.5 flex items-center gap-2 text-[0.9063rem] text-muted-foreground">
+                    {next && <span className="shrink-0 rounded-full bg-lime px-2.5 py-0.5 text-[0.75rem] font-medium text-(--on-lime)">Up next</span>}
                     <span className="truncate">{done ? "All done" : t.description}</span>
                   </span>
                 </span>
-                <ArrowRightUpIcon className="size-[18px] shrink-0 text-muted-foreground transition-[transform,color] duration-200 group-hover/step:translate-x-0.5 group-hover/step:-translate-y-0.5 group-hover/step:text-foreground" />
+                <ArrowRightUpIcon className="size-[1.125rem] shrink-0 text-muted-foreground transition-[transform,color] duration-200 group-hover/step:translate-x-0.5 group-hover/step:-translate-y-0.5 group-hover/step:text-foreground" />
               </Link>
             </li>
           )
@@ -515,12 +673,12 @@ export function FrostStat({
   className?: string
 }) {
   return (
-    <div className={cn("frost rounded-[24px] p-5", className)}>
-      <p className="text-[17px] font-medium text-muted-foreground">{label}</p>
+    <div className={cn("frost rounded-[1.5rem] p-5", className)}>
+      <p className="text-[1.0625rem] font-medium text-muted-foreground">{label}</p>
       {value !== undefined && (
         <p className="mt-3 text-[3.25rem] leading-none font-light tracking-[-0.05em] tabular-nums">{value}</p>
       )}
-      {caption && <p className="mt-2.5 text-[15.5px] text-muted-foreground">{caption}</p>}
+      {caption && <p className="mt-2.5 text-[0.9688rem] text-muted-foreground">{caption}</p>}
       {children}
     </div>
   )
@@ -545,11 +703,11 @@ export function Field({
     <div className={cn("space-y-2.5", className)}>
       {action ? (
         <div className="flex items-baseline justify-between gap-3">
-          <label className="block pl-1 text-[15px] font-medium text-foreground/75">{label}</label>
+          <label className="block pl-1 text-[0.9375rem] font-medium text-foreground/75">{label}</label>
           {action}
         </div>
       ) : (
-        <label className="block pl-1 text-[15px] font-medium text-foreground/75">{label}</label>
+        <label className="block pl-1 text-[0.9375rem] font-medium text-foreground/75">{label}</label>
       )}
       {children}
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
@@ -572,13 +730,13 @@ export function GreetingHeader({
   return (
     <div className="rise flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
       <div className="min-w-0">
-        <h1 className="text-[clamp(2.5rem,4.4vw,3.75rem)] leading-[1.05] font-light tracking-[-0.045em]">
+        <h1 className="text-[clamp(2rem,3.4vw,3.125rem)] leading-[1.05] font-light tracking-[-0.045em]">
           Welcome back, <span className="font-medium">{name}</span>
         </h1>
         {(subtitle || demo) && (
-          <p className="mt-3 text-[18px] text-muted-foreground">
+          <p className="mt-2 text-[1rem] text-muted-foreground">
             {subtitle}
-            {demo && <span className="ml-2 text-[13px] opacity-60">· Showing sample data</span>}
+            {demo && <span className="ml-2 text-[0.8125rem] opacity-60">· Showing sample data</span>}
           </p>
         )}
       </div>
@@ -602,16 +760,17 @@ export function PageHeader({
   actions?: React.ReactNode
 }) {
   return (
-    <div className="rise flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+    <div className="rise -mt-3 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 sm:-mt-5">
       <div>
         <div className="flex items-center gap-3">
-          <h1 className="text-[clamp(2.5rem,4.4vw,3.5rem)]">{title}</h1>
+          {/* the title melts into the page: full ink at the top, fading toward the background */}
+          <h1 className="bg-[linear-gradient(180deg,var(--foreground)_25%,color-mix(in_oklab,var(--foreground)_30%,var(--background))_100%)] bg-clip-text pb-1 text-[clamp(2rem,3.2vw,2.875rem)] text-transparent">{title}</h1>
           {badge}
         </div>
         {(subtitle || demo) && (
-          <p className="mt-3 text-[18px] text-muted-foreground">
+          <p className="mt-1 text-[1rem] text-muted-foreground/85">
             {subtitle}
-            {demo && <span className="ml-2 text-[13px] opacity-60">· Showing sample data</span>}
+            {demo && <span className="ml-2 text-[0.8125rem] opacity-60">· Showing sample data</span>}
           </p>
         )}
       </div>
@@ -626,12 +785,12 @@ export function DashboardSkeleton() {
       <Skeleton className="h-12 w-72 rounded-2xl" />
       <div className="grid gap-5 sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-44 rounded-[32px]" />
+          <Skeleton key={i} className="h-44 rounded-[2rem]" />
         ))}
       </div>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <Skeleton className="h-80 rounded-[32px]" />
-        <Skeleton className="h-80 rounded-[32px]" />
+        <Skeleton className="h-80 rounded-[2rem]" />
+        <Skeleton className="h-80 rounded-[2rem]" />
       </div>
     </div>
   )
@@ -659,14 +818,14 @@ export function HeroCard({
   className?: string
 }) {
   return (
-    <div className={cn("rise tone-lime tint dbl flex min-h-[23rem] flex-col rounded-[32px] border p-7 [--r:32px]", className)}>
+    <div className={cn("rise tone-lime tint dbl flex min-h-[23rem] flex-col rounded-[2rem] border p-7 [--r:32px]", className)}>
       <div className="flex items-center gap-3">
         <OrgAvatar name={name} className="size-12" />
         <div className="leading-tight">
-          <p className="text-[22px] font-medium tracking-[-0.01em]">{name}</p>
-          <p className="mt-0.5 text-[16px] text-muted-foreground">{role}</p>
+          <p className="text-[1.375rem] font-medium tracking-[-0.01em]">{name}</p>
+          <p className="mt-0.5 text-[1rem] text-muted-foreground">{role}</p>
         </div>
-        <p className="ml-auto text-right text-[15px] leading-tight text-muted-foreground">
+        <p className="ml-auto text-right text-[0.9375rem] leading-tight text-muted-foreground">
           {kicker}
           <span className="mt-0.5 block text-[2.25rem] font-light tracking-tight text-foreground tabular-nums">{value}</span>
         </p>
@@ -689,7 +848,7 @@ export function HeroCard({
 }
 
 const PC_BTN =
-  "flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-white text-[15.5px] font-medium text-[oklch(0.3_0.1_280)] shadow-[0_8px_20px_-10px_oklch(0.2_0.06_280/0.6)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
+  "flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-white text-[0.9688rem] font-medium text-[oklch(0.3_0.1_280)] shadow-[0_8px_20px_-10px_oklch(0.2_0.06_280/0.6)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
 
 /** Stacked, masked backdrop-blur layers: blur ramps up smoothly from nothing to heavy. */
 function ProgressiveBlur({ className }: { className?: string }) {
@@ -757,7 +916,7 @@ export function ProfileCard({
   return (
     <div
       className={cn(
-        "rise pc-theme group/pc relative isolate flex min-h-[23rem] flex-col overflow-hidden rounded-[32px] text-white shadow-[0_1px_2px_oklch(0.2_0.04_280/0.08),0_24px_44px_-24px_oklch(0.3_0.12_280/0.5)]",
+        "rise pc-theme group/pc relative isolate flex min-h-[23rem] flex-col overflow-hidden rounded-[2rem] text-white shadow-[0_1px_2px_oklch(0.2_0.04_280/0.08),0_24px_44px_-24px_oklch(0.3_0.12_280/0.5)]",
         className
       )}
       style={{ ...style, background: "linear-gradient(165deg, var(--pc-1) 0%, var(--pc-2) 55%, var(--pc-3) 100%)" }}
@@ -770,7 +929,7 @@ export function ProfileCard({
       ) : (
         <>
           {/* soft fading bars, like a quiet equaliser */}
-          <div aria-hidden className="photo-in absolute inset-x-0 bottom-0 -z-10 flex h-3/5 items-end justify-between gap-[5px] px-5 opacity-60">
+          <div aria-hidden className="photo-in absolute inset-x-0 bottom-0 -z-10 flex h-3/5 items-end justify-between gap-[0.3125rem] px-5 opacity-60">
             {Array.from({ length: 22 }, (_, i) => (
               <span key={i} className="w-full rounded-t-full bg-gradient-to-t from-white/35 to-white/0" style={{ height: `${28 + ((i * 37) % 62)}%` }} />
             ))}
@@ -783,11 +942,11 @@ export function ProfileCard({
       {/* progressive blur: the picture melts into focus-less glass toward the bottom */}
       <ProgressiveBlur className="absolute inset-x-0 bottom-0 -z-10 h-[42%]" />
       <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-[38%] bg-gradient-to-t from-(--pc-deep) to-transparent" />
-      <span aria-hidden className="absolute inset-0 -z-10 rounded-[32px] shadow-[inset_0_1px_0_oklch(1_0_0/0.35),inset_0_0_0_1px_oklch(1_0_0/0.14)]" />
+      <span aria-hidden className="absolute inset-0 -z-10 rounded-[2rem] shadow-[inset_0_1px_0_oklch(1_0_0/0.35),inset_0_0_0_1px_oklch(1_0_0/0.14)]" />
 
       <div className="rise px-6 pt-7 text-center" style={{ "--i": 4 } as React.CSSProperties}>
-        <p className="text-[26px] leading-tight font-medium tracking-[-0.02em] [text-shadow:0_1px_14px_oklch(0.25_0.08_280/0.45)]">{name}</p>
-        <p className="mt-2 inline-flex items-center gap-2 text-[15px] text-white/85">
+        <p className="text-[1.625rem] leading-tight font-medium tracking-[-0.02em] [text-shadow:0_1px_14px_oklch(0.25_0.08_280/0.45)]">{name}</p>
+        <p className="mt-2 inline-flex items-center gap-2 text-[0.9375rem] text-white/85">
           <span className="relative flex size-2.5">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-white/70" />
             <span className="relative inline-flex size-2.5 rounded-full bg-white" />
@@ -819,12 +978,12 @@ export function ProfileCard({
 
       <div className="rise mt-auto space-y-3.5 p-4" style={{ "--i": 6 } as React.CSSProperties}>
         <div className="flex items-center gap-3 px-1">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/25 text-[14px] font-semibold ring-1 ring-white/40 backdrop-blur">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/25 text-[0.875rem] font-semibold ring-1 ring-white/40 backdrop-blur">
             {initials}
           </span>
           <span className="min-w-0 flex-1 leading-tight">
-            <span className="block truncate text-[15.5px] font-medium">{handle}</span>
-            <span className="mt-0.5 block text-[13.5px] text-white/75">{roleLabel ?? (action === "View profile" ? "Student" : "Recruiter")}</span>
+            <span className="block truncate text-[0.9688rem] font-medium">{handle}</span>
+            <span className="mt-0.5 block text-[0.8438rem] text-white/75">{roleLabel ?? (action === "View profile" ? "Student" : "Recruiter")}</span>
           </span>
         </div>
         {onAction ? (
@@ -862,9 +1021,9 @@ function SlideCta({ href, label }: { href: string; label: string }) {
       className="group/cta relative block h-14 min-w-0 flex-1 overflow-hidden rounded-full border border-(--hairline) bg-card outline-none [container-type:inline-size] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.985]"
     >
       <span className="cta-chip absolute top-1.5 bottom-1.5 left-1.5 z-10 flex w-11 items-center justify-center rounded-full bg-secondary text-foreground">
-        <ArrowRightIcon className="size-[18px]" />
+        <ArrowRightIcon className="size-[1.125rem]" />
       </span>
-      <span className="cta-label absolute inset-y-0 right-5 left-16 flex items-center truncate text-[17px] font-medium">{label}</span>
+      <span className="cta-label absolute inset-y-0 right-5 left-16 flex items-center truncate text-[1.0625rem] font-medium">{label}</span>
     </a>
   )
 }
@@ -885,15 +1044,15 @@ export function QuickTile({
     <Link
       href={href}
       className={cn(
-        `tone-${tone} tint dbl lift flex min-h-[7.5rem] flex-col justify-between rounded-[26px] border p-5 transition-transform duration-150 active:scale-[0.97] [--r:26px]`
+        `tone-${tone} tint dbl lift flex min-h-[7.5rem] flex-col justify-between rounded-[1.625rem] border p-5 transition-transform duration-150 active:scale-[0.97] [--r:26px]`
       )}
     >
       <span className="flex size-9 items-center justify-center self-end rounded-full bg-card text-foreground">
-        <ArrowRightUpIcon className="size-[18px]" />
+        <ArrowRightUpIcon className="size-[1.125rem]" />
       </span>
       <span>
-        <span className="block text-[18px] font-medium">{label}</span>
-        <span className="mt-0.5 block text-[14.5px] leading-snug text-muted-foreground">{hint}</span>
+        <span className="block text-[1.125rem] font-medium">{label}</span>
+        <span className="mt-0.5 block text-[0.9063rem] leading-snug text-muted-foreground">{hint}</span>
       </span>
     </Link>
   )

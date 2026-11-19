@@ -447,12 +447,12 @@ export function BridgeWelcome({ bridge }: { bridge: Bridge }) {
         <div aria-hidden className="absolute inset-[-18%] rounded-full bg-[radial-gradient(closest-side,oklch(0.75_0.12_295/0.35),transparent)] blur-xl dark:bg-[radial-gradient(closest-side,oklch(0.55_0.2_295/0.45),transparent)]" />
         <AssistantOrb mood={mood} className="relative w-[10rem]" />
       </div>
-      <h2 className="mt-3 animate-in text-[28px] leading-[1.05] font-medium tracking-[-0.035em] duration-500 fill-mode-both fade-in-0 slide-in-from-bottom-2">
+      <h2 className="mt-3 animate-in text-[1.75rem] leading-[1.05] font-medium tracking-[-0.035em] duration-500 fill-mode-both fade-in-0 slide-in-from-bottom-2">
         {firstName ? `Hey ${firstName},` : "Hi, I'm Bridge."}
         <br />
         <span className="font-display tracking-[-0.01em] text-[oklch(0.5_0.17_285)] italic dark:text-[oklch(0.8_0.11_292)]">how can I help today?</span>
       </h2>
-      <p className="mt-3 max-w-[17rem] animate-in text-[14px] leading-relaxed text-muted-foreground delay-150 duration-500 fill-mode-both fade-in-0">
+      <p className="mt-3 max-w-[17rem] animate-in text-[0.875rem] leading-relaxed text-muted-foreground delay-150 duration-500 fill-mode-both fade-in-0">
         Ask about internships, your skills, your profile or interviews — by typing or by voice.
       </p>
     </div>
@@ -475,7 +475,7 @@ function StillOrb({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "block size-[22px] rounded-full",
+        "block size-[1.375rem] rounded-full",
         "bg-[radial-gradient(circle_at_34%_28%,#fff_0%,#f3edff_14%,transparent_32%),radial-gradient(circle_at_50%_62%,#c084fc_0%,#8b5cf6_34%,#6366f1_62%,#3730a3_100%)]",
         "shadow-[inset_0_-2px_4px_rgba(49,24,120,0.45),inset_0_1px_1px_rgba(255,255,255,0.7),0_0_0_1px_rgba(99,70,200,0.18),0_3px_8px_-3px_rgba(110,60,230,0.55)]",
         className
@@ -500,7 +500,7 @@ function Message({ m, live, onRetry }: { m: ChatMsg; live?: AssistantMood; onRet
   if (m.role === "user") {
     return (
       <div data-mid={m.id} className="flex animate-in justify-end duration-200 fade-in-0 slide-in-from-bottom-1">
-        <p className="glass-card tint tone-violet max-w-[85%] rounded-[var(--r)] px-4 py-3 text-[15px] leading-relaxed whitespace-pre-wrap text-(--t-fg) [--r:22px]">
+        <p className="glass-card tint tone-violet max-w-[85%] rounded-[var(--r)] px-4 py-3 text-[0.9375rem] leading-relaxed whitespace-pre-wrap text-(--t-fg) [--r:22px]">
           {m.content}
         </p>
       </div>
@@ -510,15 +510,15 @@ function Message({ m, live, onRetry }: { m: ChatMsg; live?: AssistantMood; onRet
     <div className="animate-in duration-200 fade-in-0">
       {/* the signature: a live orb while Bridge thinks, which settles into a still one; the name in the site's serif */}
       <div className="mb-2 flex h-7 items-center gap-2.5">
-        <span aria-hidden className="relative grid size-[22px] shrink-0 place-items-center">
+        <span aria-hidden className="relative grid size-[1.375rem] shrink-0 place-items-center">
           <StillOrb className={cn("absolute inset-0 transition-[opacity,transform] duration-300 ease-[var(--ease-out)]", live ? "scale-75 opacity-0" : "scale-100 opacity-100")} />
           {live && <AssistantOrb mood={live} className="absolute w-9 animate-in duration-200 fade-in-0 zoom-in-75" />}
         </span>
-        <span className="font-display bg-[linear-gradient(100deg,oklch(0.45_0.2_285),oklch(0.55_0.21_315))] bg-clip-text pr-0.5 text-[18px] leading-none tracking-[-0.01em] text-transparent italic dark:bg-[linear-gradient(100deg,oklch(0.85_0.1_290),oklch(0.82_0.12_330))]">
+        <span className="font-display bg-[linear-gradient(100deg,oklch(0.45_0.2_285),oklch(0.55_0.21_315))] bg-clip-text pr-0.5 text-[1.125rem] leading-none tracking-[-0.01em] text-transparent italic dark:bg-[linear-gradient(100deg,oklch(0.85_0.1_290),oklch(0.82_0.12_330))]">
           Bridge
         </span>
         {m.thoughtMs !== undefined && m.thoughtMs >= 100 && !live && !m.error && (
-          <span className="animate-in text-[12px] text-muted-foreground/80 tabular-nums duration-300 fade-in-0">
+          <span className="animate-in text-[0.75rem] text-muted-foreground/80 tabular-nums duration-300 fade-in-0">
             · thought for {(m.thoughtMs / 1000).toFixed(1)}s
           </span>
         )}
@@ -527,7 +527,7 @@ function Message({ m, live, onRetry }: { m: ChatMsg; live?: AssistantMood; onRet
         // the whole answer failed: a calm card that explains, with Try again
         <ErrorCard kind={m.errorKind ?? "generic"} message={m.content || undefined} onRetry={onRetry} />
       ) : (
-        <div className="text-[15px] leading-relaxed text-foreground/85">
+        <div className="text-[0.9375rem] leading-relaxed text-foreground/85">
           {m.content ? <Markdown text={m.content} /> : <Thinking />}
           {/* part of the answer arrived, then it was cut off or stopped */}
           {m.content && (m.partial || m.stopped) && <CutShortNote kind={m.stopped ? "stopped" : (m.errorKind ?? "generic")} onRetry={onRetry} />}
@@ -576,7 +576,7 @@ export function BridgeThread({ bridge, className, topInset = 0 }: { bridge: Brid
   }, [messages, lastUser, topInset])
 
   return (
-    <div ref={box} className={cn("overflow-y-auto overscroll-contain [scrollbar-width:thin]", className)} style={{ paddingTop: topInset }}>
+    <div ref={box} className={cn("overflow-y-auto overscroll-contain", className)} style={{ paddingTop: topInset }}>
       <div ref={list} className="space-y-7" role="log" aria-live="polite">
         {messages.map((m, i) => (
           <Message key={m.id} m={m} live={live && i === messages.length - 1 ? bridge.mood : undefined} onRetry={m.role === "assistant" && !m.local && i === messages.length - 1 ? () => bridge.chat.retry(m.id) : undefined} />
@@ -677,21 +677,21 @@ export function BridgeComposer({ bridge, compact, autoFocus }: { bridge: Bridge;
                 ask(c.name)
                 setText("")
               }}
-              className="flex w-full items-center gap-3 rounded-[12px] bg-foreground/[0.04] px-3 py-2 text-left transition-colors hover:bg-foreground/[0.07]"
+              className="flex w-full items-center gap-3 rounded-[0.75rem] bg-foreground/[0.04] px-3 py-2 text-left transition-colors hover:bg-foreground/[0.07]"
             >
-              <span className="font-mono text-[13px] font-semibold text-[oklch(0.5_0.17_285)] dark:text-[oklch(0.8_0.11_292)]">{c.name}</span>
-              <span className="text-[13px] text-muted-foreground">{c.hint}</span>
-              <span className="ml-auto text-[11px] text-muted-foreground/70">Enter ↵</span>
+              <span className="font-mono text-[0.8125rem] font-semibold text-[oklch(0.5_0.17_285)] dark:text-[oklch(0.8_0.11_292)]">{c.name}</span>
+              <span className="text-[0.8125rem] text-muted-foreground">{c.hint}</span>
+              <span className="ml-auto text-[0.6875rem] text-muted-foreground/70">Enter ↵</span>
             </button>
           ))}
         </div>
       ) : (
-        <p className="mb-2 px-3 text-[12px] text-muted-foreground">
+        <p className="mb-2 px-3 text-[0.75rem] text-muted-foreground">
           Type{" "}
           <button
             type="button"
             onClick={() => ask("/help")}
-            className="rounded-md bg-foreground/[0.06] px-1.5 py-0.5 font-mono text-[11.5px] font-semibold text-foreground/80 transition-colors hover:bg-foreground/10"
+            className="rounded-md bg-foreground/[0.06] px-1.5 py-0.5 font-mono text-[0.7188rem] font-semibold text-foreground/80 transition-colors hover:bg-foreground/10"
           >
             /help
           </button>{" "}
@@ -723,11 +723,11 @@ export function BridgeComposer({ bridge, compact, autoFocus }: { bridge: Bridge;
             }
           }}
           aria-label={micOpen ? "Listening" : "Message Bridge"}
-          className="relative z-[1] block min-h-10 w-full resize-none bg-transparent py-2.5 text-[15px] leading-snug text-foreground outline-none"
+          className="relative z-[1] block min-h-10 w-full resize-none bg-transparent py-2.5 text-[0.9375rem] leading-snug text-foreground outline-none"
         />
         {/* placeholder that crossfades between "Ask Bridge anything…" and "Listening…" instead of swapping */}
         {!(input.listening ? input.interim : text) && (
-          <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 grid items-center text-[15px] text-muted-foreground/70">
+          <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 grid items-center text-[0.9375rem] text-muted-foreground/70">
             <span
               className="[grid-area:1/1] whitespace-nowrap transition-[opacity,filter,transform] duration-300 ease-[var(--ease-out)]"
               style={{ opacity: micOpen ? 0 : 1, filter: micOpen ? "blur(3px)" : "none", transform: micOpen ? "translateY(-3px)" : "none" }}
@@ -779,7 +779,7 @@ export function BridgeComposer({ bridge, compact, autoFocus }: { bridge: Bridge;
                 <span className="absolute top-0 size-10 rounded-full" style={{ right: PILL_REACH, background: pill.bg, opacity: closing ? 0 : 1 }} />
                 <span className="absolute top-0 right-0 size-10 rounded-full" style={{ background: pill.bg, opacity: closing ? 1 : 0 }} />
                 <span
-                  className="absolute size-[34px] rounded-full"
+                  className="absolute size-[2.125rem] rounded-full"
                   style={{
                     top: 3,
                     right: PILL_REACH + 3,
@@ -803,7 +803,7 @@ export function BridgeComposer({ bridge, compact, autoFocus }: { bridge: Bridge;
                 aria-label="Cancel recording"
                 tabIndex={micOpen ? 0 : -1}
                 aria-hidden={!micOpen}
-                className="absolute z-[2] flex size-[34px] items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 active:scale-90"
+                className="absolute z-[2] flex size-[2.125rem] items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 active:scale-90"
                 style={{
                   top: 3,
                   right: PILL_REACH + 3 + CANCEL_SLOT - 6,
@@ -867,7 +867,7 @@ export function BridgeComposer({ bridge, compact, autoFocus }: { bridge: Bridge;
         )}
         {busy ? (
           <button type="button" onClick={stopAll} aria-label="Stop" className={cn(ROUND, "bg-primary text-primary-foreground")}>
-            <StopIcon className="size-[17px]" />
+            <StopIcon className="size-[1.0625rem]" />
           </button>
         ) : (
           <button
@@ -881,11 +881,11 @@ export function BridgeComposer({ bridge, compact, autoFocus }: { bridge: Bridge;
               "bg-primary text-primary-foreground shadow-[inset_0_0_0_2px_var(--primary),inset_0_0_0_3px_color-mix(in_oklab,var(--primary-foreground)_22%,transparent)] disabled:opacity-30"
             )}
           >
-            <ArrowUpIcon className="size-[18px]" />
+            <ArrowUpIcon className="size-[1.125rem]" />
           </button>
         )}
       </div>
-      <div className={cn("mt-2 flex items-center justify-between gap-3 px-2 text-[11.5px] text-muted-foreground/80", compact && "mt-1.5")}>
+      <div className={cn("mt-2 flex items-center justify-between gap-3 px-2 text-[0.7188rem] text-muted-foreground/80", compact && "mt-1.5")}>
         <span className="truncate">{compact ? "Bridge can make mistakes." : "Bridge can make mistakes — double-check important details."}</span>
         <span className="relative ml-auto">
           <button

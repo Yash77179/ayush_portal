@@ -13,7 +13,7 @@ import { useSidebar } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 const ICON_BTN =
-  "glass-nav relative flex size-11 shrink-0 items-center justify-center rounded-full text-foreground/85 outline-none transition-[transform,color] duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:scale-90 [&_svg]:size-[18px]"
+  "glass-nav relative flex size-11 shrink-0 items-center justify-center rounded-full text-foreground/85 outline-none transition-[transform,color] duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:scale-90 [&_svg]:size-[1.125rem]"
 
 function Hint({ label, children }: { label: string; children: React.ReactElement }) {
   return (
@@ -85,7 +85,7 @@ export function AppHeader() {
         </Link>
       </Hint>
 
-      <h2 className="ml-3 truncate text-[17px] leading-6 font-medium lg:hidden">{title}</h2>
+      <h2 className="ml-3 truncate text-[1.0625rem] leading-6 font-medium lg:hidden">{title}</h2>
 
       <nav
         ref={navRef}
@@ -113,12 +113,12 @@ export function AppHeader() {
               aria-label={l.label}
               title={crowded && !active ? l.label : undefined}
               className={cn(
-                "group/tab relative z-10 flex shrink-0 items-center gap-2 rounded-full py-2.5 text-[15.5px] font-medium transition-[color,transform] duration-300 ease-(--ease-out) active:scale-[0.96]",
+                "group/tab relative z-10 flex shrink-0 items-center gap-2 rounded-full py-2.5 text-[0.9688rem] font-medium transition-[color,transform] duration-300 ease-(--ease-out) active:scale-[0.96]",
                 crowded && !active ? "px-3.5 2xl:px-5" : "px-5",
                 active ? "text-(--on-lime)" : "text-foreground/55 hover:text-foreground"
               )}
             >
-              <Icon className="size-[18px] transition-transform duration-300 ease-(--ease-out) group-hover/tab:-translate-y-px group-hover/tab:scale-110" />
+              <Icon className="size-[1.125rem] transition-transform duration-300 ease-(--ease-out) group-hover/tab:-translate-y-px group-hover/tab:scale-110" />
               {/* with many sections, inactive tabs show only their icon until the screen is wide enough */}
               <span className={cn(crowded && !active && "hidden 2xl:inline")}>{l.label}</span>
             </Link>

@@ -307,7 +307,7 @@ function RegisterForm() {
                 disabled={loading}
                 invalid={otpError}
               />
-              <p className="text-center text-[14px] text-muted-foreground">
+              <p className="text-center text-[0.875rem] text-muted-foreground">
                 {resendIn > 0 ? (
                   <>Didn&apos;t get it? You can ask again in <span className="tabular-nums">{Math.floor(resendIn / 60)}:{String(resendIn % 60).padStart(2, "0")}</span></>
                 ) : (
@@ -334,7 +334,7 @@ function RegisterForm() {
             </defs>
           </svg>
           <div ref={goo} aria-hidden className="pointer-events-none invisible absolute inset-0" style={{ filter: "url(#auth-goo)" }}>
-            <div ref={gooMain} className="absolute inset-y-0 right-0 left-0 rounded-[14px] bg-primary" />
+            <div ref={gooMain} className="absolute inset-y-0 right-0 left-0 rounded-[0.875rem] bg-primary" />
             <div ref={gooBack} className="absolute top-0 left-0 size-14 rounded-full bg-primary" />
           </div>
 

@@ -120,7 +120,7 @@ function Pipeline() {
         title="Pipeline"
         subtitle={canManage ? "Drag candidates between stages. Every move is logged and the candidate is kept informed." : "You have interviewer access: you can open candidates, rate them and file scorecards."}
         actions={
-          <Link href="/dashboard/company/applicants" className="text-[15px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+          <Link href="/dashboard/company/applicants" className="text-[0.9375rem] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
             Table view
           </Link>
         }
@@ -145,7 +145,7 @@ function Pipeline() {
           <SearchIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, college, tag" className="pl-10" />
         </div>
-        <span className="text-[15px] text-muted-foreground tabular-nums xl:col-span-2 xl:text-right">{visible.length} candidates</span>
+        <span className="text-[0.9375rem] text-muted-foreground tabular-nums xl:col-span-2 xl:text-right">{visible.length} candidates</span>
       </div>
 
       <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
@@ -180,20 +180,20 @@ function Column({ stage, cards, disabled }: { stage: string; cards: ApplicantCar
       ref={setNodeRef}
       aria-label={STAGE_LABEL[stage]}
       className={cn(
-        "flex w-[17.5rem] shrink-0 flex-col rounded-[26px] border border-(--hairline) bg-secondary/50 p-2.5 transition-colors duration-150",
+        "flex w-[17.5rem] shrink-0 flex-col rounded-[1.625rem] border border-(--hairline) bg-secondary/50 p-2.5 transition-colors duration-150",
         isOver && "border-foreground/30 bg-secondary"
       )}
     >
       <header className="flex items-center gap-2 px-2.5 pt-1.5 pb-3">
         <span className={cn("size-2 rounded-full", STATUS_DOT[stage])} />
-        <h2 className="text-[15px] font-medium">{STAGE_LABEL[stage]}</h2>
-        <span className="ml-auto rounded-full bg-card px-2 py-0.5 text-[13.5px] text-muted-foreground tabular-nums">{cards.length}</span>
+        <h2 className="text-[0.9375rem] font-medium">{STAGE_LABEL[stage]}</h2>
+        <span className="ml-auto rounded-full bg-card px-2 py-0.5 text-[0.8438rem] text-muted-foreground tabular-nums">{cards.length}</span>
       </header>
-      <div className="-mr-1 flex max-h-[calc(100svh-17rem)] min-h-40 flex-col gap-2 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">
+      <div className="-mr-1 flex max-h-[calc(100svh-17rem)] min-h-40 flex-col gap-2 overflow-y-auto overscroll-contain pr-1">
         {cards.map((c) => (
           <DraggableCard key={c.id} card={c} disabled={disabled} />
         ))}
-        {cards.length === 0 && <p className="px-3 py-8 text-center text-[14.5px] text-muted-foreground">Drop candidates here</p>}
+        {cards.length === 0 && <p className="px-3 py-8 text-center text-[0.9063rem] text-muted-foreground">Drop candidates here</p>}
       </div>
     </section>
   );
@@ -213,19 +213,19 @@ function Card({ card, overlay }: { card: ApplicantCard; overlay?: boolean }) {
   const body = (
     <div
       className={cn(
-        "rounded-[20px] border border-(--hairline) bg-card p-3.5 text-left transition-shadow",
+        "rounded-[1.25rem] border border-(--hairline) bg-card p-3.5 text-left transition-shadow",
         overlay ? "rotate-[1.5deg] shadow-xl" : "hover:shadow-md"
       )}
     >
       <div className="flex items-start gap-3">
         <OrgAvatar name={s.user_name} className="size-9" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[15px] font-medium">{s.user_name}</p>
-          <p className="truncate text-[13.5px] text-muted-foreground">{s.university?.name || s.user_email}</p>
+          <p className="truncate text-[0.9375rem] font-medium">{s.user_name}</p>
+          <p className="truncate text-[0.8438rem] text-muted-foreground">{s.university?.name || s.user_email}</p>
         </div>
         {!card.viewed_at && <span title="Not opened yet" className="mt-1.5 size-2 shrink-0 rounded-full bg-sky-500" />}
       </div>
-      <p className="mt-2.5 truncate text-[13.5px] text-muted-foreground">{card.internship.title}</p>
+      <p className="mt-2.5 truncate text-[0.8438rem] text-muted-foreground">{card.internship.title}</p>
       <div className="mt-2.5 flex flex-wrap items-center gap-2">
         <MatchPill score={card.match_score} />
         {card.avg_rating !== null && <StarRating value={card.avg_rating} size="sm" readOnly />}
@@ -234,26 +234,26 @@ function Card({ card, overlay }: { card: ApplicantCard; overlay?: boolean }) {
       {card.tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {card.tags.slice(0, 3).map((t) => (
-            <span key={t} className="rounded-full bg-secondary px-2 py-0.5 text-[12.5px]">
+            <span key={t} className="rounded-full bg-secondary px-2 py-0.5 text-[0.7813rem]">
               {t}
             </span>
           ))}
         </div>
       )}
       {card.next_interview && (
-        <p className="mt-2.5 flex items-center gap-1.5 text-[13.5px] text-muted-foreground">
+        <p className="mt-2.5 flex items-center gap-1.5 text-[0.8438rem] text-muted-foreground">
           <CalendarIcon className="size-3.5" /> {fmtDateTime(card.next_interview.scheduled_at)}
           {card.next_interview.candidate_response === "confirmed" && <span className="text-(--mint-fg)">· confirmed</span>}
           {card.next_interview.candidate_response === "reschedule" && <span className="text-(--pink-fg)">· reschedule?</span>}
         </p>
       )}
-      {card.offer_status && <p className="mt-2 text-[13.5px] font-medium capitalize text-muted-foreground">Offer {card.offer_status}</p>}
-      <p className="mt-2 text-[12.5px] text-muted-foreground/80">{card.source === "drive" ? "Campus drive · " : ""}Applied {timeAgo(card.applied_at)}</p>
+      {card.offer_status && <p className="mt-2 text-[0.8438rem] font-medium capitalize text-muted-foreground">Offer {card.offer_status}</p>}
+      <p className="mt-2 text-[0.7813rem] text-muted-foreground/80">{card.source === "drive" ? "Campus drive · " : ""}Applied {timeAgo(card.applied_at)}</p>
     </div>
   );
   if (overlay) return body;
   return (
-    <Link href={`/dashboard/company/applicants/${card.id}`} className="block rounded-[20px] outline-none focus-visible:ring-2 focus-visible:ring-ring" draggable={false}>
+    <Link href={`/dashboard/company/applicants/${card.id}`} className="block rounded-[1.25rem] outline-none focus-visible:ring-2 focus-visible:ring-ring" draggable={false}>
       {body}
     </Link>
   );
