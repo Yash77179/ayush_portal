@@ -254,7 +254,7 @@ export function SiteFooter() {
         </div>
 
         <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
-          <div className="pointer-events-auto space-y-1 text-[13px] text-[oklch(0.94_0.02_85/0.7)]">
+          <div className="pointer-events-auto space-y-1 text-[0.8125rem] text-[oklch(0.94_0.02_85/0.7)]">
             <p>Copyright © CareerBridge 2026</p>
             <p className="text-[oklch(0.94_0.02_85/0.45)]">Built with Django &amp; Next.js</p>
           </div>

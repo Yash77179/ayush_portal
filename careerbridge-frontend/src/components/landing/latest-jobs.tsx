@@ -90,16 +90,16 @@ function JobCard({ j, i }: { j: ShowcaseJob; i: number }) {
         style={{ color: INK }}
         onPointerMove={move}
         onPointerLeave={leave}
-        className="group/job relative flex w-[min(17.5rem,78vw)] flex-col rounded-[26px] bg-white p-1.5 sm:h-[33rem] sm:w-[21rem] sm:rounded-[34px] sm:p-2text-[oklch(0.22_0.05_280)] shadow-[0_26px_44px_-30px_oklch(0.15_0.1_280/0.5),0_2px_5px_oklch(0.15_0.1_280/0.1)] transition-transform duration-300 ease-(--ease-out) will-change-transform outline-none [transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] focus-visible:ring-2 focus-visible:ring-white lg:w-[max(19.5rem,calc((100vw-2*clamp(1.5rem,4vw,4rem)-4.5rem)/4))]"
+        className="group/job relative flex w-[min(17.5rem,78vw)] flex-col rounded-[1.625rem] bg-white p-1.5 sm:h-[33rem] sm:w-[21rem] sm:rounded-[2.125rem] sm:p-2text-[oklch(0.22_0.05_280)] shadow-[0_26px_44px_-30px_oklch(0.15_0.1_280/0.5),0_2px_5px_oklch(0.15_0.1_280/0.1)] transition-transform duration-300 ease-(--ease-out) will-change-transform outline-none [transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] focus-visible:ring-2 focus-visible:ring-white lg:w-[max(19.5rem,calc((100vw-2*clamp(1.5rem,4vw,4rem)-4.5rem)/4))]"
       >
         {/* the plate */}
-        <div className="relative flex min-h-[13.5rem] flex-1 flex-col overflow-hidden rounded-[21px] p-4 sm:min-h-0 sm:rounded-[27px] sm:p-6" style={{ background: `linear-gradient(160deg, oklch(0.995 0.004 ${look.hue}), ${look.tint})` }}>
+        <div className="relative flex min-h-[13.5rem] flex-1 flex-col overflow-hidden rounded-[1.3125rem] p-4 sm:min-h-0 sm:rounded-[1.6875rem] sm:p-6" style={{ background: `linear-gradient(160deg, oklch(0.995 0.004 ${look.hue}), ${look.tint})` }}>
           <PlateArt kind={look.art} hue={look.hue} id={`jc-${i}`} />
-          <span aria-hidden className="pointer-events-none absolute inset-[7px] rounded-[21px] border border-[oklch(0.22_0.05_280/0.12)]" />
+          <span aria-hidden className="pointer-events-none absolute inset-[0.4375rem] rounded-[1.3125rem] border border-[oklch(0.22_0.05_280/0.12)]" />
 
           <div className="relative flex items-center justify-between">
             <span className="font-display text-[1.35rem] leading-none tracking-[0.06em] text-[oklch(0.22_0.05_280/0.55)] italic">{String(i + 1).padStart(2, "0")}</span>
-            <span className="rounded-full border border-[oklch(0.22_0.05_280/0.14)] bg-white/90 px-3.5 py-1.5 text-[12.5px] font-medium tracking-[0.02em] shadow-[0_6px_14px_-8px_oklch(0.2_0.06_280/0.35)]">{MODE_LABEL[j.work_mode] ?? j.work_mode}</span>
+            <span className="rounded-full border border-[oklch(0.22_0.05_280/0.14)] bg-white/90 px-3.5 py-1.5 text-[0.7813rem] font-medium tracking-[0.02em] shadow-[0_6px_14px_-8px_oklch(0.2_0.06_280/0.35)]">{MODE_LABEL[j.work_mode] ?? j.work_mode}</span>
           </div>
 
           <div className="relative mt-auto">
@@ -107,7 +107,7 @@ function JobCard({ j, i }: { j: ShowcaseJob; i: number }) {
               <span className="mr-1 align-top text-[1.5rem] not-italic sm:text-[2.1rem]">₹</span>
               {short(j.stipend)}
             </p>
-            <p className="mt-3.5 flex items-center gap-2.5 text-[12.5px] tracking-[0.16em] text-[oklch(0.22_0.05_280/0.62)] uppercase">
+            <p className="mt-3.5 flex items-center gap-2.5 text-[0.7813rem] tracking-[0.16em] text-[oklch(0.22_0.05_280/0.62)] uppercase">
               <span aria-hidden className="h-px w-5 bg-[oklch(0.22_0.05_280/0.4)]" />
               per month · {j.duration_months} months
             </p>
@@ -116,8 +116,8 @@ function JobCard({ j, i }: { j: ShowcaseJob; i: number }) {
 
         {/* the role */}
         <div className="px-3 pt-4 pb-2 sm:px-4 sm:pt-5 sm:pb-3">
-          <h3 className="text-[19px] leading-[1.15] sm:text-[24px] sm:leading-[1.1] font-medium tracking-[-0.03em] text-balance">{j.title}</h3>
-          <p className="mt-1.5 flex items-center gap-2 text-[15px] text-[oklch(0.22_0.05_280/0.6)]">
+          <h3 className="text-[1.1875rem] leading-[1.15] sm:text-[1.5rem] sm:leading-[1.1] font-medium tracking-[-0.03em] text-balance">{j.title}</h3>
+          <p className="mt-1.5 flex items-center gap-2 text-[0.9375rem] text-[oklch(0.22_0.05_280/0.6)]">
             <svg aria-hidden viewBox="0 0 16 16" className="size-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
               <path d="M8 14.5s4.6-4.1 4.6-7.7A4.6 4.6 0 0 0 3.4 6.8C3.4 10.4 8 14.5 8 14.5Z" />
               <circle cx="8" cy="6.8" r="1.6" />
@@ -126,10 +126,10 @@ function JobCard({ j, i }: { j: ShowcaseJob; i: number }) {
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            {j.openings > 0 && <span className="rounded-full border border-[oklch(0.22_0.05_280/0.14)] px-3 py-1 text-[12.5px] font-medium">{j.openings} {j.openings === 1 ? "opening" : "openings"}</span>}
-            <span className="rounded-full border border-[oklch(0.22_0.05_280/0.14)] px-3 py-1 text-[12.5px] font-medium">{j.skills} skills</span>
+            {j.openings > 0 && <span className="rounded-full border border-[oklch(0.22_0.05_280/0.14)] px-3 py-1 text-[0.7813rem] font-medium">{j.openings} {j.openings === 1 ? "opening" : "openings"}</span>}
+            <span className="rounded-full border border-[oklch(0.22_0.05_280/0.14)] px-3 py-1 text-[0.7813rem] font-medium">{j.skills} skills</span>
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12.5px] font-medium"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.7813rem] font-medium"
               style={{ background: urgent ? "oklch(0.95 0.06 60)" : "oklch(0.96 0.012 280)", color: urgent ? "oklch(0.42 0.12 50)" : INK }}
             >
               <span aria-hidden className={cn("size-1.5 rounded-full", urgent && "animate-pulse")} style={{ background: urgent ? "oklch(0.62 0.17 50)" : "oklch(0.65 0.12 160)" }} />
@@ -143,8 +143,8 @@ function JobCard({ j, i }: { j: ShowcaseJob; i: number }) {
               <img src={`/logos/${j.logo}.svg`} alt={`${j.company} logo`} className="size-[55%] object-contain" loading="lazy" />
             </span>
             <div className="min-w-0 flex-1 leading-tight">
-              <p className="text-[11px] tracking-[0.2em] text-[oklch(0.22_0.05_280/0.5)] uppercase">Hiring company</p>
-              <p className="mt-1 truncate text-[16.5px] font-medium">{j.company}</p>
+              <p className="text-[0.6875rem] tracking-[0.2em] text-[oklch(0.22_0.05_280/0.5)] uppercase">Hiring company</p>
+              <p className="mt-1 truncate text-[1.0313rem] font-medium">{j.company}</p>
             </div>
             <span className="flex size-10 shrink-0 items-center sm:size-12 justify-center rounded-full bg-[oklch(0.22_0.05_280)] text-white transition-transform duration-500 ease-(--ease-out) group-hover/job:-rotate-45">
               <ArrowRightIcon className="size-5" />
@@ -252,7 +252,7 @@ export function LatestJobs() {
         {list.map((j, i) => (
           <JobCard key={j.id} j={j} i={i} />
         ))}
-        {list.length === 0 && <li className="py-16 text-[17px] text-white/70">No roles in this category yet.</li>}
+        {list.length === 0 && <li className="py-16 text-[1.0625rem] text-white/70">No roles in this category yet.</li>}
       </ul>
     </div>
   )

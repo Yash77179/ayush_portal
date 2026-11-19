@@ -71,30 +71,30 @@ export function HistoryPanel({ bridge, onClose }: { bridge: Bridge; onClose: () 
 
   return (
     <div className="flex h-full flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4 [scrollbar-width:thin]">
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
         {!user ? (
           <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-            <p className="text-[15px] font-medium">Keep your chats</p>
-            <p className="mt-1.5 text-[13.5px] leading-relaxed text-muted-foreground">Sign in and Bridge saves every conversation here, so you can pick up where you left off.</p>
-            <Link href="/login" className="mt-4 rounded-full bg-primary px-4 py-2 text-[13.5px] font-semibold text-primary-foreground transition-transform active:scale-95">
+            <p className="text-[0.9375rem] font-medium">Keep your chats</p>
+            <p className="mt-1.5 text-[0.8438rem] leading-relaxed text-muted-foreground">Sign in and Bridge saves every conversation here, so you can pick up where you left off.</p>
+            <Link href="/login" className="mt-4 rounded-full bg-primary px-4 py-2 text-[0.8438rem] font-semibold text-primary-foreground transition-transform active:scale-95">
               Sign in
             </Link>
           </div>
         ) : items === null ? (
           <div className="space-y-2 px-2 pt-1">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-12 animate-pulse rounded-[14px] bg-foreground/[0.05]" />
+              <div key={i} className="h-12 animate-pulse rounded-[0.875rem] bg-foreground/[0.05]" />
             ))}
           </div>
         ) : items.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-            <p className="text-[15px] font-medium">No chats yet</p>
-            <p className="mt-1.5 text-[13.5px] leading-relaxed text-muted-foreground">Ask Bridge something — your conversations will be saved here.</p>
+            <p className="text-[0.9375rem] font-medium">No chats yet</p>
+            <p className="mt-1.5 text-[0.8438rem] leading-relaxed text-muted-foreground">Ask Bridge something — your conversations will be saved here.</p>
           </div>
         ) : (
           Object.entries(groups).map(([label, rows], gi) => (
             <section key={label} className="mb-4 animate-in duration-300 fade-in-0 slide-in-from-top-1" style={{ animationDelay: `${gi * 50}ms` }}>
-              <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">{label}</p>
+              <p className="mb-1.5 px-3 text-[0.6875rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">{label}</p>
               <ul className="space-y-1">
                 {rows.map((c) => {
                   const current = c.id === chat.conversationId
@@ -105,20 +105,20 @@ export function HistoryPanel({ bridge, onClose }: { bridge: Bridge; onClose: () 
                         onClick={() => open(c.id)}
                         aria-current={current ? "true" : undefined}
                         className={cn(
-                          "flex w-full items-center gap-3 rounded-[14px] border py-2.5 pr-11 pl-3 text-left transition-colors [--r:14px]",
+                          "flex w-full items-center gap-3 rounded-[0.875rem] border py-2.5 pr-11 pl-3 text-left transition-colors [--r:14px]",
                           current ? "dbl border-(--hairline) bg-card" : "border-transparent hover:bg-foreground/[0.05]"
                         )}
                       >
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[14px] font-medium">{c.title || "New chat"}</span>
-                          <span className="block text-[12px] text-muted-foreground">{when(c.updated_at)}</span>
+                          <span className="block truncate text-[0.875rem] font-medium">{c.title || "New chat"}</span>
+                          <span className="block text-[0.75rem] text-muted-foreground">{when(c.updated_at)}</span>
                         </span>
                       </button>
                       <button
                         type="button"
                         onClick={() => remove(c.id)}
                         aria-label={`Delete “${c.title}”`}
-                        className="absolute top-1/2 right-2 flex size-8 -translate-y-1/2 items-center justify-center rounded-[10px] text-muted-foreground opacity-0 transition-[opacity,background-color,color] group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100"
+                        className="absolute top-1/2 right-2 flex size-8 -translate-y-1/2 items-center justify-center rounded-[0.625rem] text-muted-foreground opacity-0 transition-[opacity,background-color,color] group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100"
                       >
                         <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />

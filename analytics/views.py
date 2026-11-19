@@ -93,6 +93,29 @@ def company_dashboard_stats(request):
     })
 
 
+def weekly(dates, weeks=12, cumulative=False, before=0):
+    """Count datetimes into `weeks` buckets of 7 days, oldest first, the last bucket ending now (for sparklines).
+
+    cumulative=True turns it into a running total; `before` is the count that already existed before the window.
+    """
+    from django.utils import timezone
+
+    now = timezone.now()
+    buckets = [0] * weeks
+    for d in dates:
+        if d is None:
+            continue
+        ago = (now - d).days // 7
+        if 0 <= ago < weeks:
+            buckets[weeks - 1 - ago] += 1
+    if cumulative:
+        total = before
+        for i, n in enumerate(buckets):
+            total += n
+            buckets[i] = total
+    return buckets
+
+
 @api_view(["GET"])
 @permission_classes([role_required("university")])
 def university_dashboard_stats(request):
@@ -115,7 +138,23 @@ def university_dashboard_stats(request):
     )
     recent = apps.select_related("student__user", "internship__company").order_by("-updated_at")[:6]
 
+    # Last 12 weeks, for the stat cards' sparklines. Pipeline moves come from the application timeline.
+    from datetime import timedelta
+    from django.utils import timezone
+    from applications.models import ApplicationEvent
+
+    since = timezone.now() - timedelta(weeks=12)
+    moves = ApplicationEvent.objects.filter(application__in=apps, kind="moved", created_at__gte=since)
+    joined = students.values_list("user__date_joined", flat=True)
+    trends = {
+        "students": weekly(joined, cumulative=True, before=students.filter(user__date_joined__lt=since).count()),
+        "verified": weekly(students.filter(verified_at__gte=since).values_list("verified_at", flat=True)),
+        "interviews": weekly(moves.filter(to_status="interview").values_list("created_at", flat=True)),
+        "placements": weekly(moves.filter(to_status="selected").values_list("created_at", flat=True)),
+    }
+
     return Response({
+        "trends": trends,
         "university": staff.university.name if staff else None,
         "linked": bool(staff),
         "total_students": total_students,

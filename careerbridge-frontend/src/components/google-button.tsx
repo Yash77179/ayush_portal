@@ -140,7 +140,7 @@ export function GoogleAuth({ label = "Continue with Google", role }: { label?: s
 
   return (
     <div className="mt-5">
-      <div className="flex items-center gap-4 text-[12px] font-medium tracking-[0.2em] text-muted-foreground uppercase">
+      <div className="flex items-center gap-4 text-[0.75rem] font-medium tracking-[0.2em] text-muted-foreground uppercase">
         <span aria-hidden className="h-px flex-1 bg-(--hairline)" />
         or
         <span aria-hidden className="h-px flex-1 bg-(--hairline)" />

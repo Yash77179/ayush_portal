@@ -52,7 +52,7 @@ export default function OfferLetterPage() {
   return (
     <main className="min-h-svh bg-secondary/60 px-4 py-10 print:bg-white print:p-0">
       <div className="mx-auto mb-5 flex max-w-[52rem] items-center justify-between gap-3 print:hidden">
-        <Link href={user?.role === "student" ? "/dashboard/student/applications" : "/dashboard/company/pipeline"} className="text-[15px] text-muted-foreground hover:text-foreground">
+        <Link href={user?.role === "student" ? "/dashboard/student/applications" : "/dashboard/company/pipeline"} className="text-[0.9375rem] text-muted-foreground hover:text-foreground">
           ← Back
         </Link>
         <Button onClick={() => window.print()}>
@@ -60,7 +60,7 @@ export default function OfferLetterPage() {
         </Button>
       </div>
 
-      <article className="mx-auto max-w-[52rem] rounded-[28px] bg-white p-10 text-[15px] leading-relaxed text-neutral-900 shadow-sm sm:p-14 print:max-w-none print:rounded-none print:shadow-none">
+      <article className="mx-auto max-w-[52rem] rounded-[1.75rem] bg-white p-10 text-[0.9375rem] leading-relaxed text-neutral-900 shadow-sm sm:p-14 print:max-w-none print:rounded-none print:shadow-none">
         <header className="flex items-start justify-between gap-6 border-b border-neutral-200 pb-8">
           <div className="flex items-center gap-4">
             {offer.company.logo ? (
@@ -90,7 +90,7 @@ export default function OfferLetterPage() {
             application and interviews, and we’re excited to have you join the team.
           </p>
 
-          <table className="w-full border-collapse text-left text-[14.5px]">
+          <table className="w-full border-collapse text-left text-[0.9063rem]">
             <tbody>
               {[
                 ["Role", offer.role_title],
@@ -123,7 +123,7 @@ export default function OfferLetterPage() {
           </div>
         </section>
 
-        <footer className="mt-10 flex items-center justify-between gap-4 border-t border-neutral-200 pt-5 text-[12.5px] text-neutral-500">
+        <footer className="mt-10 flex items-center justify-between gap-4 border-t border-neutral-200 pt-5 text-[0.7813rem] text-neutral-500">
           <span>Issued through CareerBridge to {offer.candidate_email}</span>
           <span className="font-medium text-neutral-700">Status: {status}</span>
         </footer>

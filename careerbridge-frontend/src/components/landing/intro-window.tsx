@@ -33,7 +33,7 @@ const THEM = "pointer-events-none isolate absolute z-[5] text-white/90 [text-sha
 /* the display serif comes in one weight; a thin stroke in the text's own colour makes it read bold over the photo */
 const HEAVY = "[-webkit-text-stroke:0.012em_currentColor] [paint-order:stroke_fill]"
 const US = "pointer-events-none invisible absolute z-[5] text-white/85 opacity-0 [text-shadow:0_1px_14px_rgb(4_6_15/0.7)]"
-const LABEL = "flex items-center gap-3 text-[11px] font-semibold tracking-[0.22em] text-white/55 uppercase sm:text-[12px]"
+const LABEL = "flex items-center gap-3 text-[0.6875rem] font-semibold tracking-[0.22em] text-white/55 uppercase sm:text-[0.75rem]"
 const STATEMENT = "font-display mt-2.5 text-[clamp(1.3rem,2.55vw,2.85rem)] leading-[1.08] tracking-[-0.01em] whitespace-nowrap italic"
 const LINE = "block"
 const RED = "text-[oklch(0.55_0.21_26)]" // blood red
@@ -236,7 +236,7 @@ export function IntroWindow() {
               type="button"
               onClick={skip}
               aria-label="Skip intro"
-              className="group/skip pointer-events-auto absolute bottom-[calc(100%+var(--t)*0.35)] left-1/2 z-10 w-[calc(var(--ww)*0.32)] max-w-[88px] min-w-[60px] -translate-x-1/2 rotate-[-4deg] cursor-pointer rounded-md transition-transform duration-300 ease-(--ease-out) hover:rotate-[-1deg] hover:scale-[1.06] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.97]"
+              className="group/skip pointer-events-auto absolute bottom-[calc(100%+var(--t)*0.35)] left-1/2 z-10 w-[calc(var(--ww)*0.32)] max-w-[5.5rem] min-w-[3.75rem] -translate-x-1/2 rotate-[-4deg] cursor-pointer rounded-md transition-transform duration-300 ease-(--ease-out) hover:rotate-[-1deg] hover:scale-[1.06] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.97]"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

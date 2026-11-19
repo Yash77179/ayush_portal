@@ -109,9 +109,9 @@ export default function StudentApplicationsPage() {
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile index={2} tone="blue" icon={<ApplicationsIcon />} title="Total" value={total} caption="Applications sent" />
-        <StatTile index={3} tone="amber" icon={<ClockIcon />} title="In progress" value={count("active")} caption="Awaiting a decision" />
-        <StatTile index={4} tone="mint" icon={<TrophyIcon />} title="Hired" value={selected} caption={`${count("offered")} offer${count("offered") === 1 ? "" : "s"} waiting`} />
-        <StatTile index={5} tone="pink" icon={<CloseCircleIcon />} title="Rejected" value={count("rejected")} caption="Not this time" />
+        <StatTile index={3} tone="amber" icon={<ClockIcon />} title="In progress" value={count("active")} meter={{ value: count("active"), max: total }} caption="Awaiting a decision" />
+        <StatTile index={4} tone="mint" icon={<TrophyIcon />} title="Hired" value={selected} meter={{ value: selected, max: total }} caption={`${count("offered")} offer${count("offered") === 1 ? "" : "s"} waiting`} />
+        <StatTile index={5} tone="pink" icon={<CloseCircleIcon />} title="Rejected" value={count("rejected")} meter={{ value: count("rejected"), max: total }} caption="Not this time" />
       </div>
 
       <Panel title="All applications" style={stagger(6)} contentClassName="space-y-5">

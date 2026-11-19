@@ -105,9 +105,9 @@ export default function CompanyInternshipsPage() {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile index={2} tone="mint" icon={<CheckCircleIcon />} title="Live" value={live} caption="Accepting applications" />
-        <StatTile index={3} tone="amber" icon={<PenIcon />} title="Drafts" value={drafts} caption="Not published yet" />
-        <StatTile index={4} tone="pink" icon={<CloseCircleIcon />} title="Closed" value={closed} caption="No longer open" />
+        <StatTile index={2} tone="mint" icon={<CheckCircleIcon />} title="Live" value={live} meter={{ value: live, max: items.length }} caption="Accepting applications" />
+        <StatTile index={3} tone="amber" icon={<PenIcon />} title="Drafts" value={drafts} meter={{ value: drafts, max: items.length }} caption="Not published yet" />
+        <StatTile index={4} tone="pink" icon={<CloseCircleIcon />} title="Closed" value={closed} meter={{ value: closed, max: items.length }} caption="No longer open" />
         <StatTile index={5} tone="blue" icon={<InternshipsIcon />} title="Open positions" value={openings} caption="Across live listings" />
       </div>
 

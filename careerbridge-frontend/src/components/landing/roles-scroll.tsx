@@ -87,7 +87,7 @@ function SideCard({ side }: { side: Side }) {
           <span className="font-display text-[0.5em] text-[oklch(0.5_0.18_285)] italic">{side.n}</span>
           <span className="font-display italic">{side.title}</span>
         </h3>
-        <p className="mt-1.5 text-[13px] leading-[1.4] text-[oklch(0.22_0.06_280/0.75)] sm:hidden">{side.short}</p>
+        <p className="mt-1.5 text-[0.8125rem] leading-[1.4] text-[oklch(0.22_0.06_280/0.75)] sm:hidden">{side.short}</p>
         <p className="mt-[1.4vw] max-w-[24rem] text-[clamp(15px,1.15vw,17px)] leading-[1.5] text-[oklch(0.22_0.06_280/0.75)] max-sm:hidden">{side.text}</p>
         <Link href={side.href} className="group/side mt-auto flex items-center gap-3 self-start pt-2 outline-none lg:gap-4">
           {/* the sticker on a little round plate: it straightens and lifts when you point at it */}
@@ -106,7 +106,7 @@ function SideCard({ side }: { side: Side }) {
               style={{ "--tilt": `${side.tilt}deg` } as React.CSSProperties}
             />
           </span>
-          <span className="inline-flex items-center gap-2 text-[11.5px] font-semibold tracking-[0.1em] whitespace-nowrap uppercase sm:text-[12.5px] sm:tracking-[0.16em] group-focus-visible/side:underline lg:text-[13px]">
+          <span className="inline-flex items-center gap-2 text-[0.7188rem] font-semibold tracking-[0.1em] whitespace-nowrap uppercase sm:text-[0.7813rem] sm:tracking-[0.16em] group-focus-visible/side:underline lg:text-[0.8125rem]">
             <Roll>{side.cta}</Roll>
             <ArrowRightIcon className="size-4 transition-transform duration-300 ease-(--ease-out) group-hover/side:translate-x-1" />
           </span>
@@ -140,7 +140,7 @@ export function RolesScroll() {
             <span className="mask-line pr-[0.12em]"><span>three <span className="text-[oklch(0.45_0.18_282)]">sides</span></span></span>
           </h2>
           <div className="lg:pt-[0.6vw]">
-            <p data-build="roles-pitch" className="max-w-[40rem] text-[16.5px] leading-[1.42] text-[oklch(0.22_0.06_280/0.85)] sm:text-[18px] lg:text-[clamp(18px,1.65vw,24px)] lg:leading-[1.35]">
+            <p data-build="roles-pitch" className="max-w-[40rem] text-[1.0313rem] leading-[1.42] text-[oklch(0.22_0.06_280/0.85)] sm:text-[1.125rem] lg:text-[clamp(18px,1.65vw,24px)] lg:leading-[1.35]">
               <span className={ACCENT}>Students</span> looking for a first step, <span className={ACCENT}>companies</span> looking for people who fit,
               and <span className={ACCENT}>universities</span> keeping track of both.{" "}
               Everyone works in the same place, on the same live record, from first application to placement.
@@ -152,7 +152,7 @@ export function RolesScroll() {
         </div>
 
         {/* the label over the row, a line that fills as the row goes by, and which card you are on */}
-        <div data-build="roles-label" className="relative mx-5 flex shrink-0 items-center gap-4 sm:mx-10 lg:absolute lg:mx-0 text-[12px] font-semibold tracking-[0.22em] text-[oklch(0.22_0.06_280/0.6)] uppercase sm:inset-x-10 lg:inset-x-[3.1vw] lg:top-[44.5svh] lg:text-[13px]">
+        <div data-build="roles-label" className="relative mx-5 flex shrink-0 items-center gap-4 sm:mx-10 lg:absolute lg:mx-0 text-[0.75rem] font-semibold tracking-[0.22em] text-[oklch(0.22_0.06_280/0.6)] uppercase sm:inset-x-10 lg:inset-x-[3.1vw] lg:top-[44.5svh] lg:text-[0.8125rem]">
           <span className="whitespace-nowrap">Who it&rsquo;s for</span>
           <span aria-hidden className="relative h-[2px] flex-1 rounded-full bg-[oklch(0.2_0.05_280/0.12)]">
             <span data-hprog className="absolute inset-0 origin-left scale-x-0 bg-[oklch(0.45_0.18_282)]" />

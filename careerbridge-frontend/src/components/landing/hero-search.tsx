@@ -32,14 +32,14 @@ export function HeroSearch() {
         onChange={(e) => setQ(e.target.value)}
         placeholder="Role, company or skill"
         aria-label="Search internships"
-        className="min-w-0 flex-1 bg-transparent px-4 text-[17px] outline-none placeholder:text-muted-foreground/70"
+        className="min-w-0 flex-1 bg-transparent px-4 text-[1.0625rem] outline-none placeholder:text-muted-foreground/70"
       />
       <span aria-hidden className="hidden h-8 w-px bg-border sm:block" />
       <select
         value={mode}
         onChange={(e) => setMode(e.target.value)}
         aria-label="Work mode"
-        className="hidden h-full w-36 cursor-pointer appearance-none bg-transparent px-5 text-[16px] outline-none sm:block"
+        className="hidden h-full w-36 cursor-pointer appearance-none bg-transparent px-5 text-[1rem] outline-none sm:block"
       >
         <option value="all">Any mode</option>
         <option value="remote">Remote</option>

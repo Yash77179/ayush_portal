@@ -56,7 +56,7 @@ export default function AccountPage() {
         />
 
         <Panel className="lg:col-span-8" title="Appearance" style={stagger(1)} contentClassName="space-y-4">
-          <p className="text-[14px] text-muted-foreground">Choose how CareerBridge looks on this device.</p>
+          <p className="text-[0.875rem] text-muted-foreground">Choose how CareerBridge looks on this device.</p>
           <div className="grid grid-cols-3 gap-3">
             {THEMES.map(({ v, label, Icon }) => (
               <button
@@ -65,7 +65,7 @@ export default function AccountPage() {
                 onClick={() => setTheme(v)}
                 aria-pressed={theme === v}
                 className={cn(
-                  "flex flex-col items-center gap-3 rounded-[22px] border p-5 text-[14px] font-medium outline-none transition-[background-color,border-color,transform] duration-150 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring",
+                  "flex flex-col items-center gap-3 rounded-[1.375rem] border p-5 text-[0.875rem] font-medium outline-none transition-[background-color,border-color,transform] duration-150 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring",
                   theme === v ? "border-foreground/80 bg-secondary" : "border-(--hairline) hover:bg-secondary"
                 )}
               >
@@ -80,10 +80,10 @@ export default function AccountPage() {
       <Panel title="Shortcuts" style={stagger(2)} contentClassName="stagger divide-y divide-border">
         {SHORTCUTS.map((s) => (
           <div key={s.label} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
-            <span className="text-[14px]">{s.label}</span>
+            <span className="text-[0.875rem]">{s.label}</span>
             <span className="flex gap-1.5">
               {s.keys.map((k) => (
-                <kbd key={k} className="grid h-7 min-w-7 place-items-center rounded-lg border border-(--hairline) bg-secondary px-1.5 text-[12px] font-medium">
+                <kbd key={k} className="grid h-7 min-w-7 place-items-center rounded-lg border border-(--hairline) bg-secondary px-1.5 text-[0.75rem] font-medium">
                   {k}
                 </kbd>
               ))}

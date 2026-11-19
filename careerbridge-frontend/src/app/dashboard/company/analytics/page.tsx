@@ -66,8 +66,8 @@ export default function AnalyticsPage() {
       ) : (
         <>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <StatTile index={1} tone="blue" icon={<PeopleIcon />} title="Applicants" value={data.total} caption={`${data.rejected} rejected`} />
-            <StatTile index={2} tone="mint" icon={<TrophyIcon />} title="Hired" value={data.funnel.at(-1)?.count ?? 0} caption={data.total ? `${(((data.funnel.at(-1)?.count ?? 0) / data.total) * 100).toFixed(1)}% of applicants` : "—"} />
+            <StatTile index={1} tone="blue" icon={<PeopleIcon />} title="Applicants" value={data.total} meter={{ value: data.total - data.rejected, max: data.total }} caption={`${data.rejected} rejected`} />
+            <StatTile index={2} tone="mint" icon={<TrophyIcon />} title="Hired" value={data.funnel.at(-1)?.count ?? 0} meter={{ value: data.funnel.at(-1)?.count ?? 0, max: data.total }} caption={data.total ? `${(((data.funnel.at(-1)?.count ?? 0) / data.total) * 100).toFixed(1)}% of applicants` : "—"} />
             <StatTile index={3} tone="amber" icon={<ClockIcon />} title="Time to hire" value={data.time_to_hire_days ?? "—"} unit={data.time_to_hire_days !== null ? "days" : undefined} caption="Applied → hired, average" />
             <StatTile index={4} tone="violet" icon={<CalendarIcon />} title="Interviews" value={data.upcoming_interviews} caption="Coming up" />
           </div>
@@ -81,7 +81,7 @@ export default function AnalyticsPage() {
                 <ProgressBar key={f.stage} label={`${data.funnel[i].label} → ${f.label}`} value={f.conversion} />
               ))}
             </div>
-            <p className="text-[14.5px] text-muted-foreground">Counts include everyone who ever reached a stage, so people rejected later still show how far they got.</p>
+            <p className="text-[0.9063rem] text-muted-foreground">Counts include everyone who ever reached a stage, so people rejected later still show how far they got.</p>
           </Panel>
 
           <div className="grid items-start gap-5 lg:grid-cols-2">
@@ -90,15 +90,15 @@ export default function AnalyticsPage() {
                 data={data.time_in_stage_days.map((t) => ({ label: t.label, value: t.avg_days ?? 0 }))}
                 emptyText="Appears once candidates start moving"
               />
-              <p className="mt-3 text-[14.5px] text-muted-foreground">Average days before moving on.</p>
+              <p className="mt-3 text-[0.9063rem] text-muted-foreground">Average days before moving on.</p>
             </Panel>
             <Panel title="Where applicants come from" style={stagger(7)} contentClassName="space-y-4">
-              {data.sources.length === 0 && <p className="text-[15px] text-muted-foreground">No applicants yet.</p>}
+              {data.sources.length === 0 && <p className="text-[0.9375rem] text-muted-foreground">No applicants yet.</p>}
               {data.sources.map((s) => (
                 <ProgressBar key={s.source} label={`${s.label} · ${s.count}`} value={data.total ? (s.count / data.total) * 100 : 0} />
               ))}
-              <div className="rounded-2xl bg-secondary p-4 text-[15px]">
-                <p className="text-[17px] font-medium">Offers</p>
+              <div className="rounded-2xl bg-secondary p-4 text-[0.9375rem]">
+                <p className="text-[1.0625rem] font-medium">Offers</p>
                 <p className="mt-1 text-muted-foreground">
                   {data.offers.sent} sent · {data.offers.accepted} accepted
                   {data.offers.acceptance_rate !== null && ` · ${data.offers.acceptance_rate}% acceptance`}
@@ -109,7 +109,7 @@ export default function AnalyticsPage() {
 
           <Panel title="By listing" style={stagger(8)}>
             {data.per_listing.length === 0 ? (
-              <p className="py-8 text-center text-[15px] text-muted-foreground">No applications yet.</p>
+              <p className="py-8 text-center text-[0.9375rem] text-muted-foreground">No applications yet.</p>
             ) : (
               <Table>
                 <TableHeader>

@@ -120,9 +120,9 @@ function Details({ company, editable }: { company: Company; editable: boolean })
       <Panel className="lg:col-span-4" title="Logo" style={stagger(1)} contentClassName="flex flex-col items-center gap-4 text-center">
         {company.logo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={mediaUrl(company.logo) ?? ""} alt="" className="size-32 rounded-[28px] object-cover" />
+          <img src={mediaUrl(company.logo) ?? ""} alt="" className="size-32 rounded-[1.75rem] object-cover" />
         ) : (
-          <OrgAvatar name={company.name} className="size-32 rounded-[28px] text-4xl" />
+          <OrgAvatar name={company.name} className="size-32 rounded-[1.75rem] text-4xl" />
         )}
         {editable && (
           <>
@@ -132,7 +132,7 @@ function Details({ company, editable }: { company: Company; editable: boolean })
             </Button>
           </>
         )}
-        <p className="text-[14.5px] text-muted-foreground">
+        <p className="text-[0.9063rem] text-muted-foreground">
           {company.is_verified ? "Verified by CareerBridge — students see a badge." : "Not verified yet. CareerBridge admins verify companies after a quick check."}
         </p>
       </Panel>
@@ -186,7 +186,7 @@ function Details({ company, editable }: { company: Company; editable: boolean })
             </Button>
           </div>
         ) : (
-          <p className="text-[15px] text-muted-foreground">Only company admins can edit this page.</p>
+          <p className="text-[0.9375rem] text-muted-foreground">Only company admins can edit this page.</p>
         )}
       </Panel>
     </form>
@@ -239,13 +239,13 @@ function Team({ isAdmin }: { isAdmin: boolean }) {
       <Panel className="lg:col-span-8" title="People" style={stagger(1)} contentClassName="space-y-2">
         {!team && <Loader2 className="mx-auto my-8 size-5 animate-spin text-muted-foreground" />}
         {team?.map((m) => (
-          <div key={m.id} className="flex flex-wrap items-center gap-3 rounded-[20px] p-2.5 hover:bg-secondary/60">
+          <div key={m.id} className="flex flex-wrap items-center gap-3 rounded-[1.25rem] p-2.5 hover:bg-secondary/60">
             <OrgAvatar name={m.name} />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[17px] font-medium">
+              <p className="truncate text-[1.0625rem] font-medium">
                 {m.name} {m.user_id === user?.id && <span className="text-muted-foreground">(you)</span>}
               </p>
-              <p className="truncate text-[14.5px] text-muted-foreground">{m.email}</p>
+              <p className="truncate text-[0.9063rem] text-muted-foreground">{m.email}</p>
             </div>
             {!m.is_active && <Badge variant="danger">Deactivated</Badge>}
             {isAdmin ? (
@@ -310,13 +310,13 @@ function Team({ isAdmin }: { isAdmin: boolean }) {
                 </SelectContent>
               </Select>
             </Field>
-            <p className="text-[14.5px] text-muted-foreground">{ROLE_HELP[role]}</p>
+            <p className="text-[0.9063rem] text-muted-foreground">{ROLE_HELP[role]}</p>
             <Button type="submit" className="w-full" disabled={adding}>
               {adding && <Loader2 className="animate-spin" />} Add to team
             </Button>
           </form>
         ) : (
-          <p className="text-[15px] text-muted-foreground">Ask a company admin to add colleagues.</p>
+          <p className="text-[0.9375rem] text-muted-foreground">Ask a company admin to add colleagues.</p>
         )}
       </Panel>
     </div>
@@ -362,7 +362,7 @@ function Templates() {
         {!items && <Loader2 className="mx-auto my-8 size-5 animate-spin text-muted-foreground" />}
         {items?.length === 0 && (
           <div className="space-y-3 py-2">
-            <p className="text-[15px] text-muted-foreground">No templates yet. Start from one of these:</p>
+            <p className="text-[0.9375rem] text-muted-foreground">No templates yet. Start from one of these:</p>
             {canManage && starters.map((s) => (
               <Button key={s.name} variant="outline" className="w-full justify-start" onClick={() => setEdit(s)}>
                 {s.name}
@@ -371,10 +371,10 @@ function Templates() {
           </div>
         )}
         {items?.map((t) => (
-          <div key={t.id} className="flex items-center gap-2 rounded-[18px] p-2.5 hover:bg-secondary/60">
+          <div key={t.id} className="flex items-center gap-2 rounded-[1.125rem] p-2.5 hover:bg-secondary/60">
             <button type="button" className="min-w-0 flex-1 text-left" onClick={() => canManage && setEdit(t)}>
-              <p className="truncate text-[17px] font-medium">{t.name}</p>
-              <p className="truncate text-[14.5px] text-muted-foreground">{t.subject}</p>
+              <p className="truncate text-[1.0625rem] font-medium">{t.name}</p>
+              <p className="truncate text-[0.9063rem] text-muted-foreground">{t.subject}</p>
             </button>
             {canManage && (
               <Button
@@ -391,7 +391,7 @@ function Templates() {
             )}
           </div>
         ))}
-        <p className="pt-2 text-[14.5px] text-muted-foreground">Use them from a candidate’s Email button or the bulk Email action. Stage changes already send their own kind, automatic messages.</p>
+        <p className="pt-2 text-[0.9063rem] text-muted-foreground">Use them from a candidate’s Email button or the bulk Email action. Stage changes already send their own kind, automatic messages.</p>
       </Panel>
       {edit && (
         <Panel className="lg:col-span-7" title={edit.id ? "Edit template" : "New template"} style={stagger(2)} contentClassName="space-y-4">

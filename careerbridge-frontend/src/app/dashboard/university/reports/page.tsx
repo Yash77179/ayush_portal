@@ -39,16 +39,16 @@ export default function ReportsPage() {
       />
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile index={1} tone="blue" icon={<GraduateIcon />} title="Students" value={r.total_students} caption={`${r.students_applied} have applied`} />
-        <StatTile index={2} tone="mint" icon={<TrophyIcon />} title="Placed" value={r.students_placed} caption={`${r.placement_rate}% placement rate`} />
+        <StatTile index={1} tone="blue" icon={<GraduateIcon />} title="Students" value={r.total_students} meter={{ value: r.students_applied, max: r.total_students }} caption={`${r.students_applied} have applied`} />
+        <StatTile index={2} tone="mint" icon={<TrophyIcon />} title="Placed" value={r.students_placed} meter={{ value: r.students_placed, max: r.total_students }} caption={`${r.placement_rate}% placement rate`} />
         <StatTile index={3} tone="amber" icon={<WalletIcon />} title="Median stipend" value={r.stipend.median !== null ? fmtMoney(r.stipend.median) : "—"} caption={r.stipend.highest !== null ? `Highest ${fmtMoney(r.stipend.highest)}` : "No placements yet"} />
-        <StatTile index={4} tone="violet" icon={<VerifiedIcon />} title="Verified" value={r.verified_students} caption="Profiles checked by you" />
+        <StatTile index={4} tone="violet" icon={<VerifiedIcon />} title="Verified" value={r.verified_students} meter={{ value: r.verified_students, max: r.total_students }} caption="Profiles checked by you" />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-12">
         <Panel className="lg:col-span-5" title="Placement rate" style={stagger(5)}>
           <Gauge className="my-4" value={r.placement_rate} label="of students placed" />
-          <div className="mt-4 grid grid-cols-2 gap-4 text-[15px]">
+          <div className="mt-4 grid grid-cols-2 gap-4 text-[0.9375rem]">
             <div className="rounded-2xl bg-secondary p-4">
               <p className="text-muted-foreground">In interviews</p>
               <p className="mt-1 text-2xl font-light tabular-nums">{r.in_interviews}</p>
@@ -66,7 +66,7 @@ export default function ReportsPage() {
 
       <Panel title="Branch-wise" style={stagger(7)}>
         {r.branches.length === 0 ? (
-          <p className="py-6 text-[15px] text-muted-foreground">No students yet.</p>
+          <p className="py-6 text-[0.9375rem] text-muted-foreground">No students yet.</p>
         ) : (
           <Table>
             <TableHeader>
@@ -103,13 +103,13 @@ export default function ReportsPage() {
           {r.years.map((y) => (
             <ProgressBar key={y.year} label={`${y.year} · ${y.placed}/${y.students} placed`} value={y.students ? (y.placed / y.students) * 100 : 0} />
           ))}
-          {r.years.length === 0 && <p className="text-[15px] text-muted-foreground">No students yet.</p>}
+          {r.years.length === 0 && <p className="text-[0.9375rem] text-muted-foreground">No students yet.</p>}
         </Panel>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Campus drives" style={stagger(10)}>
-          <dl className="grid grid-cols-2 gap-4 text-[15px]">
+          <dl className="grid grid-cols-2 gap-4 text-[0.9375rem]">
             {[
               ["Drives", r.drives.total],
               ["Upcoming", r.drives.upcoming],

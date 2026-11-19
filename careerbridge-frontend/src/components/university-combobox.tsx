@@ -138,12 +138,12 @@ export function UniversityCombobox({
           setActive(0)
         }}
         onKeyDown={onKeyDown}
-        className="field-surface h-14 w-full min-w-0 truncate rounded-[18px] pr-12 pl-13 text-[16px] outline-none placeholder:text-muted-foreground/70"
+        className="field-surface h-14 w-full min-w-0 truncate rounded-[1.125rem] pr-12 pl-13 text-[1rem] outline-none placeholder:text-muted-foreground/70"
       />
       <ChevronDownIcon className={cn("pointer-events-none absolute top-1/2 right-5 size-4 -translate-y-1/2 text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
 
       {open && (
-        <div className="absolute top-full right-0 left-0 z-50 mt-2 origin-top animate-in fade-in-0 zoom-in-95 overflow-hidden rounded-[22px] border border-(--hairline) bg-popover p-1.5 shadow-[0_24px_48px_-20px_oklch(0.2_0.05_280/0.35)] duration-150">
+        <div className="absolute top-full right-0 left-0 z-50 mt-2 origin-top animate-in fade-in-0 zoom-in-95 overflow-hidden rounded-[1.375rem] border border-(--hairline) bg-popover p-1.5 shadow-[0_24px_48px_-20px_oklch(0.2_0.05_280/0.35)] duration-150">
           <ul id={listId} role="listbox" className="max-h-72 overflow-y-auto overscroll-contain">
             {results.map((u, i) => (
               <li
@@ -159,13 +159,13 @@ export function UniversityCombobox({
                   value?.id === u.id && "font-medium"
                 )}
               >
-                <span className="truncate text-[15.5px]">{u.name}</span>
-                {u.location && <span className="truncate text-[13.5px] text-muted-foreground">{u.location}</span>}
+                <span className="truncate text-[0.9688rem]">{u.name}</span>
+                {u.location && <span className="truncate text-[0.8438rem] text-muted-foreground">{u.location}</span>}
               </li>
             ))}
 
-            {!loading && results.length === 0 && !canAdd && <li className="px-4 py-3 text-[15px] text-muted-foreground">No universities found.</li>}
-            {loading && results.length === 0 && <li className="px-4 py-3 text-[15px] text-muted-foreground">Searching…</li>}
+            {!loading && results.length === 0 && !canAdd && <li className="px-4 py-3 text-[0.9375rem] text-muted-foreground">No universities found.</li>}
+            {loading && results.length === 0 && <li className="px-4 py-3 text-[0.9375rem] text-muted-foreground">Searching…</li>}
 
             {canAdd && (
               <li
@@ -179,8 +179,8 @@ export function UniversityCombobox({
                   active === results.length && "bg-secondary"
                 )}
               >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-[20px] leading-none font-light text-primary-foreground">+</span>
-                <span className="min-w-0 text-[15.5px]">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-[1.25rem] leading-none font-light text-primary-foreground">+</span>
+                <span className="min-w-0 text-[0.9688rem]">
                   {adding ? "Adding…" : <>Add <span className="font-medium">“{trimmed}”</span> as a new university</>}
                 </span>
               </li>

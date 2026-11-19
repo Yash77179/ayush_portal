@@ -122,10 +122,10 @@ const autoKind = (el: Element): [Kind, string] => {
 function Cursor({ a, i }: { a: Agent; i: number }) {
   return (
     <div data-cursor={i} className="pointer-events-none absolute top-0 left-0 z-30 opacity-0 will-change-transform">
-      <svg viewBox="0 0 24 24" className="size-[22px] drop-shadow-[0_2px_4px_rgb(0_0_0/0.3)]" aria-hidden>
+      <svg viewBox="0 0 24 24" className="size-[1.375rem] drop-shadow-[0_2px_4px_rgb(0_0_0/0.3)]" aria-hidden>
         <path d="M3 2l17 9.5-7.4 1.6L9.4 21z" fill={a.color} stroke="white" strokeWidth="1.4" strokeLinejoin="round" />
       </svg>
-      <span className="absolute top-[18px] left-[14px] rounded-full px-2 py-[2px] text-[11px] font-semibold whitespace-nowrap text-white shadow-[0_4px_10px_rgb(0_0_0/0.2)]" style={{ background: a.color }}>
+      <span className="absolute top-[1.125rem] left-[0.875rem] rounded-full px-2 py-[2px] text-[0.6875rem] font-semibold whitespace-nowrap text-white shadow-[0_4px_10px_rgb(0_0_0/0.2)]" style={{ background: a.color }}>
         {a.name}
         <span data-doing className="ml-1 font-medium opacity-85" />
       </span>
@@ -516,11 +516,11 @@ export function AgentSwarm() {
         onClick={() => setOpen(true)}
         aria-label="Watch agents build this page"
         style={{ visibility: open ? "hidden" : undefined }}
-        className="group/swarm fixed right-3 bottom-4 z-[55] flex items-center gap-2 rounded-full border border-white/15 bg-[oklch(0.17_0.05_285/0.88)] py-1.5 pr-3.5 pl-1.5 text-[12px] font-semibold text-white shadow-[0_10px_30px_-10px_rgb(10_6_30/0.7)] transition-transform duration-300 ease-(--ease-out) hover:-translate-y-0.5 active:scale-95 motion-reduce:hidden sm:right-5 sm:bottom-5"
+        className="group/swarm fixed right-3 bottom-4 z-[55] flex items-center gap-2 rounded-full border border-white/15 bg-[oklch(0.17_0.05_285/0.88)] py-1.5 pr-3.5 pl-1.5 text-[0.75rem] font-semibold text-white shadow-[0_10px_30px_-10px_rgb(10_6_30/0.7)] transition-transform duration-300 ease-(--ease-out) hover:-translate-y-0.5 active:scale-95 motion-reduce:hidden sm:right-5 sm:bottom-5"
       >
         <span aria-hidden className="relative flex h-6 w-9 items-center">
           {AGENTS.slice(0, 3).map((a, i) => (
-            <svg key={a.name} viewBox="0 0 24 24" className="absolute size-[15px] transition-transform duration-300 group-hover/swarm:-translate-y-0.5" style={{ left: i * 9, top: i % 2 ? 6 : 1, transitionDelay: `${i * 50}ms` }}>
+            <svg key={a.name} viewBox="0 0 24 24" className="absolute size-[0.9375rem] transition-transform duration-300 group-hover/swarm:-translate-y-0.5" style={{ left: i * 9, top: i % 2 ? 6 : 1, transitionDelay: `${i * 50}ms` }}>
               <path d="M3 2l17 9.5-7.4 1.6L9.4 21z" fill={a.color} stroke="white" strokeWidth="1.6" strokeLinejoin="round" />
             </svg>
           ))}
@@ -537,22 +537,22 @@ export function AgentSwarm() {
           ))}
 
           {/* the status: a light pill, like a design tool's toolbar */}
-          <div className="absolute bottom-4 left-1/2 z-40 flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-[oklch(0.2_0.05_280/0.12)] bg-white/90 py-1.5 pr-4 pl-2 text-[12px] text-[oklch(0.25_0.05_280)] shadow-[0_12px_30px_-12px_oklch(0.3_0.1_285/0.35)] sm:bottom-5">
+          <div className="absolute bottom-4 left-1/2 z-40 flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-[oklch(0.2_0.05_280/0.12)] bg-white/90 py-1.5 pr-4 pl-2 text-[0.75rem] text-[oklch(0.25_0.05_280)] shadow-[0_12px_30px_-12px_oklch(0.3_0.1_285/0.35)] sm:bottom-5">
             <span aria-hidden className="flex -space-x-1.5">
               {AGENTS.map((a) => (
                 <span key={a.name} className="size-4 rounded-full ring-2 ring-white" style={{ background: a.color }} />
               ))}
             </span>
-            <span data-status className="font-display min-w-0 truncate text-[14px] italic">starting</span>
+            <span data-status className="font-display min-w-0 truncate text-[0.875rem] italic">starting</span>
             <span className="hidden text-[oklch(0.25_0.05_280/0.5)] sm:inline">
               · <span data-count className="text-[oklch(0.25_0.05_280)] tabular-nums">0</span> built
             </span>
-            <span data-timer className="font-mono text-[11px] tabular-nums text-[oklch(0.25_0.05_280/0.55)]">0.0s</span>
+            <span data-timer className="font-mono text-[0.6875rem] tabular-nums text-[oklch(0.25_0.05_280/0.55)]">0.0s</span>
           </div>
 
           {/* shipped: in the site's own look */}
-          <div data-shipped className="invisible absolute top-1/2 left-1/2 z-40 w-[min(30rem,calc(100vw-2.5rem))] -translate-x-1/2 -translate-y-1/2 rounded-[22px] border border-[oklch(0.2_0.05_280/0.1)] bg-[oklch(0.985_0.006_290/0.96)] px-8 py-7 text-center text-[oklch(0.22_0.05_280)] shadow-[0_40px_80px_-30px_oklch(0.2_0.1_285/0.55)]">
-            <p className="flex items-center justify-center gap-3 text-[11px] font-semibold tracking-[0.24em] text-[oklch(0.5_0.17_285)] uppercase">
+          <div data-shipped className="invisible absolute top-1/2 left-1/2 z-40 w-[min(30rem,calc(100vw-2.5rem))] -translate-x-1/2 -translate-y-1/2 rounded-[1.375rem] border border-[oklch(0.2_0.05_280/0.1)] bg-[oklch(0.985_0.006_290/0.96)] px-8 py-7 text-center text-[oklch(0.22_0.05_280)] shadow-[0_40px_80px_-30px_oklch(0.2_0.1_285/0.55)]">
+            <p className="flex items-center justify-center gap-3 text-[0.6875rem] font-semibold tracking-[0.24em] text-[oklch(0.5_0.17_285)] uppercase">
               <span aria-hidden className="h-px w-6 bg-[oklch(0.5_0.17_285/0.5)]" />
               Shipped
               <span aria-hidden className="h-px w-6 bg-[oklch(0.5_0.17_285/0.5)]" />
@@ -560,7 +560,7 @@ export function AgentSwarm() {
             <p className="font-display mt-3 text-[clamp(1.7rem,4vw,2.6rem)] leading-[1.05] tracking-[-0.01em] uppercase italic">
               Built live by <span className="text-[oklch(0.5_0.19_290)]">six agents</span>
             </p>
-            <p className="mt-3 text-[14px] text-[oklch(0.22_0.06_280/0.65)]">
+            <p className="mt-3 text-[0.875rem] text-[oklch(0.22_0.06_280/0.65)]">
               <span data-ship-count className="font-semibold text-[oklch(0.22_0.05_280)]">0</span> components · {SECTIONS.length} sections · <span data-ship-time>0 seconds</span>
             </p>
             <div aria-hidden className="mt-4 flex justify-center -space-x-1.5">
@@ -570,7 +570,7 @@ export function AgentSwarm() {
             </div>
           </div>
 
-          <button type="button" onClick={() => closeRef.current()} className="absolute top-4 right-4 z-50 rounded-full border border-[oklch(0.2_0.05_280/0.12)] bg-white/90 px-3.5 py-1.5 text-[12px] font-semibold text-[oklch(0.25_0.05_280)] shadow-[0_8px_20px_-10px_oklch(0.3_0.1_285/0.4)] transition-colors hover:bg-white sm:top-5 sm:right-6">
+          <button type="button" onClick={() => closeRef.current()} className="absolute top-4 right-4 z-50 rounded-full border border-[oklch(0.2_0.05_280/0.12)] bg-white/90 px-3.5 py-1.5 text-[0.75rem] font-semibold text-[oklch(0.25_0.05_280)] shadow-[0_8px_20px_-10px_oklch(0.3_0.1_285/0.4)] transition-colors hover:bg-white sm:top-5 sm:right-6">
             Skip · Esc
           </button>
         </div>

@@ -450,18 +450,18 @@ export function StoryStage() {
             <div
               key={c.tag}
               data-card
-              className="absolute top-1/2 left-1/2 aspect-[4/5.6] w-[min(64vw,19rem,34svh)] rounded-[16px] bg-white p-2 lg:rounded-[18px] sm:aspect-[4/5] sm:w-[min(42vw,22rem,36svh)] lg:w-[min(23vw,27rem,56svh)] opacity-0 shadow-[0_30px_60px_-30px_oklch(0.2_0.1_285/0.55),0_2px_6px_oklch(0.2_0.1_285/0.1)] will-change-transform"
+              className="absolute top-1/2 left-1/2 aspect-[4/5.6] w-[min(64vw,19rem,34svh)] rounded-[1rem] bg-white p-2 lg:rounded-[1.125rem] sm:aspect-[4/5] sm:w-[min(42vw,22rem,36svh)] lg:w-[min(23vw,27rem,56svh)] opacity-0 shadow-[0_30px_60px_-30px_oklch(0.2_0.1_285/0.55),0_2px_6px_oklch(0.2_0.1_285/0.1)] will-change-transform"
               style={{ zIndex: i + 1 }}
             >
               {c.art ? (
-                <div className="relative size-full overflow-hidden rounded-[11px] p-5 lg:rounded-[14px] lg:p-6" style={{ background: `linear-gradient(160deg, oklch(0.998 0.003 ${c.hue}), oklch(0.95 0.045 ${c.hue}))` }}>
+                <div className="relative size-full overflow-hidden rounded-[0.6875rem] p-5 lg:rounded-[0.875rem] lg:p-6" style={{ background: `linear-gradient(160deg, oklch(0.998 0.003 ${c.hue}), oklch(0.95 0.045 ${c.hue}))` }}>
                   <PlateArt kind={c.art} hue={c.hue} id={`sg-${i}`} />
-                  <span className="relative text-[11px] font-semibold tracking-[0.24em] text-[oklch(0.22_0.05_280/0.6)] uppercase">{c.tag}</span>
+                  <span className="relative text-[0.6875rem] font-semibold tracking-[0.24em] text-[oklch(0.22_0.05_280/0.6)] uppercase">{c.tag}</span>
                   <p className="font-display absolute right-5 bottom-5 left-5 text-[clamp(1.9rem,3.2vw,3.4rem)] leading-[0.95] tracking-[-0.02em] text-[oklch(0.22_0.05_280)] italic lg:right-6 lg:bottom-6 lg:left-6">{c.title}</p>
                 </div>
               ) : (
-                <div className="relative size-full overflow-hidden rounded-[11px] lg:rounded-[14px] bg-[radial-gradient(90%_60%_at_45%_22%,oklch(0.86_0.09_295),transparent_70%),linear-gradient(170deg,oklch(0.6_0.2_288),oklch(0.42_0.22_283))] p-5 text-white lg:p-6">
-                  <span className="relative inline-flex rounded-full bg-black/20 px-3 py-1.5 text-[11px] font-semibold tracking-[0.24em] uppercase backdrop-blur-sm">{c.tag}</span>
+                <div className="relative size-full overflow-hidden rounded-[0.6875rem] lg:rounded-[0.875rem] bg-[radial-gradient(90%_60%_at_45%_22%,oklch(0.86_0.09_295),transparent_70%),linear-gradient(170deg,oklch(0.6_0.2_288),oklch(0.42_0.22_283))] p-5 text-white lg:p-6">
+                  <span className="relative inline-flex rounded-full bg-black/20 px-3 py-1.5 text-[0.6875rem] font-semibold tracking-[0.24em] uppercase backdrop-blur-sm">{c.tag}</span>
                   <svg data-card-spark viewBox="0 0 100 100" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ width: SPARK, height: SPARK }}>
                     <path d={STAR_D} fill="white" />
                   </svg>
@@ -498,13 +498,13 @@ export function StoryStage() {
           </h2>
           <div data-bnote className="absolute right-[6vw] bottom-[6svh] left-[6vw] max-w-[24rem] lg:right-auto lg:bottom-[11vh] lg:left-[5vw]">
             <MeetPill seen={bridgeOn} className="border-white/20 bg-white/[0.08] text-white/80" />
-            <p className="mt-4 text-[15px] leading-relaxed text-white/70 lg:mt-5 lg:text-[clamp(1rem,1.15vw,1.15rem)]">
+            <p className="mt-4 text-[0.9375rem] leading-relaxed text-white/70 lg:mt-5 lg:text-[clamp(1rem,1.15vw,1.15rem)]">
               Bridge, the assistant inside CareerBridge, knows your profile and every open listing — ask it anything, by text or out loud.
             </p>
             <button
               type="button"
               onClick={talk}
-              className="group pointer-events-auto mt-5 inline-flex items-center gap-2 text-[15px] font-medium text-white underline decoration-white/30 underline-offset-[6px] transition-[text-decoration-color] hover:decoration-white/80"
+              className="group pointer-events-auto mt-5 inline-flex items-center gap-2 text-[0.9375rem] font-medium text-white underline decoration-white/30 underline-offset-[0.375rem] transition-[text-decoration-color] hover:decoration-white/80"
             >
               {user ? "Talk to Bridge" : "Sign in to talk to Bridge"}
               <ArrowRightIcon className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />

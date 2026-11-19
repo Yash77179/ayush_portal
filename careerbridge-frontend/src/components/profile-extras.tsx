@@ -38,9 +38,9 @@ function span(start: string, end: string | null, current: boolean) {
 }
 
 const SMALL_BTN =
-  "inline-flex h-10 items-center gap-1.5 rounded-full border border-(--hairline) bg-card px-4 text-[14.5px] font-medium shadow-[inset_0_0_0_3px_var(--card),inset_0_0_0_4px_var(--keyline-card)] outline-none transition-[background-color,transform] duration-150 hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
+  "inline-flex h-10 items-center gap-1.5 rounded-full border border-(--hairline) bg-card px-4 text-[0.9063rem] font-medium shadow-[inset_0_0_0_3px_var(--card),inset_0_0_0_4px_var(--keyline-card)] outline-none transition-[background-color,transform] duration-150 hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
 
-const SAMPLE_NOTE = <span className="ml-2 text-[13px] font-normal text-muted-foreground opacity-70">· Sample data</span>
+const SAMPLE_NOTE = <span className="ml-2 text-[0.8125rem] font-normal text-muted-foreground opacity-70">· Sample data</span>
 
 function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
@@ -61,7 +61,7 @@ function IconDelete({ onClick, label, always }: { onClick: () => void; label: st
         always ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover/item:opacity-100"
       )}
     >
-      <TrashIcon className="size-[18px]" />
+      <TrashIcon className="size-[1.125rem]" />
     </button>
   )
 }
@@ -97,7 +97,7 @@ function DropZone({
         if (f) onFile(f)
       }}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center rounded-[26px] border-2 border-dashed text-center transition-[background-color,border-color,transform] duration-200 has-focus-visible:ring-2 has-focus-visible:ring-ring",
+        "flex cursor-pointer flex-col items-center justify-center rounded-[1.625rem] border-2 border-dashed text-center transition-[background-color,border-color,transform] duration-200 has-focus-visible:ring-2 has-focus-visible:ring-ring",
         compact ? "gap-1.5 px-5 py-6" : "min-h-56 gap-2.5 px-6 py-8",
         over ? "scale-[1.01] border-(--c-violet) bg-(--violet-bg)" : "border-foreground/15 bg-secondary/40 hover:border-foreground/30 hover:bg-secondary/70"
       )}
@@ -105,8 +105,8 @@ function DropZone({
       <span className="tone-violet flex size-12 items-center justify-center rounded-2xl bg-(--t-bg) text-(--t-fg)">
         {busy ? <Loader2 className="size-5 animate-spin" /> : <PlusIcon className="size-6" />}
       </span>
-      <span className="text-[17px] font-medium">{title}</span>
-      <span className="max-w-64 text-[14.5px] leading-snug text-muted-foreground">{hint}</span>
+      <span className="text-[1.0625rem] font-medium">{title}</span>
+      <span className="max-w-64 text-[0.9063rem] leading-snug text-muted-foreground">{hint}</span>
       <input
         type="file"
         accept={accept}
@@ -192,14 +192,14 @@ export function ResumeAndSkills({ demo, onSkillsChanged }: { demo: boolean; onSk
       <Panel className="lg:col-span-5" title="Resume" style={stagger(4)} contentClassName="flex flex-col gap-4">
         <DropZone accept="application/pdf,.pdf" onFile={handle} busy={busy} title={file ? "Replace your resume" : "Upload your resume"} hint="PDF up to 5 MB. We read it to suggest skills — nothing is added without your OK." />
         {file && (
-          <div className="flex items-center gap-3.5 rounded-[22px] border border-(--hairline) bg-card p-3.5">
-            <span className="tone-pink flex size-12 shrink-0 items-center justify-center rounded-2xl bg-(--t-bg) text-[12px] font-semibold tracking-wide text-(--t-fg)">PDF</span>
+          <div className="flex items-center gap-3.5 rounded-[1.375rem] border border-(--hairline) bg-card p-3.5">
+            <span className="tone-pink flex size-12 shrink-0 items-center justify-center rounded-2xl bg-(--t-bg) text-[0.75rem] font-semibold tracking-wide text-(--t-fg)">PDF</span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[16px] font-medium">{file.name}</p>
-              <p className="text-[14px] text-muted-foreground">Uploaded · visible to recruiters</p>
+              <p className="truncate text-[1rem] font-medium">{file.name}</p>
+              <p className="text-[0.875rem] text-muted-foreground">Uploaded · visible to recruiters</p>
             </div>
             {file.url && (
-              <a href={file.url} target="_blank" rel="noopener noreferrer" className="rounded-full px-3 py-1.5 text-[14px] font-medium underline-offset-4 hover:underline">
+              <a href={file.url} target="_blank" rel="noopener noreferrer" className="rounded-full px-3 py-1.5 text-[0.875rem] font-medium underline-offset-4 hover:underline">
                 View
               </a>
             )}
@@ -217,12 +217,12 @@ export function ResumeAndSkills({ demo, onSkillsChanged }: { demo: boolean; onSk
         {shown.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 py-10 text-center">
             <span className="tone-mint flex size-14 items-center justify-center rounded-2xl bg-(--t-bg) text-(--t-fg)"><ApplicationsIcon className="size-6" /></span>
-            <p className="text-[17px] font-medium">Nothing read yet</p>
-            <p className="max-w-72 text-[14.5px] text-muted-foreground">Upload your resume and we’ll pull out the skills we recognise.</p>
+            <p className="text-[1.0625rem] font-medium">Nothing read yet</p>
+            <p className="max-w-72 text-[0.9063rem] text-muted-foreground">Upload your resume and we’ll pull out the skills we recognise.</p>
           </div>
         ) : (
           <>
-            <p className="text-[15px] text-muted-foreground">
+            <p className="text-[0.9375rem] text-muted-foreground">
               {isSample ? "Here’s what we’d find in a typical resume" : `We recognised ${shown.length} skill${shown.length === 1 ? "" : "s"}`}
               {isSample && SAMPLE_NOTE}
             </p>
@@ -234,17 +234,17 @@ export function ResumeAndSkills({ demo, onSkillsChanged }: { demo: boolean; onSk
                     disabled={s.already_added || adding !== null}
                     onClick={() => add(s)}
                     className={cn(
-                      "inline-flex h-11 items-center gap-2.5 rounded-full border pr-3.5 pl-4 text-[15.5px] font-medium outline-none transition-[background-color,transform,border-color] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-95",
+                      "inline-flex h-11 items-center gap-2.5 rounded-full border pr-3.5 pl-4 text-[0.9688rem] font-medium outline-none transition-[background-color,transform,border-color] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-95",
                       s.already_added ? "tone-mint border-transparent bg-(--t-bg) text-(--t-fg)" : "border-(--hairline) bg-card hover:bg-secondary"
                     )}
                   >
                     {s.name}
                     {s.already_added ? (
-                      <CheckCircleIcon className="size-[18px]" />
+                      <CheckCircleIcon className="size-[1.125rem]" />
                     ) : adding === s.id ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
-                      <span className="flex size-6 items-center justify-center rounded-full bg-primary text-[16px] leading-none font-light text-primary-foreground">+</span>
+                      <span className="flex size-6 items-center justify-center rounded-full bg-primary text-[1rem] leading-none font-light text-primary-foreground">+</span>
                     )}
                   </button>
                 </li>
@@ -284,7 +284,7 @@ function ExperienceDialog({ open, onOpenChange, onSave }: { open: boolean; onOpe
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90svh] overflow-y-auto rounded-[32px] p-7 sm:max-w-xl">
+      <DialogContent className="max-h-[90svh] overflow-y-auto rounded-[2rem] p-7 sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-medium tracking-tight">Add experience</DialogTitle>
           <DialogDescription>An internship, job, freelance gig or a project you led.</DialogDescription>
@@ -309,7 +309,7 @@ function ExperienceDialog({ open, onOpenChange, onSave }: { open: boolean; onOpe
               <Input type="month" disabled={f.current} value={f.end} onChange={(e) => set("end", e.target.value)} />
             </Field>
           </div>
-          <label className="flex cursor-pointer items-center gap-3 text-[15.5px]">
+          <label className="flex cursor-pointer items-center gap-3 text-[0.9688rem]">
             <input type="checkbox" checked={f.current} onChange={(e) => set("current", e.target.checked)} className="size-5 accent-(--c-violet)" />
             I currently work here
           </label>
@@ -363,16 +363,16 @@ const fmtMonths = (m: number) => [Math.floor(m / 12) ? `${Math.floor(m / 12)} yr
 
 function Stat({ value, label }: { value: React.ReactNode; label: string }) {
   return (
-    <div className="min-w-0 rounded-[18px] border border-(--hairline) bg-card px-2.5 py-2.5 sm:px-4 sm:py-3">
-      <p className="truncate text-[17px] leading-tight font-semibold tracking-[-0.02em] tabular-nums sm:text-[20px]">{value}</p>
-      <p className="mt-0.5 truncate text-[11px] text-muted-foreground min-[400px]:text-[12px] sm:text-[12.5px]">{label}</p>
+    <div className="min-w-0 rounded-[1.125rem] border border-(--hairline) bg-card px-2.5 py-2.5 sm:px-4 sm:py-3">
+      <p className="truncate text-[1.0625rem] leading-tight font-semibold tracking-[-0.02em] tabular-nums sm:text-[1.25rem]">{value}</p>
+      <p className="mt-0.5 truncate text-[0.6875rem] text-muted-foreground min-[25rem]:text-[0.75rem] sm:text-[0.7813rem]">{label}</p>
     </div>
   )
 }
 
 function Chip({ icon: Icon, children }: { icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-(--hairline) bg-card px-3 py-1 text-[13px] font-medium text-foreground/75">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-(--hairline) bg-card px-3 py-1 text-[0.8125rem] font-medium text-foreground/75">
       <Icon className="size-3.5 text-(--c-violet)" />
       {children}
     </span>
@@ -380,7 +380,7 @@ function Chip({ icon: Icon, children }: { icon: React.ComponentType<{ className?
 }
 
 const Eyebrow = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <p className={cn("text-[11.5px] font-semibold tracking-[0.14em] text-muted-foreground uppercase", className)}>{children}</p>
+  <p className={cn("text-[0.7188rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase", className)}>{children}</p>
 )
 
 /**
@@ -414,7 +414,7 @@ function CareerBar({ items, selectedId, onPick }: { items: Experience[]; selecte
           )
         })}
       </div>
-      <div className="mt-1.5 flex justify-between text-[12px] text-muted-foreground tabular-nums">
+      <div className="mt-1.5 flex justify-between text-[0.75rem] text-muted-foreground tabular-nums">
         <span>{new Date(from).getFullYear()}</span>
         <span>Today</span>
       </div>
@@ -437,19 +437,19 @@ function ExperienceDetail({
   const lines = e.description ? e.description.split("\n").filter(Boolean) : []
   const sameCompany = items.filter((r) => r.id !== e.id && r.company.trim().toLowerCase() === e.company.trim().toLowerCase())
   return (
-    <div className="relative min-w-0 overflow-hidden rounded-[22px] border border-(--hairline) bg-[color-mix(in_oklab,var(--c-violet)_5%,var(--card))] p-5 sm:p-6">
+    <div className="relative min-w-0 overflow-hidden rounded-[1.375rem] border border-(--hairline) bg-[color-mix(in_oklab,var(--c-violet)_5%,var(--card))] p-5 sm:p-6">
       {/* a soft glow in the corner so the card doesn't read flat */}
       <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 size-56 rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--c-violet)_16%,transparent),transparent)]" />
 
       <div key={e.id} className="relative animate-in duration-300 fade-in-0 slide-in-from-bottom-1">
         <div className="flex items-start gap-3.5">
-          <OrgAvatar name={e.company} className="size-12 shrink-0 bg-card text-[15px] shadow-[0_6px_14px_-8px_oklch(0.3_0.08_280/0.45)] ring-[3px] ring-card" />
+          <OrgAvatar name={e.company} className="size-12 shrink-0 bg-card text-[0.9375rem] shadow-[0_6px_14px_-8px_oklch(0.3_0.08_280/0.45)] ring-[3px] ring-card" />
           <div className="min-w-0 flex-1">
-            <p className="text-[20px] leading-tight font-semibold tracking-[-0.015em]">{e.title}</p>
-            <p className="mt-1 text-[15px] leading-snug text-foreground/70">{e.company}</p>
+            <p className="text-[1.25rem] leading-tight font-semibold tracking-[-0.015em]">{e.title}</p>
+            <p className="mt-1 text-[0.9375rem] leading-snug text-foreground/70">{e.company}</p>
           </div>
           {e.is_current && (
-            <span className="tone-mint inline-flex shrink-0 items-center gap-1.5 rounded-full bg-(--t-bg) px-2.5 py-1 text-[12.5px] leading-none font-medium text-(--t-fg)">
+            <span className="tone-mint inline-flex shrink-0 items-center gap-1.5 rounded-full bg-(--t-bg) px-2.5 py-1 text-[0.7813rem] leading-none font-medium text-(--t-fg)">
               <span className="size-1.5 animate-pulse rounded-full bg-(--t-fg)" />
               Current
             </span>
@@ -471,14 +471,14 @@ function ExperienceDetail({
         {lines.length > 0 ? (
           <ul className="mt-2.5 space-y-2">
             {lines.map((line, j) => (
-              <li key={j} className="flex gap-2.5 text-[14.5px] leading-snug text-foreground/80">
-                <span aria-hidden className="mt-[7px] size-1.5 shrink-0 rounded-full bg-(--c-violet)" />
+              <li key={j} className="flex gap-2.5 text-[0.9063rem] leading-snug text-foreground/80">
+                <span aria-hidden className="mt-[0.4375rem] size-1.5 shrink-0 rounded-full bg-(--c-violet)" />
                 {line}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-[14px] text-muted-foreground">No description added for this role.</p>
+          <p className="mt-2 text-[0.875rem] text-muted-foreground">No description added for this role.</p>
         )}
 
         {sameCompany.length > 0 && (
@@ -490,7 +490,7 @@ function ExperienceDetail({
                   key={r.id}
                   type="button"
                   onClick={() => onPick(r.id)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-(--hairline) bg-card px-3 py-1 text-[13px] font-medium transition-colors hover:bg-secondary"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-(--hairline) bg-card px-3 py-1 text-[0.8125rem] font-medium transition-colors hover:bg-secondary"
                 >
                   {r.title}
                   <ArrowRight className="size-3.5 text-muted-foreground" />
@@ -535,7 +535,7 @@ function ExperienceInner({ x, className }: { x: Extras; className?: string }) {
   return (
     <>
       <Panel className={className} title="Experience" style={stagger(6)} action={<AddButton onClick={() => setOpen(true)} label="Add experience" />}>
-        {isDemo && <p className="-mt-2 mb-5 text-[14px] text-muted-foreground">Sample data — add your own and it replaces this.</p>}
+        {isDemo && <p className="-mt-2 mb-5 text-[0.875rem] text-muted-foreground">Sample data — add your own and it replaces this.</p>}
         {selected ? (
           <>
             <div className="mb-6 grid grid-cols-3 gap-2 sm:gap-2.5">
@@ -574,13 +574,13 @@ function ExperienceInner({ x, className }: { x: Extras; className?: string }) {
                   drawDuration={400}
                   foldDuration={300}
                 />
-                <p className="mt-3 hidden text-[12.5px] text-muted-foreground md:block">Pick a role to see the details.</p>
+                <p className="mt-3 hidden text-[0.7813rem] text-muted-foreground md:block">Pick a role to see the details.</p>
               </div>
               <ExperienceDetail e={selected} items={items} onPick={pick} onDelete={isDemo ? undefined : () => x.removeExperience(selected.id)} />
             </div>
           </>
         ) : (
-          <p className="text-[14.5px] text-muted-foreground">No experience yet — add your first role.</p>
+          <p className="text-[0.9063rem] text-muted-foreground">No experience yet — add your first role.</p>
         )}
       </Panel>
       <ExperienceDialog open={open} onOpenChange={setOpen} onSave={x.addExperience} />
@@ -604,7 +604,7 @@ function AchievementDialog({ open, onOpenChange, onSave }: { open: boolean; onOp
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-[32px] p-7 sm:max-w-lg">
+      <DialogContent className="rounded-[2rem] p-7 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-2xl font-medium tracking-tight">Add achievement</DialogTitle>
           <DialogDescription>Awards, hackathon results, publications, scholarships…</DialogDescription>
@@ -659,10 +659,10 @@ function AchievementsInner({ x, className }: { x: Extras; className?: string }) 
   return (
     <>
       <Panel className={className} title="Achievements" style={stagger(7)} action={<AddButton onClick={() => setOpen(true)} label="Add" />}>
-        {isDemo && <p className="-mt-2 mb-5 text-[14px] text-muted-foreground">Sample data — add your own and it replaces this.</p>}
+        {isDemo && <p className="-mt-2 mb-5 text-[0.875rem] text-muted-foreground">Sample data — add your own and it replaces this.</p>}
         <ul className="stagger space-y-4">
           {items.map((a, i) => (
-            <li key={a.id} className={cn(MEDALS[i % MEDALS.length].tint, "group/item relative overflow-hidden rounded-[28px] bg-(--t-bg) p-5 shadow-[inset_0_0_0_1px_oklch(1_0_0/0.55)] transition-transform duration-200 hover:-translate-y-0.5")}>
+            <li key={a.id} className={cn(MEDALS[i % MEDALS.length].tint, "group/item relative overflow-hidden rounded-[1.75rem] bg-(--t-bg) p-5 shadow-[inset_0_0_0_1px_oklch(1_0_0/0.55)] transition-transform duration-200 hover:-translate-y-0.5")}>
               {a.achieved_on && (
                 <span aria-hidden className="pointer-events-none absolute -right-2 -bottom-6 text-[6rem] leading-none font-light tracking-[-0.06em] text-(--t-fg)/[0.07] select-none">
                   {new Date(a.achieved_on).getFullYear()}
@@ -671,9 +671,9 @@ function AchievementsInner({ x, className }: { x: Extras; className?: string }) 
               <div className="relative flex items-start gap-5">
                 <Medal i={i} />
                 <div className="min-w-0 flex-1 pt-1">
-                  <p className="text-[18px] leading-snug font-medium tracking-[-0.01em] text-foreground">{a.title}</p>
-                  {a.detail && <p className="mt-1.5 text-[14.5px] leading-snug text-foreground/65">{a.detail}</p>}
-                  {a.achieved_on && <p className="mt-3 inline-flex rounded-full bg-card/80 px-3 py-1 text-[13px] font-medium text-(--t-fg)">{month(a.achieved_on)}</p>}
+                  <p className="text-[1.125rem] leading-snug font-medium tracking-[-0.01em] text-foreground">{a.title}</p>
+                  {a.detail && <p className="mt-1.5 text-[0.9063rem] leading-snug text-foreground/65">{a.detail}</p>}
+                  {a.achieved_on && <p className="mt-3 inline-flex rounded-full bg-card/80 px-3 py-1 text-[0.8125rem] font-medium text-(--t-fg)">{month(a.achieved_on)}</p>}
                 </div>
                 {!isDemo && <IconDelete onClick={() => x.removeAchievement(a.id)} label={`Remove ${a.title}`} />}
               </div>
@@ -715,7 +715,7 @@ function CertDialog({ open, onOpenChange, onSave }: { open: boolean; onOpenChang
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90svh] overflow-y-auto rounded-[32px] p-7 sm:max-w-xl">
+      <DialogContent className="max-h-[90svh] overflow-y-auto rounded-[2rem] p-7 sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-medium tracking-tight">Add certification</DialogTitle>
           <DialogDescription>Upload a copy so recruiters can verify it.</DialogDescription>
@@ -741,13 +741,13 @@ function CertDialog({ open, onOpenChange, onSave }: { open: boolean; onOpenChang
             </Field>
           </div>
           {file ? (
-            <div className="flex items-center gap-3 rounded-[22px] border border-(--hairline) bg-card p-3.5">
+            <div className="flex items-center gap-3 rounded-[1.375rem] border border-(--hairline) bg-card p-3.5">
               <span className="tone-violet flex size-11 shrink-0 items-center justify-center rounded-2xl bg-(--t-bg) text-(--t-fg)"><ApplicationsIcon className="size-5" /></span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[15.5px] font-medium">{file.name}</p>
-                <p className="text-[13.5px] text-muted-foreground">{(file.size / 1024).toFixed(0)} KB</p>
+                <p className="truncate text-[0.9688rem] font-medium">{file.name}</p>
+                <p className="text-[0.8438rem] text-muted-foreground">{(file.size / 1024).toFixed(0)} KB</p>
               </div>
-              <button type="button" onClick={() => setFile(null)} className="rounded-full px-3 py-1.5 text-[14px] font-medium text-muted-foreground hover:text-foreground">Remove</button>
+              <button type="button" onClick={() => setFile(null)} className="rounded-full px-3 py-1.5 text-[0.875rem] font-medium text-muted-foreground hover:text-foreground">Remove</button>
             </div>
           ) : (
             <DropZone compact accept="application/pdf,image/png,image/jpeg,image/webp,.pdf" onFile={pick} title="Upload the certificate" hint="PDF or image, up to 5 MB" />
@@ -767,17 +767,17 @@ function CertCard({ c, i, demo, onDelete }: { c: Certification; i: number; demo:
   const tone = TONES[i % TONES.length]
   const initial = c.issuer.trim().charAt(0).toUpperCase() || "C"
   return (
-    <li className="group/item relative flex flex-col overflow-hidden rounded-[28px] border border-(--hairline) bg-card p-2 shadow-[0_1px_2px_oklch(0.2_0.05_280/0.04),0_16px_30px_-22px_oklch(0.2_0.06_280/0.3)] transition-transform duration-200 hover:-translate-y-0.5">
-      <div className={cn(tone, "relative overflow-hidden rounded-[22px] bg-(--t-bg) p-5 shadow-[inset_0_0_0_1px_oklch(1_0_0/0.55)]")}>
+    <li className="group/item relative flex flex-col overflow-hidden rounded-[1.75rem] border border-(--hairline) bg-card p-2 shadow-[0_1px_2px_oklch(0.2_0.05_280/0.04),0_16px_30px_-22px_oklch(0.2_0.06_280/0.3)] transition-transform duration-200 hover:-translate-y-0.5">
+      <div className={cn(tone, "relative overflow-hidden rounded-[1.375rem] bg-(--t-bg) p-5 shadow-[inset_0_0_0_1px_oklch(1_0_0/0.55)]")}>
         <span aria-hidden className="pointer-events-none absolute -top-6 -right-4 text-[9rem] leading-none font-light tracking-[-0.06em] text-(--t-fg)/[0.08] select-none">{initial}</span>
         <div className="relative flex items-start justify-between gap-3">
           <OrgAvatar name={c.issuer.split("·")[0].trim()} className="size-11 bg-card" />
         </div>
-        <p className="relative mt-6 text-[19px] leading-snug font-medium tracking-[-0.01em] text-foreground">{c.name}</p>
-        <p className="relative mt-1.5 flex items-center gap-1.5 text-[15.5px] text-foreground/65">{c.issuer}<VerifiedBadge className="size-5" title="Verified credential" /></p>
+        <p className="relative mt-6 text-[1.1875rem] leading-snug font-medium tracking-[-0.01em] text-foreground">{c.name}</p>
+        <p className="relative mt-1.5 flex items-center gap-1.5 text-[0.9688rem] text-foreground/65">{c.issuer}<VerifiedBadge className="size-5" title="Verified credential" /></p>
       </div>
       <div className="flex flex-1 flex-col gap-3 px-3.5 pt-4 pb-3">
-        <dl className="grid grid-cols-2 gap-3 text-[14px]">
+        <dl className="grid grid-cols-2 gap-3 text-[0.875rem]">
           <div>
             <dt className="text-muted-foreground">Issued</dt>
             <dd className="mt-0.5 font-medium">{month(c.issued_on) || "—"}</dd>
@@ -790,16 +790,16 @@ function CertCard({ c, i, demo, onDelete }: { c: Certification; i: number; demo:
         <div className="mt-auto flex items-center gap-2">
           {c.file ? (
             c.file === "demo" ? (
-              <span className="inline-flex h-10 flex-1 items-center gap-2 rounded-full bg-secondary px-4 text-[14.5px] font-medium">
-                <ApplicationsIcon className="size-[18px]" /> Certificate attached
+              <span className="inline-flex h-10 flex-1 items-center gap-2 rounded-full bg-secondary px-4 text-[0.9063rem] font-medium">
+                <ApplicationsIcon className="size-[1.125rem]" /> Certificate attached
               </span>
             ) : (
-              <a href={c.file} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 flex-1 items-center gap-2 rounded-full bg-secondary px-4 text-[14.5px] font-medium outline-none transition-colors hover:bg-secondary/70 focus-visible:ring-2 focus-visible:ring-ring">
-                <ApplicationsIcon className="size-[18px]" /> View certificate
+              <a href={c.file} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 flex-1 items-center gap-2 rounded-full bg-secondary px-4 text-[0.9063rem] font-medium outline-none transition-colors hover:bg-secondary/70 focus-visible:ring-2 focus-visible:ring-ring">
+                <ApplicationsIcon className="size-[1.125rem]" /> View certificate
               </a>
             )
           ) : (
-            <span className="inline-flex h-10 flex-1 items-center rounded-full border border-dashed border-border px-4 text-[14.5px] text-muted-foreground">No file attached</span>
+            <span className="inline-flex h-10 flex-1 items-center rounded-full border border-dashed border-border px-4 text-[0.9063rem] text-muted-foreground">No file attached</span>
           )}
           {!demo && <IconDelete onClick={onDelete} label={`Remove ${c.name}`} />}
         </div>
@@ -814,7 +814,7 @@ function CertsInner({ x, className }: { x: Extras; className?: string }) {
   return (
     <>
       <Panel className={className} title="Certifications" style={stagger(8)} action={<AddButton onClick={() => setOpen(true)} label="Add certification" />}>
-        {isDemo && <p className="-mt-2 mb-5 text-[14px] text-muted-foreground">Sample data — add your own and it replaces this.</p>}
+        {isDemo && <p className="-mt-2 mb-5 text-[0.875rem] text-muted-foreground">Sample data — add your own and it replaces this.</p>}
         <ul className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((c, i) => (
             <CertCard key={c.id} c={c} i={i} demo={isDemo} onDelete={() => x.removeCert(c.id)} />

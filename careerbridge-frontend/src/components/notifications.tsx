@@ -2,10 +2,12 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { XIcon } from "lucide-react"
 import { cn } from "cn"
 
 import { useAuth } from "@/contexts/auth-context"
-import { getNotifications, markNotificationsRead, timeAgo, type AppNotification } from "@/lib/ats"
+import { fmtDateTime, getNotifications, markNotificationsRead, timeAgo, type AppNotification } from "@/lib/ats"
 import {
   ApplicationsIcon,
   BellIcon,
@@ -109,6 +111,7 @@ export function NotificationsMenu({ className }: { className?: string }) {
   const { unread, items, loaded } = useNotifications(!!user)
   const [open, setOpenState] = React.useState(false)
   const [tab, setTab] = React.useState<TabId>("all")
+  const [detail, setDetail] = React.useState<AppNotification | null>(null)
   const rootRef = React.useRef<HTMLDivElement>(null)
 
   // Stay mounted while the closing animation plays, then unmount.
@@ -165,21 +168,20 @@ export function NotificationsMenu({ className }: { className?: string }) {
           type="button"
           onClick={() => {
             if (!n.is_read) markRead([n.id])
-            if (n.link) {
-              setOpen(false)
-              router.push(n.link)
-            }
+            if (n.kind === "announcement") return openAnnouncement(n)
+            setOpen(false)
+            setDetail(n)
           }}
-          className="w-full rounded-[26px] border border-(--hairline) bg-card p-4 text-left shadow-[0_1px_2px_oklch(0.2_0.05_280/0.04),0_14px_28px_-20px_oklch(0.2_0.06_280/0.28)] transition-transform duration-150 active:scale-[0.99]"
+          className="w-full rounded-[1.625rem] border border-(--hairline) bg-card p-4 text-left shadow-[0_1px_2px_oklch(0.2_0.05_280/0.04),0_14px_28px_-20px_oklch(0.2_0.06_280/0.28)] transition-transform duration-150 active:scale-[0.99]"
         >
           <div className="flex items-start gap-3.5">
-            <span className={cn(k.tone, "flex size-10 shrink-0 items-center justify-center rounded-[14px] bg-(--t-bg) text-(--t-fg) [&_svg]:size-5")}>{k.icon}</span>
+            <span className={cn(k.tone, "flex size-10 shrink-0 items-center justify-center rounded-[0.875rem] bg-(--t-bg) text-(--t-fg) [&_svg]:size-5")}>{k.icon}</span>
             <div className="min-w-0 flex-1">
-              <p className="text-[15px] leading-snug font-medium">{n.title}</p>
-              {n.body && <p className="mt-0.5 line-clamp-3 text-[14px] leading-snug text-foreground/70">{n.body}</p>}
-              <p className="mt-1 text-[12.5px] text-muted-foreground">{k.label}</p>
+              <p className="text-[0.9375rem] leading-snug font-medium">{n.title}</p>
+              {n.body && <p className="mt-0.5 line-clamp-3 text-[0.875rem] leading-snug text-foreground/70">{n.body}</p>}
+              <p className="mt-1 text-[0.7813rem] text-muted-foreground">{k.label}</p>
             </div>
-            <span className="flex shrink-0 items-center gap-2 pt-0.5 text-[12.5px] text-muted-foreground tabular-nums">
+            <span className="flex shrink-0 items-center gap-2 pt-0.5 text-[0.7813rem] text-muted-foreground tabular-nums">
               {!n.is_read && <span className="size-2 rounded-full bg-(--c-violet)" aria-label="Unread" />}
               {timeAgo(n.created_at)}
             </span>
@@ -189,10 +191,24 @@ export function NotificationsMenu({ className }: { className?: string }) {
     )
   }
 
+  /** Announcements open in full on Campus (the popup with files, event and "Got it"). */
+  const openAnnouncement = (n: AppNotification) => {
+    setOpen(false)
+    const target = n.link.includes("?a=") ? n.link : `/dashboard/student/campus?q=${encodeURIComponent(n.title.replace(/^(Urgent|Reminder): /, ""))}`
+    router.push(target)
+    window.dispatchEvent(new CustomEvent("cb:deeplink", { detail: target.split("?")[1] ?? "" }))
+  }
+  const follow = (n: AppNotification) => {
+    setOpen(false)
+    router.push(n.link)
+    // already on that page? let it react to the new query (e.g. Campus focusing a drive)
+    window.dispatchEvent(new CustomEvent("cb:deeplink", { detail: n.link.split("?")[1] ?? "" }))
+  }
+
   const group = (label: string, list: AppNotification[]) =>
     list.length === 0 ? null : (
       <li key={label} className="list-none">
-        <p className="mb-2.5 px-2 text-[12.5px] font-medium tracking-[0.1em] text-muted-foreground uppercase">{label}</p>
+        <p className="mb-2.5 px-2 text-[0.7813rem] font-medium tracking-[0.1em] text-muted-foreground uppercase">{label}</p>
         <ul className="space-y-3">{list.map(card)}</ul>
       </li>
     )
@@ -204,7 +220,7 @@ export function NotificationsMenu({ className }: { className?: string }) {
         aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className="glass-nav relative flex size-11 shrink-0 items-center justify-center rounded-full text-foreground/85 outline-none transition-[transform,color] duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:scale-90 [&_svg]:size-[18px]"
+        className="glass-nav relative flex size-11 shrink-0 items-center justify-center rounded-full text-foreground/85 outline-none transition-[transform,color] duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:scale-90 [&_svg]:size-[1.125rem]"
       >
         <BellIcon />
         {unread > 0 && <span className="absolute top-2.5 right-3 size-2 rounded-full bg-destructive ring-2 ring-card" />}
@@ -216,13 +232,13 @@ export function NotificationsMenu({ className }: { className?: string }) {
           aria-label="Notifications"
           data-state={open ? "open" : "closed"}
           inert={!open}
-          className="absolute top-full right-0 z-50 mt-3 flex max-h-[min(42rem,calc(100svh-7rem))] w-[min(31rem,calc(100vw-2rem))] origin-top-right flex-col overflow-hidden rounded-[30px] border border-(--hairline) bg-popover text-popover-foreground shadow-[0_36px_72px_-28px_oklch(0.2_0.06_280/0.5),0_2px_6px_oklch(0.2_0.06_280/0.06)] duration-350 ease-(--ease-out) data-[state=closed]:animate-out data-[state=closed]:fill-mode-forwards data-[state=closed]:duration-250 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-0 motion-reduce:animate-none"
+          className="absolute top-full right-0 z-50 mt-3 flex max-h-[min(42rem,calc(100svh-7rem))] w-[min(31rem,calc(100vw-2rem))] origin-top-right flex-col overflow-hidden rounded-[1.875rem] border border-(--hairline) bg-popover text-popover-foreground shadow-[0_36px_72px_-28px_oklch(0.2_0.06_280/0.5),0_2px_6px_oklch(0.2_0.06_280/0.06)] duration-350 ease-(--ease-out) data-[state=closed]:animate-out data-[state=closed]:fill-mode-forwards data-[state=closed]:duration-250 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-0 motion-reduce:animate-none"
         >
-          <span aria-hidden className="pointer-events-none absolute inset-[5px] z-20 rounded-[24px] border border-(--keyline-card)" />
+          <span aria-hidden className="pointer-events-none absolute inset-[0.3125rem] z-20 rounded-[1.5rem] border border-(--keyline-card)" />
 
           <div className="flex shrink-0 items-center justify-between gap-3 px-7 pt-6">
-            <h3 className="text-[24px] font-medium tracking-[-0.025em]">Notifications</h3>
-            {unread > 0 && <span className="rounded-full bg-secondary px-3 py-1 text-[13px] font-medium tabular-nums">{unread} new</span>}
+            <h3 className="text-[1.5rem] font-medium tracking-[-0.025em]">Notifications</h3>
+            {unread > 0 && <span className="rounded-full bg-secondary px-3 py-1 text-[0.8125rem] font-medium tabular-nums">{unread} new</span>}
           </div>
 
           <div role="tablist" className="mt-4 flex shrink-0 gap-6 overflow-x-auto border-b border-(--hairline) px-7">
@@ -234,7 +250,7 @@ export function NotificationsMenu({ className }: { className?: string }) {
                 type="button"
                 onClick={() => setTab(t.id)}
                 className={cn(
-                  "-mb-px shrink-0 border-b-2 pb-3.5 text-[15px] font-medium outline-none transition-colors duration-150",
+                  "-mb-px shrink-0 border-b-2 pb-3.5 text-[0.9375rem] font-medium outline-none transition-colors duration-150",
                   tab === t.id ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -244,9 +260,9 @@ export function NotificationsMenu({ className }: { className?: string }) {
           </div>
 
           <ul className="flex-1 space-y-6 overflow-y-auto overscroll-contain bg-secondary/55 p-4 pb-5">
-            {!loaded && <li className="px-4 py-14 text-center text-[15px] text-muted-foreground">Loading…</li>}
+            {!loaded && <li className="px-4 py-14 text-center text-[0.9375rem] text-muted-foreground">Loading…</li>}
             {loaded && shown.length === 0 && (
-              <li className="flex flex-col items-center gap-3 px-4 py-14 text-center text-[15px] text-muted-foreground">
+              <li className="flex flex-col items-center gap-3 px-4 py-14 text-center text-[0.9375rem] text-muted-foreground">
                 <CheckCircleIcon className="size-8" />
                 You’re all caught up.
               </li>
@@ -255,7 +271,7 @@ export function NotificationsMenu({ className }: { className?: string }) {
             {group("Earlier", earlier)}
           </ul>
 
-          <div className="flex shrink-0 items-center justify-between border-t border-(--hairline) px-7 py-4 text-[14px]">
+          <div className="flex shrink-0 items-center justify-between border-t border-(--hairline) px-7 py-4 text-[0.875rem]">
             <button
               type="button"
               disabled={unread === 0}
@@ -268,6 +284,16 @@ export function NotificationsMenu({ className }: { className?: string }) {
           </div>
         </div>
       )}
+
+      <NotificationDialog
+        n={detail}
+        onClose={() => setDetail(null)}
+        onOpen={() => {
+          if (!detail) return
+          setDetail(null)
+          follow(detail)
+        }}
+      />
     </div>
   )
 }
@@ -275,4 +301,55 @@ export function NotificationsMenu({ className }: { className?: string }) {
 /** Open the notifications panel from anywhere (e.g. the sidebar row). */
 export function openNotifications() {
   window.dispatchEvent(new Event("cb:notifications"))
+}
+
+/** One notification read in full, in a centred popup over a blurred page, with a way to go to what it's about. */
+function NotificationDialog({ n, onClose, onOpen }: { n: AppNotification | null; onClose: () => void; onOpen: () => void }) {
+  // keep the last one on screen while the closing animation plays
+  const [shown, setShown] = React.useState(n)
+  if (n && n !== shown) setShown(n)
+  const view = n ?? shown
+  const k = view ? (KIND[view.kind] ?? KIND.system) : KIND.system
+  return (
+    <DialogPrimitive.Root open={!!n} onOpenChange={(o) => !o && onClose()}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[color-mix(in_oklab,var(--background)_42%,transparent)] backdrop-blur-[10px] duration-300 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content
+          aria-describedby={undefined}
+          className="fixed top-1/2 left-1/2 z-50 max-h-[calc(100svh-2rem)] w-[min(32rem,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[1.75rem] bg-popover p-6 text-popover-foreground shadow-[0_2px_8px_oklch(0.2_0.02_270/0.06),0_40px_90px_-30px_oklch(0.2_0.02_270/0.45)] ring-1 ring-(--hairline) duration-300 ease-(--ease-out) data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-[0.97] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-[0.97] sm:p-8"
+        >
+          {view && (
+            <>
+              <DialogPrimitive.Close aria-label="Close" className="absolute top-4 right-4 rounded-full p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
+                <XIcon className="size-[1.125rem]" />
+              </DialogPrimitive.Close>
+              <div className="flex items-center gap-3 pr-8">
+                <span className={cn(k.tone, "flex size-11 shrink-0 items-center justify-center rounded-[0.9375rem] bg-(--t-bg) text-(--t-fg) [&_svg]:size-5")}>{k.icon}</span>
+                <div className="min-w-0 leading-tight">
+                  <p className="text-[0.6875rem] font-medium tracking-[0.09em] text-muted-foreground uppercase">{k.label}</p>
+                  <p className="mt-1 text-[0.8125rem] text-muted-foreground">{fmtDateTime(view.created_at)}</p>
+                </div>
+              </div>
+              <DialogPrimitive.Title className="mt-5 text-[1.375rem] leading-snug font-medium tracking-[-0.02em] [overflow-wrap:anywhere]">{view.title}</DialogPrimitive.Title>
+              {view.body && <p className="mt-2 text-[0.9375rem] leading-relaxed whitespace-pre-wrap text-foreground/80 [overflow-wrap:anywhere]">{view.body}</p>}
+              <div className="mt-6 flex gap-2">
+                {view.link && (
+                  <button
+                    type="button"
+                    onClick={onOpen}
+                    className="inline-flex h-10 items-center rounded-full bg-foreground px-5 text-[0.875rem] font-medium text-background transition-transform duration-150 active:scale-[0.97]"
+                  >
+                    Open
+                  </button>
+                )}
+                <DialogPrimitive.Close className="inline-flex h-10 items-center rounded-full px-4 text-[0.875rem] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
+                  Close
+                </DialogPrimitive.Close>
+              </div>
+            </>
+          )}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  )
 }

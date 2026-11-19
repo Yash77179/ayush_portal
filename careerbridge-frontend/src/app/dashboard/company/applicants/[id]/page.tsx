@@ -197,29 +197,29 @@ function Candidate() {
 
   return (
     <div className="space-y-6">
-      <Link href="/dashboard/company/pipeline" className="rise inline-flex items-center gap-2 text-[15px] text-muted-foreground hover:text-foreground">
+      <Link href="/dashboard/company/pipeline" className="rise inline-flex items-center gap-2 text-[0.9375rem] text-muted-foreground hover:text-foreground">
         <ArrowLeftIcon className="size-4" /> Pipeline
       </Link>
 
       {/* Header */}
-      <section className="rise flex flex-col gap-6 rounded-[32px] border border-(--hairline) bg-card p-6 sm:p-8 lg:flex-row lg:items-center">
+      <section className="rise flex flex-col gap-6 rounded-[2rem] border border-(--hairline) bg-card p-6 sm:p-8 lg:flex-row lg:items-center">
         <div className="flex min-w-0 flex-1 items-start gap-4 sm:items-center sm:gap-5">
           {c.student_photo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={mediaUrl(c.student_photo) ?? ""} alt="" className="size-14 shrink-0 rounded-[20px] object-cover sm:size-20 sm:rounded-[24px]" />
+            <img src={mediaUrl(c.student_photo) ?? ""} alt="" className="size-14 shrink-0 rounded-[1.25rem] object-cover sm:size-20 sm:rounded-[1.5rem]" />
           ) : (
-            <OrgAvatar name={s.user_name} className="size-14 rounded-[20px] text-xl sm:size-20 sm:rounded-[24px] sm:text-2xl" />
+            <OrgAvatar name={s.user_name} className="size-14 rounded-[1.25rem] text-xl sm:size-20 sm:rounded-[1.5rem] sm:text-2xl" />
           )}
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h1 className="truncate text-[clamp(1.75rem,3vw,2.5rem)] leading-tight font-medium tracking-tight">{s.user_name}</h1>
               <VerifiedChip status={s.verification_status} />
             </div>
-            <p className="mt-1 text-[15px] text-muted-foreground">
+            <p className="mt-1 text-[0.9375rem] text-muted-foreground">
               {[s.degree, s.branch].filter(Boolean).join(" · ") || "—"}
               {s.university ? ` · ${s.university.name}` : ""}
             </p>
-            <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[14.5px] text-muted-foreground">
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.9063rem] text-muted-foreground">
               <a href={`mailto:${s.user_email}`} className="inline-flex max-w-full min-w-0 items-center gap-1.5 hover:text-foreground">
                 <MailIcon className="size-4 shrink-0" /> <span className="truncate">{s.user_email}</span>
               </a>
@@ -247,7 +247,7 @@ function Candidate() {
           </div>
         </div>
         <div className="flex flex-col gap-3 lg:w-80">
-          <p className="text-[14.5px] text-muted-foreground">
+          <p className="text-[0.9063rem] text-muted-foreground">
             {c.internship.title} · applied {timeAgo(c.applied_at)}
             {c.source === "drive" && " · campus drive"}
           </p>
@@ -292,13 +292,13 @@ function Candidate() {
           {/* Offer */}
           {c.offer && (
             <Panel title="Offer" style={stagger(1)} tone={c.offer.status === "accepted" ? "mint" : undefined} action={<OfferBadge offer={c.offer} />}>
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-[15px] sm:grid-cols-4">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-[0.9375rem] sm:grid-cols-4">
                 <Info label="Role" value={c.offer.role_title} />
                 <Info label="Stipend" value={`${fmtMoney(c.offer.stipend)}/mo`} />
                 <Info label="Starts" value={fmtDate(c.offer.start_date)} />
                 <Info label="Reply by" value={fmtDate(c.offer.expires_on)} />
               </dl>
-              {c.offer.response_note && <p className="mt-4 rounded-2xl bg-secondary p-3 text-[15px]">“{c.offer.response_note}”</p>}
+              {c.offer.response_note && <p className="mt-4 rounded-2xl bg-secondary p-3 text-[0.9375rem]">“{c.offer.response_note}”</p>}
               <div className="mt-5 flex flex-wrap gap-2">
                 <Button variant="outline" render={<Link href={`/offers/${c.offer.id}`} target="_blank" />} nativeButton={false}>
                   Offer letter
@@ -330,48 +330,48 @@ function Candidate() {
             action={canManage && !closed ? <Button size="sm" variant="outline" onClick={() => { setEditing(null); setDialog("interview"); }}>Schedule</Button> : undefined}
             contentClassName="space-y-3"
           >
-            {c.interviews.length === 0 && <p className="py-4 text-[15px] text-muted-foreground">No interviews yet.</p>}
+            {c.interviews.length === 0 && <p className="py-4 text-[0.9375rem] text-muted-foreground">No interviews yet.</p>}
             {c.interviews.map((i) => {
               const mine = i.feedback.find((f) => f.author_id === user?.id);
               const onPanel = i.interviewers.some((p) => p.id === user?.id);
               return (
-                <div key={i.id} className={cn("rounded-[22px] border border-(--hairline) p-4", i.status === "cancelled" && "opacity-60")}>
+                <div key={i.id} className={cn("rounded-[1.375rem] border border-(--hairline) p-4", i.status === "cancelled" && "opacity-60")}>
                   <div className="grid grid-cols-[auto_1fr] items-start gap-3 sm:grid-cols-[auto_1fr_auto]">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-secondary">
                       {i.mode === "video" ? <VideoIcon className="size-5" /> : i.mode === "phone" ? <PhoneIcon className="size-5" /> : <CalendarIcon className="size-5" />}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[17px] font-medium">{i.round_name}</p>
-                      <p className="text-[14.5px] text-muted-foreground">
+                      <p className="text-[1.0625rem] font-medium">{i.round_name}</p>
+                      <p className="text-[0.9063rem] text-muted-foreground">
                         {fmtDateTime(i.scheduled_at)} · {i.duration_minutes} min
                         {i.interviewers.length > 0 && ` · ${i.interviewers.map((p) => p.name).join(", ")}`}
                       </p>
                       {i.meeting_link && (
-                        <a href={i.meeting_link} target="_blank" rel="noreferrer" className="block truncate text-[14.5px] underline-offset-4 hover:underline">
+                        <a href={i.meeting_link} target="_blank" rel="noreferrer" className="block truncate text-[0.9063rem] underline-offset-4 hover:underline">
                           {i.meeting_link}
                         </a>
                       )}
-                      {i.location && <p className="text-[14.5px]">{i.location}</p>}
+                      {i.location && <p className="text-[0.9063rem]">{i.location}</p>}
                     </div>
                     <div className="col-span-2 flex flex-wrap items-center gap-2 sm:col-span-1 sm:flex-col sm:items-end sm:gap-1.5">
                       <Badge variant={i.status === "completed" ? "success" : i.status === "cancelled" ? "danger" : "info"} className="capitalize">
                         {i.status}
                       </Badge>
                       {i.status === "scheduled" && (
-                        <span className={cn("text-[13.5px]", i.candidate_response === "confirmed" ? "text-(--mint-fg)" : i.candidate_response === "reschedule" ? "text-(--pink-fg)" : "text-muted-foreground")}>
+                        <span className={cn("text-[0.8438rem]", i.candidate_response === "confirmed" ? "text-(--mint-fg)" : i.candidate_response === "reschedule" ? "text-(--pink-fg)" : "text-muted-foreground")}>
                           {i.candidate_response === "confirmed" ? "Candidate confirmed" : i.candidate_response === "reschedule" ? "Asked to reschedule" : "Awaiting reply"}
                         </span>
                       )}
                     </div>
                   </div>
-                  {i.candidate_note && <p className="mt-3 rounded-2xl bg-secondary p-3 text-[14.5px]">Candidate: “{i.candidate_note}”</p>}
+                  {i.candidate_note && <p className="mt-3 rounded-2xl bg-secondary p-3 text-[0.9063rem]">Candidate: “{i.candidate_note}”</p>}
                   {i.feedback.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {i.feedback.map((f) => (
-                        <div key={f.id} className="rounded-2xl bg-secondary/70 p-3 text-[14.5px]">
+                        <div key={f.id} className="rounded-2xl bg-secondary/70 p-3 text-[0.9063rem]">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="font-medium">{f.author_name}</span>
-                            <span className={cn("rounded-full px-2 py-0.5 text-[12.5px] font-semibold", RECOMMENDATION[f.recommendation]?.cls)}>
+                            <span className={cn("rounded-full px-2 py-0.5 text-[0.7813rem] font-semibold", RECOMMENDATION[f.recommendation]?.cls)}>
                               {RECOMMENDATION[f.recommendation]?.label}
                             </span>
                             <span className="text-muted-foreground tabular-nums">
@@ -417,21 +417,21 @@ function Candidate() {
           <Panel title="Skill match" style={stagger(3)} action={<MatchPill score={c.match.score} />}>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <p className="mb-2 text-[14.5px] text-muted-foreground">Has</p>
+                <p className="mb-2 text-[0.9063rem] text-muted-foreground">Has</p>
                 <div className="flex flex-wrap gap-1.5">
                   {[...c.match.matched_required, ...c.match.matched_preferred].map((n) => (
-                    <span key={n} className="rounded-full bg-(--mint-bg) px-2.5 py-1 text-[13.5px] text-(--mint-fg)">{n}</span>
+                    <span key={n} className="rounded-full bg-(--mint-bg) px-2.5 py-1 text-[0.8438rem] text-(--mint-fg)">{n}</span>
                   ))}
-                  {c.match.matched_required.length + c.match.matched_preferred.length === 0 && <span className="text-[15px] text-muted-foreground">None of the listed skills</span>}
+                  {c.match.matched_required.length + c.match.matched_preferred.length === 0 && <span className="text-[0.9375rem] text-muted-foreground">None of the listed skills</span>}
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-[14.5px] text-muted-foreground">Missing (required)</p>
+                <p className="mb-2 text-[0.9063rem] text-muted-foreground">Missing (required)</p>
                 <div className="flex flex-wrap gap-1.5">
                   {c.match.missing_required.map((n) => (
-                    <span key={n} className="rounded-full bg-(--pink-bg) px-2.5 py-1 text-[13.5px] text-(--pink-fg)">{n}</span>
+                    <span key={n} className="rounded-full bg-(--pink-bg) px-2.5 py-1 text-[0.8438rem] text-(--pink-fg)">{n}</span>
                   ))}
-                  {c.match.missing_required.length === 0 && <span className="text-[15px] text-muted-foreground">Nothing — all required skills present</span>}
+                  {c.match.missing_required.length === 0 && <span className="text-[0.9375rem] text-muted-foreground">Nothing — all required skills present</span>}
                 </div>
               </div>
             </div>
@@ -442,13 +442,13 @@ function Candidate() {
             <Panel title="Application" style={stagger(4)} contentClassName="space-y-4">
               {c.answers.map((a) => (
                 <div key={a.question_id}>
-                  <p className="text-[14.5px] text-muted-foreground">{a.question}</p>
+                  <p className="text-[0.9063rem] text-muted-foreground">{a.question}</p>
                   <p className="mt-1 whitespace-pre-wrap">{a.answer}</p>
                 </div>
               ))}
               {c.cover_letter && (
                 <div>
-                  <p className="text-[14.5px] text-muted-foreground">Cover letter</p>
+                  <p className="text-[0.9063rem] text-muted-foreground">Cover letter</p>
                   <p className="mt-1 whitespace-pre-wrap">{c.cover_letter}</p>
                 </div>
               )}
@@ -457,8 +457,8 @@ function Candidate() {
 
           {/* Profile */}
           <Panel title="Profile" style={stagger(5)} contentClassName="space-y-6">
-            {s.bio && <p className="whitespace-pre-wrap text-[15px]">{s.bio}</p>}
-            <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-[15px] sm:grid-cols-4">
+            {s.bio && <p className="whitespace-pre-wrap text-[0.9375rem]">{s.bio}</p>}
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-[0.9375rem] sm:grid-cols-4">
               <Info label="CGPA" value={s.cgpa ?? "—"} />
               <Info label="Graduates" value={s.graduation_year ?? "—"} />
               <Info label="Enrollment no." value={s.enrollment_number || "—"} />
@@ -466,10 +466,10 @@ function Candidate() {
             </dl>
             {c.skills.length > 0 && (
               <div>
-                <p className="mb-2 text-[14.5px] text-muted-foreground">Skills</p>
+                <p className="mb-2 text-[0.9063rem] text-muted-foreground">Skills</p>
                 <div className="flex flex-wrap gap-1.5">
                   {c.skills.map((sk) => (
-                    <span key={sk.name} className="rounded-full bg-secondary px-2.5 py-1 text-[13.5px]">
+                    <span key={sk.name} className="rounded-full bg-secondary px-2.5 py-1 text-[0.8438rem]">
                       {sk.name} <span className="text-muted-foreground capitalize">· {sk.proficiency}</span>
                     </span>
                   ))}
@@ -478,26 +478,26 @@ function Candidate() {
             )}
             {c.experiences.length > 0 && (
               <div className="space-y-3">
-                <p className="text-[14.5px] text-muted-foreground">Experience</p>
+                <p className="text-[0.9063rem] text-muted-foreground">Experience</p>
                 {c.experiences.map((e) => (
                   <div key={e.id}>
-                    <p className="text-[17px] font-medium">
+                    <p className="text-[1.0625rem] font-medium">
                       {e.title} · {e.company}
                     </p>
-                    <p className="text-[14.5px] text-muted-foreground">
+                    <p className="text-[0.9063rem] text-muted-foreground">
                       {fmtDate(e.start_date, { month: "short", year: "numeric" })} – {e.is_current ? "Present" : fmtDate(e.end_date, { month: "short", year: "numeric" })}
                       {e.location && ` · ${e.location}`}
                     </p>
-                    {e.description && <p className="mt-1 text-[15px] whitespace-pre-wrap text-muted-foreground">{e.description}</p>}
+                    {e.description && <p className="mt-1 text-[0.9375rem] whitespace-pre-wrap text-muted-foreground">{e.description}</p>}
                   </div>
                 ))}
               </div>
             )}
             {c.certifications.length > 0 && (
               <div className="space-y-2">
-                <p className="text-[14.5px] text-muted-foreground">Certifications</p>
+                <p className="text-[0.9063rem] text-muted-foreground">Certifications</p>
                 {c.certifications.map((ce) => (
-                  <p key={ce.id} className="text-[15px]">
+                  <p key={ce.id} className="text-[0.9375rem]">
                     {ce.credential_url ? (
                       <a href={ce.credential_url} target="_blank" rel="noreferrer" className="font-medium underline-offset-4 hover:underline">{ce.name}</a>
                     ) : (
@@ -510,9 +510,9 @@ function Candidate() {
             )}
             {c.achievements.length > 0 && (
               <div className="space-y-2">
-                <p className="text-[14.5px] text-muted-foreground">Achievements</p>
+                <p className="text-[0.9063rem] text-muted-foreground">Achievements</p>
                 {c.achievements.map((a) => (
-                  <p key={a.id} className="text-[15px]">
+                  <p key={a.id} className="text-[0.9375rem]">
                     <span className="font-medium">{a.title}</span>
                     {a.detail && <span className="text-muted-foreground"> — {a.detail}</span>}
                   </p>
@@ -525,15 +525,15 @@ function Candidate() {
         <div className="min-w-0 space-y-5 lg:col-span-4">
           <Panel title="Rating" style={stagger(1)} contentClassName="space-y-3">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[15px] text-muted-foreground">Your rating</span>
+              <span className="text-[0.9375rem] text-muted-foreground">Your rating</span>
               <StarRating value={c.my_rating} onChange={rate} />
             </div>
-            <div className="flex items-center justify-between gap-3 text-[15px]">
+            <div className="flex items-center justify-between gap-3 text-[0.9375rem]">
               <span className="text-muted-foreground">Team average</span>
               <span className="font-medium tabular-nums">{c.avg_rating ?? "—"}{c.avg_rating !== null && " / 5"}</span>
             </div>
             {c.ratings.length > 0 && (
-              <ul className="space-y-1 border-t border-border pt-3 text-[14.5px]">
+              <ul className="space-y-1 border-t border-border pt-3 text-[0.9063rem]">
                 {c.ratings.map((r) => (
                   <li key={r.author_name} className="flex items-center justify-between">
                     <span className="text-muted-foreground">{r.author_name}</span>
@@ -553,11 +553,11 @@ function Candidate() {
             <Button size="sm" onClick={saveNote} disabled={savingNote || !note.trim()}>
               {savingNote && <Loader2 className="animate-spin" />} Add note
             </Button>
-            <ul className="-mr-2 max-h-[22rem] space-y-2.5 overflow-y-auto overscroll-contain pt-1 pr-2 [scrollbar-width:thin]">
+            <ul className="-mr-2 max-h-[22rem] space-y-2.5 overflow-y-auto overscroll-contain pt-1 pr-2">
               {c.notes.map((n) => (
                 <li key={n.id} className="group rounded-2xl bg-secondary p-3">
-                  <p className="text-[15px] whitespace-pre-wrap">{n.body}</p>
-                  <div className="mt-1.5 flex items-center gap-2 text-[13.5px] text-muted-foreground">
+                  <p className="text-[0.9375rem] whitespace-pre-wrap">{n.body}</p>
+                  <div className="mt-1.5 flex items-center gap-2 text-[0.8438rem] text-muted-foreground">
                     {n.author_name} · {timeAgo(n.created_at)}
                     {(n.author_id === user?.id || isAdmin) && (
                       <button
@@ -579,14 +579,14 @@ function Candidate() {
           </Panel>
 
           <Panel title="Activity" style={stagger(4)}>
-            <ol className="relative max-h-[28rem] space-y-4 overflow-y-auto overscroll-contain border-l border-border pl-5 [scrollbar-width:thin]">
+            <ol className="relative max-h-[28rem] space-y-4 overflow-y-auto overscroll-contain border-l border-border pl-5">
               {c.events.map((e) => (
                 <li key={e.id} className="relative">
                   <span className="absolute top-1.5 -left-[1.6rem] size-2.5 rounded-full border-2 border-card bg-foreground/40" />
-                  <p className="text-[14.5px]">
+                  <p className="text-[0.9063rem]">
                     <span className="font-medium">{e.actor_name}</span> {(EVENT_TEXT[e.kind] ?? ((x) => x.detail))(e)}
                   </p>
-                  <p className="text-[13.5px] text-muted-foreground">{fmtDateTime(e.created_at)}</p>
+                  <p className="text-[0.8438rem] text-muted-foreground">{fmtDateTime(e.created_at)}</p>
                 </li>
               ))}
             </ol>

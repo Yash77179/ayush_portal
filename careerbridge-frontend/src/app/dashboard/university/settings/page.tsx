@@ -58,9 +58,9 @@ export default function UniversitySettingsPage() {
             <div className="flex items-center gap-4">
               {u.logo ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={mediaUrl(u.logo) ?? ""} alt="" className="size-20 rounded-[22px] object-cover" />
+                <img src={mediaUrl(u.logo) ?? ""} alt="" className="size-20 rounded-[1.375rem] object-cover" />
               ) : (
-                <OrgAvatar name={u.name} className="size-20 rounded-[22px] text-2xl" />
+                <OrgAvatar name={u.name} className="size-20 rounded-[1.375rem] text-2xl" />
               )}
               {data.is_admin && (
                 <>
@@ -104,7 +104,7 @@ export default function UniversitySettingsPage() {
                 </Button>
               </div>
             ) : (
-              <p className="text-[15px] text-muted-foreground">Only the placement cell admin can edit these details.</p>
+              <p className="text-[0.9375rem] text-muted-foreground">Only the placement cell admin can edit these details.</p>
             )}
           </Panel>
         </form>
@@ -112,11 +112,11 @@ export default function UniversitySettingsPage() {
         {data.is_admin && data.requests.length > 0 && (
           <Panel title={`Asking to join · ${data.requests.length}`} style={stagger(2)} contentClassName="space-y-2">
             {data.requests.map((r) => (
-              <div key={r.id} className="flex items-start gap-3 rounded-[18px] p-2.5 hover:bg-secondary/60">
+              <div key={r.id} className="flex items-start gap-3 rounded-[1.125rem] p-2.5 hover:bg-secondary/60">
                 <OrgAvatar name={r.name} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[17px] font-medium">{r.name}</p>
-                  <p className="truncate text-[14.5px] text-muted-foreground">{[r.title, r.email].filter(Boolean).join(" · ")}</p>
+                  <p className="truncate text-[1.0625rem] font-medium">{r.name}</p>
+                  <p className="truncate text-[0.9063rem] text-muted-foreground">{[r.title, r.email].filter(Boolean).join(" · ")}</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     <Button size="sm" onClick={() => act(() => approveStaff(r.id))}>
                       Approve
@@ -128,18 +128,18 @@ export default function UniversitySettingsPage() {
                 </div>
               </div>
             ))}
-            <p className="pt-1 text-[14.5px] text-muted-foreground">They can&rsquo;t see anything of your placement cell until you approve them.</p>
+            <p className="pt-1 text-[0.9063rem] text-muted-foreground">They can&rsquo;t see anything of your placement cell until you approve them.</p>
           </Panel>
         )}
         <Panel title="Placement cell" style={stagger(3)} contentClassName="space-y-2">
           {data.staff.map((s) => (
-            <div key={s.id} className="flex items-start gap-3 rounded-[18px] p-2.5 hover:bg-secondary/60">
+            <div key={s.id} className="flex items-start gap-3 rounded-[1.125rem] p-2.5 hover:bg-secondary/60">
               <OrgAvatar name={s.name} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[17px] font-medium">
+                <p className="truncate text-[1.0625rem] font-medium">
                   {s.name} {s.is_you && <span className="text-muted-foreground">(you)</span>}
                 </p>
-                <p className="truncate text-[14.5px] text-muted-foreground">
+                <p className="truncate text-[0.9063rem] text-muted-foreground">
                   {s.title || s.email}
                   {s.is_admin && s.made_admin_by && ` · made admin by ${s.made_admin_by}`}
                 </p>
@@ -161,14 +161,14 @@ export default function UniversitySettingsPage() {
                       Step down
                     </Button>
                   )}
-                  {data.is_admin && !s.is_you && !s.can_manage && <span className="text-[13px] text-muted-foreground">Above you, so you can&rsquo;t change them</span>}
+                  {data.is_admin && !s.is_you && !s.can_manage && <span className="text-[0.8125rem] text-muted-foreground">Above you, so you can&rsquo;t change them</span>}
                 </div>
               </div>
             </div>
           ))}
-          <p className="pt-2 text-[14.5px] text-muted-foreground">Colleagues join by signing up as a University representative and linking {u.name}.</p>
+          <p className="pt-2 text-[0.9063rem] text-muted-foreground">Colleagues join by signing up as a University representative and linking {u.name}.</p>
           {data.is_admin && (
-            <p className="text-[14.5px] text-muted-foreground">
+            <p className="text-[0.9063rem] text-muted-foreground">
               Anyone you make admin sits one level below you. You can change or remove admins at your level or below, but never anyone above you, so never the person who made you admin.
             </p>
           )}

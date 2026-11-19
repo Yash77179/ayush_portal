@@ -117,10 +117,10 @@ function Popup() {
             // fixed! — the double-border card classes set position: relative, which must not win here
             "fixed! z-[60] flex flex-col overflow-hidden rounded-[var(--r)] [--r:28px]",
             "shadow-[0_1px_2px_oklch(0.2_0.03_280/0.06),0_40px_80px_-30px_oklch(0.25_0.1_285/0.45)]",
-            "inset-x-3 top-3 bottom-3 sm:inset-x-auto sm:top-auto sm:right-6 sm:bottom-6 sm:h-[min(680px,calc(100svh-3rem))] sm:w-[408px]",
+            "inset-x-3 top-3 bottom-3 sm:inset-x-auto sm:top-auto sm:right-6 sm:bottom-6 sm:h-[min(680px,calc(100svh-3rem))] sm:w-[25.5rem]",
             // grows out of the launcher in the corner, folds back into it
             "origin-bottom-right transition-[opacity,transform,filter] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
-            "pointer-events-none translate-y-3 scale-[0.88] opacity-0 blur-[6px]",
+            "pointer-events-none translate-y-3 scale-[0.88] opacity-0 blur-[0.375rem]",
             "data-[open]:pointer-events-auto data-[open]:translate-y-0 data-[open]:scale-100 data-[open]:opacity-100 data-[open]:blur-none",
             "motion-reduce:translate-y-0 motion-reduce:scale-100 motion-reduce:blur-none motion-reduce:transition-opacity"
           )}
@@ -129,8 +129,8 @@ function Popup() {
           <header className="absolute inset-x-0 top-0 z-10 flex items-center gap-1.5 px-5 pt-4 pb-3">
             <EdgeBlur side="top" className="inset-0 -z-10" />
             <div className="min-w-0 flex-1">
-              <p className="text-[17px] leading-tight font-semibold tracking-[-0.02em]">{live.on ? "Live with Bridge" : historyOpen ? "Your chats" : "Bridge"}</p>
-              <p className="mt-0.5 truncate text-[12.5px] text-muted-foreground" aria-live="polite">
+              <p className="text-[1.0625rem] leading-tight font-semibold tracking-[-0.02em]">{live.on ? "Live with Bridge" : historyOpen ? "Your chats" : "Bridge"}</p>
+              <p className="mt-0.5 truncate text-[0.7813rem] text-muted-foreground" aria-live="polite">
                 {live.on ? (
                   <span className="inline-flex items-center gap-1.5">
                     <span className="size-1.5 animate-pulse rounded-full bg-[#e5484d]" /> Hands-free conversation
@@ -150,12 +150,12 @@ function Popup() {
                 title="Live — talk hands-free  (/live)"
                 className={SQUIRCLE}
               >
-                <SoundwaveIcon className="size-[18px]" />
+                <SoundwaveIcon className="size-[1.125rem]" />
               </button>
             )}
             {!live.on && !historyOpen && !empty && (
               <button type="button" onClick={reset} aria-label="New chat" title="New chat" className={SQUIRCLE}>
-                <NewChatIcon className="size-[18px]" />
+                <NewChatIcon className="size-[1.125rem]" />
               </button>
             )}
             {!live.on && (
@@ -167,7 +167,7 @@ function Popup() {
               title={historyOpen ? "Back to chat" : "History  (/history)"}
               className={cn(SQUIRCLE, historyOpen && "bg-[oklch(0.56_0.15_280/0.12)] text-[oklch(0.45_0.17_283)] dark:text-[oklch(0.85_0.1_292)]")}
             >
-              <HistoryIcon className="size-[18px]" />
+              <HistoryIcon className="size-[1.125rem]" />
             </button>
             )}
             <button
@@ -177,14 +177,14 @@ function Popup() {
               title="Close"
               className={SQUIRCLE}
             >
-              <svg viewBox="0 0 24 24" className="size-[17px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg viewBox="0 0 24 24" className="size-[1.0625rem]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />
               </svg>
             </button>
           </header>
 
           {historyOpen ? (
-            <div className="min-h-0 flex-1 animate-in pt-[72px] duration-300 fade-in-0 slide-in-from-top-2">
+            <div className="min-h-0 flex-1 animate-in pt-[4.5rem] duration-300 fade-in-0 slide-in-from-top-2">
               <HistoryPanel bridge={bridge} onClose={() => setHistoryOpen(false)} />
             </div>
           ) : empty ? (
@@ -226,7 +226,7 @@ function Popup() {
         )}
       >
         <AssistantOrb mood={open ? "idle" : mood} className="w-14" />
-        <span className="max-w-0 overflow-hidden text-[14.5px] font-semibold whitespace-nowrap transition-[max-width,padding] duration-300 group-hover:max-w-[7rem] group-hover:pr-4 group-focus-visible:max-w-[7rem] group-focus-visible:pr-4">
+        <span className="max-w-0 overflow-hidden text-[0.9063rem] font-semibold whitespace-nowrap transition-[max-width,padding] duration-300 group-hover:max-w-[7rem] group-hover:pr-4 group-focus-visible:max-w-[7rem] group-focus-visible:pr-4">
           Ask Bridge
         </span>
       </button>
@@ -236,4 +236,4 @@ function Popup() {
 
 /** Header buttons: a soft squircle (rounded square), double-bordered like the rest of the site. */
 const SQUIRCLE =
-  "dbl flex size-10 shrink-0 items-center justify-center rounded-[13px] border border-(--hairline) bg-card/70 text-foreground/70 outline-none backdrop-blur-sm transition-[background-color,color,transform] duration-150 [--r:13px] hover:bg-card hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.92]"
+  "dbl flex size-10 shrink-0 items-center justify-center rounded-[0.8125rem] border border-(--hairline) bg-card/70 text-foreground/70 outline-none backdrop-blur-sm transition-[background-color,color,transform] duration-150 [--r:13px] hover:bg-card hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.92]"

@@ -121,7 +121,7 @@ function CompanySetup({ onDone }: { onDone: (m: MyCompany) => void }) {
       />
       <form onSubmit={submit}>
         <Panel style={stagger(1)} contentClassName="space-y-5 pt-6">
-          <div className="flex items-center gap-3 rounded-2xl bg-secondary p-4 text-[15px] text-muted-foreground">
+          <div className="flex items-center gap-3 rounded-2xl bg-secondary p-4 text-[0.9375rem] text-muted-foreground">
             <BuildingsIcon className="size-5 shrink-0" />
             Already on CareerBridge? Ask your company admin to add you from <span className="font-medium text-foreground">Company → Team</span> using your sign-in email.
           </div>
@@ -260,7 +260,7 @@ function FullScreen({ children }: { children: React.ReactNode }) {
       <div className="relative flex items-center justify-between">
         <span className="flex items-center gap-3">
           <BrandMark className="size-10" />
-          <span className="text-[17px] font-medium">CareerBridge</span>
+          <span className="text-[1.0625rem] font-medium">CareerBridge</span>
         </span>
         <Button variant="ghost" onClick={logout}>
           Sign out
@@ -273,8 +273,8 @@ function FullScreen({ children }: { children: React.ReactNode }) {
 
 function OnboardingCard({ title, subtitle, icon, children }: { title: string; subtitle: React.ReactNode; icon?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="mx-auto w-full max-w-[44rem] rounded-[32px] border border-(--hairline) bg-card p-7 shadow-[0_40px_90px_-50px_oklch(0.3_0.1_285/0.45)] sm:p-12">
-      {icon && <span className="mb-6 flex size-16 items-center justify-center rounded-[22px] bg-secondary [&_svg]:size-8">{icon}</span>}
+    <div className="mx-auto w-full max-w-[44rem] rounded-[2rem] border border-(--hairline) bg-card p-7 shadow-[0_40px_90px_-50px_oklch(0.3_0.1_285/0.45)] sm:p-12">
+      {icon && <span className="mb-6 flex size-16 items-center justify-center rounded-[1.375rem] bg-secondary [&_svg]:size-8">{icon}</span>}
       <h1 className="text-[clamp(2.1rem,5vw,3.2rem)] leading-[1.02] font-medium tracking-[-0.03em]">{title}</h1>
       <p className="mt-4 text-[clamp(1rem,1.6vw,1.15rem)] leading-relaxed text-muted-foreground">{subtitle}</p>
       <div className="mt-9">{children}</div>
@@ -311,13 +311,13 @@ function UniversitySetup({ onDone }: { onDone: (d: UniversityRequest) => void })
           <UniversityCombobox value={uni} onChange={setUni} />
         </Field>
         <Field label="Your role">
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Training & Placement Officer" className="h-13 text-[16px]" />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Training & Placement Officer" className="h-13 text-[1rem]" />
         </Field>
-        <div className="flex items-center gap-3 rounded-2xl bg-secondary p-4 text-[15px] text-muted-foreground">
+        <div className="flex items-center gap-3 rounded-2xl bg-secondary p-4 text-[0.9375rem] text-muted-foreground">
           <GraduateIcon className="size-5 shrink-0" />
           Your placement cell&rsquo;s admins approve new members. If you&rsquo;re the first from your university, CareerBridge approves you and you become its admin.
         </div>
-        <Button size="lg" type="submit" disabled={!uni || saving} className="h-13 w-full text-[16px]">
+        <Button size="lg" type="submit" disabled={!uni || saving} className="h-13 w-full text-[1rem]">
           {saving && <Loader2 className="animate-spin" />} Send request
         </Button>
       </form>
@@ -356,7 +356,7 @@ function UniversityWaiting({ request, onChange }: { request: UniversityRequest; 
         </>
       }
     >
-      <dl className="grid gap-x-6 gap-y-3 rounded-2xl bg-secondary p-5 text-[15px] sm:grid-cols-[9rem_1fr]">
+      <dl className="grid gap-x-6 gap-y-3 rounded-2xl bg-secondary p-5 text-[0.9375rem] sm:grid-cols-[9rem_1fr]">
         <dt className="text-muted-foreground">University</dt>
         <dd className="font-medium">{request.university.name}</dd>
         <dt className="text-muted-foreground">Your role</dt>

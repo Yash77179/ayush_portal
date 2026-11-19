@@ -58,10 +58,10 @@ export default function InterviewsPage() {
       <PageHeader title="Interviews" subtitle="Everything on your team's interview calendar, with replies and scorecards." />
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile index={1} tone="blue" icon={<CalendarIcon />} title="Today" value={today} caption="Interviews today" />
-        <StatTile index={2} tone="amber" icon={<CalendarIcon />} title="Awaiting reply" value={waiting} caption="Candidate hasn't confirmed" />
-        <StatTile index={3} tone="pink" icon={<CalendarIcon />} title="Reschedule" value={resched} caption="Asked for a new time" />
-        <StatTile index={4} tone="violet" icon={<CalendarIcon />} title="Needs scorecard" value={needScore} caption="Done, no feedback yet" />
+        <StatTile index={1} tone="blue" icon={<CalendarIcon />} title="Today" value={today} meter={{ value: today, max: items.length }} caption="Interviews today" />
+        <StatTile index={2} tone="amber" icon={<CalendarIcon />} title="Awaiting reply" value={waiting} meter={{ value: waiting, max: items.length }} caption="Candidate hasn't confirmed" />
+        <StatTile index={3} tone="pink" icon={<CalendarIcon />} title="Reschedule" value={resched} meter={{ value: resched, max: items.length }} caption="Asked for a new time" />
+        <StatTile index={4} tone="violet" icon={<CalendarIcon />} title="Needs scorecard" value={needScore} meter={{ value: needScore, max: items.length }} caption="Done, no feedback yet" />
       </div>
 
       <Panel style={stagger(5)} contentClassName="space-y-6 pt-6">
@@ -74,19 +74,19 @@ export default function InterviewsPage() {
         </Tabs>
 
         {items.length === 0 && (
-          <p className="py-12 text-center text-[15px] text-muted-foreground">
+          <p className="py-12 text-center text-[0.9375rem] text-muted-foreground">
             {scope === "past" ? "No past interviews yet." : "Nothing scheduled. Open a candidate and choose Interview to send an invite."}
           </p>
         )}
 
         {Object.entries(groups).map(([day, list]) => (
           <section key={day} className="space-y-2.5">
-            <h2 className="text-[14.5px] font-medium tracking-[0.06em] text-muted-foreground uppercase">{day}</h2>
+            <h2 className="text-[0.9063rem] font-medium tracking-[0.06em] text-muted-foreground uppercase">{day}</h2>
             {list.map((i) => {
               const mine = i.feedback.find((f) => f.author_id === user?.id);
               const past = new Date(i.scheduled_at) < new Date();
               return (
-                <div key={i.id} className={cn("flex flex-wrap items-center gap-4 rounded-[22px] border border-(--hairline) p-4", i.status === "cancelled" && "opacity-60")}>
+                <div key={i.id} className={cn("flex flex-wrap items-center gap-4 rounded-[1.375rem] border border-(--hairline) p-4", i.status === "cancelled" && "opacity-60")}>
                   <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-secondary">
                     {i.mode === "video" ? <VideoIcon className="size-5" /> : i.mode === "phone" ? <PhoneIcon className="size-5" /> : <CalendarIcon className="size-5" />}
                   </span>
@@ -94,14 +94,14 @@ export default function InterviewsPage() {
                     <Link href={`/dashboard/company/applicants/${i.application_id}`} className="font-medium hover:underline">
                       {i.candidate_name}
                     </Link>
-                    <p className="truncate text-[14.5px] text-muted-foreground">
+                    <p className="truncate text-[0.9063rem] text-muted-foreground">
                       {new Date(i.scheduled_at).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" })} · {i.round_name} · {i.internship_title}
                     </p>
-                    {i.interviewers.length > 0 && <p className="text-[13.5px] text-muted-foreground">Panel: {i.interviewers.map((p) => p.name).join(", ")}</p>}
+                    {i.interviewers.length > 0 && <p className="text-[0.8438rem] text-muted-foreground">Panel: {i.interviewers.map((p) => p.name).join(", ")}</p>}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {i.feedback.map((f) => (
-                      <span key={f.id} title={f.author_name} className={cn("rounded-full px-2 py-0.5 text-[12.5px] font-semibold", RECOMMENDATION[f.recommendation]?.cls)}>
+                      <span key={f.id} title={f.author_name} className={cn("rounded-full px-2 py-0.5 text-[0.7813rem] font-semibold", RECOMMENDATION[f.recommendation]?.cls)}>
                         {RECOMMENDATION[f.recommendation]?.label}
                       </span>
                     ))}
@@ -130,7 +130,7 @@ export default function InterviewsPage() {
                       </Button>
                     )}
                   </div>
-                  {i.candidate_note && <p className="w-full rounded-2xl bg-secondary p-3 text-[14.5px]">Candidate: “{i.candidate_note}”</p>}
+                  {i.candidate_note && <p className="w-full rounded-2xl bg-secondary p-3 text-[0.9063rem]">Candidate: “{i.candidate_note}”</p>}
                 </div>
               );
             })}

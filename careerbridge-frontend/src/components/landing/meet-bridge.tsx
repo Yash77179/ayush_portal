@@ -41,7 +41,7 @@ export function MeetPill({ seen, className }: { seen: boolean; className?: strin
   return (
     <p
       className={cn(
-        "inline-flex items-center rounded-full border border-(--hairline) bg-card p-1 text-[12px] font-medium tracking-[0.2em] text-muted-foreground uppercase",
+        "inline-flex items-center rounded-full border border-(--hairline) bg-card p-1 text-[0.75rem] font-medium tracking-[0.2em] text-muted-foreground uppercase",
         "origin-left transition-[scale,opacity] duration-[650ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none",
         seen ? "scale-100 opacity-100" : "scale-0 opacity-0",
         className
@@ -56,7 +56,7 @@ export function MeetPill({ seen, className }: { seen: boolean; className?: strin
           <span
             className={cn(
               "block pr-3 pl-2 whitespace-nowrap transition-[opacity,filter,translate] delay-[750ms] duration-700 ease-out motion-reduce:transition-none",
-              seen ? "translate-x-0 opacity-100 blur-0" : "-translate-x-2 opacity-0 blur-[4px]"
+              seen ? "translate-x-0 opacity-100 blur-0" : "-translate-x-2 opacity-0 blur-[0.25rem]"
             )}
           >
             Meet Bridge
@@ -90,14 +90,14 @@ export function MeetBridge() {
           Your career,{" "}
           <span className="font-display tracking-[-0.01em] text-[oklch(0.5_0.17_285)] italic dark:text-[oklch(0.8_0.11_292)]">one question</span> away.
         </h2>
-        <p className={cn("mt-4 max-w-md text-[16px] leading-relaxed text-pretty text-muted-foreground", rise("delay-300"))}>
+        <p className={cn("mt-4 max-w-md text-[1rem] leading-relaxed text-pretty text-muted-foreground", rise("delay-300"))}>
           Bridge, the assistant inside CareerBridge, knows your profile and every open listing — ask it anything, by text or out loud.
         </p>
         <button
           type="button"
           onClick={open}
           className={cn(
-            "group mt-7 inline-flex items-center gap-2 text-[15px] font-medium underline decoration-foreground/25 underline-offset-[6px] hover:decoration-foreground/70",
+            "group mt-7 inline-flex items-center gap-2 text-[0.9375rem] font-medium underline decoration-foreground/25 underline-offset-[0.375rem] hover:decoration-foreground/70",
             rise("delay-[400ms]")
           )}
         >

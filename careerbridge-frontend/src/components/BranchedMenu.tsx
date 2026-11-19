@@ -203,7 +203,7 @@ const BranchedMenu: React.FC<BranchedMenuProps> = ({
                 heads.current[i] = el;
               }}
               type="button"
-              className="m-0 block cursor-pointer border-0 bg-transparent py-[9px] text-left font-medium outline-none [color:var(--bm-muted)] [font-family:inherit] [font-size:calc(var(--bm-font)+1px)] [-webkit-tap-highlight-color:transparent] [transition:color_200ms_ease] group-data-[open]/section:[color:var(--bm-ink)] data-[active]:[color:var(--bm-ink)] hover:[color:var(--bm-ink)]"
+              className="m-0 block cursor-pointer border-0 bg-transparent py-[0.5625rem] text-left font-medium outline-none [color:var(--bm-muted)] [font-family:inherit] [font-size:calc(var(--bm-font)+1px)] [-webkit-tap-highlight-color:transparent] [transition:color_200ms_ease] group-data-[open]/section:[color:var(--bm-ink)] data-[active]:[color:var(--bm-ink)] hover:[color:var(--bm-ink)]"
               aria-expanded={kids ? isOpen : undefined}
               aria-current={leafActive ? 'true' : undefined}
               data-active={leafActive ? '' : undefined}

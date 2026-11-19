@@ -31,7 +31,10 @@ export function ShellGate({ children }: { children: React.ReactNode }) {
     else if (unfinished && inShell) router.replace("/complete-profile");
   }, [loading, user, needsAuth, unfinished, inShell, router]);
 
-  if (!inShell) return <>{children}</>;
+  // Marks every page but the landing page for the compact app scale (see `data-density` in globals.css).
+  const density = pathname !== "/" ? <span hidden data-density="compact" /> : null;
+
+  if (!inShell) return <>{density}{children}</>;
 
   if (loading || (!user && needsAuth) || unfinished) {
     return (
@@ -42,8 +45,8 @@ export function ShellGate({ children }: { children: React.ReactNode }) {
   }
 
   // placement officers see nothing but "link your university" until their placement cell has approved them
-  if (user?.role === "university" && needsAuth) return <UniversityAccess><AppShell>{children}</AppShell></UniversityAccess>;
-  if (user) return <AppShell>{children}</AppShell>;
+  if (user?.role === "university" && needsAuth) return <>{density}<UniversityAccess><AppShell>{children}</AppShell></UniversityAccess></>;
+  if (user) return <>{density}<AppShell>{children}</AppShell></>;
 
-  return <div className="mx-auto max-w-[1200px] px-5 py-10 sm:px-8">{children}</div>;
+  return <div className="mx-auto max-w-[75rem] px-5 py-10 sm:px-8">{density}{children}</div>;
 }

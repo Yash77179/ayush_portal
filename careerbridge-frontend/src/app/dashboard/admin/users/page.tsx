@@ -66,10 +66,10 @@ export default function AdminUsersPage() {
       <PageHeader title="Users" subtitle="Everyone on CareerBridge. Open someone to edit them, change their role or reset their password." />
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile index={1} tone="blue" icon={<GraduateIcon />} title="Students" value={data.roles.student} caption="Looking for internships" />
-        <StatTile index={2} tone="violet" icon={<BuildingsIcon />} title="Recruiters" value={data.roles.company} caption="Hiring for companies" />
-        <StatTile index={3} tone="mint" icon={<PeopleIcon />} title="Universities" value={data.roles.university} caption="Placement-cell staff" />
-        <StatTile index={4} tone="amber" icon={<ProfileIcon />} title="Deactivated" value={data.inactive} caption={`${data.roles.admin} admin${data.roles.admin === 1 ? "" : "s"}`} />
+        <StatTile index={1} tone="blue" icon={<GraduateIcon />} title="Students" value={data.roles.student} meter={{ value: data.roles.student, max: data.count }} caption="Looking for internships" />
+        <StatTile index={2} tone="violet" icon={<BuildingsIcon />} title="Recruiters" value={data.roles.company} meter={{ value: data.roles.company, max: data.count }} caption="Hiring for companies" />
+        <StatTile index={3} tone="mint" icon={<PeopleIcon />} title="Universities" value={data.roles.university} meter={{ value: data.roles.university, max: data.count }} caption="Placement-cell staff" />
+        <StatTile index={4} tone="amber" icon={<ProfileIcon />} title="Deactivated" value={data.inactive} meter={{ value: data.inactive, max: data.count }} caption={`${data.roles.admin} admin${data.roles.admin === 1 ? "" : "s"}`} />
       </div>
 
       <Panel title={`People · ${data.count}`} style={stagger(5)} contentClassName="space-y-5">
@@ -83,7 +83,7 @@ export default function AdminUsersPage() {
         </div>
 
         {data.results.length === 0 ? (
-          <p className="py-12 text-center text-[15px] text-muted-foreground">Nobody matches those filters.</p>
+          <p className="py-12 text-center text-[0.9375rem] text-muted-foreground">Nobody matches those filters.</p>
         ) : (
           <Table containerClassName="max-h-[min(44rem,70svh)]">
             <TableHeader>
@@ -103,7 +103,7 @@ export default function AdminUsersPage() {
             </TableBody>
           </Table>
         )}
-        {data.count > data.results.length && <p className="text-[13.5px] text-muted-foreground">Showing the newest {data.results.length} of {data.count}. Search to find someone older.</p>}
+        {data.count > data.results.length && <p className="text-[0.8438rem] text-muted-foreground">Showing the newest {data.results.length} of {data.count}. Search to find someone older.</p>}
       </Panel>
 
       <UserSheet id={openId} onClose={() => setOpenId(null)} onChanged={load} />
@@ -118,8 +118,8 @@ function UserRow({ u, onOpen }: { u: AdminUser; onOpen: () => void }) {
         <div className="flex items-center gap-3">
           <OrgAvatar name={u.name} />
           <div className="min-w-0">
-            <p className="truncate text-[16px] font-medium">{u.name}</p>
-            <p className="truncate text-[13.5px] text-muted-foreground">{u.email || `@${u.username}`}</p>
+            <p className="truncate text-[1rem] font-medium">{u.name}</p>
+            <p className="truncate text-[0.8438rem] text-muted-foreground">{u.email || `@${u.username}`}</p>
           </div>
         </div>
       </TableCell>
@@ -173,7 +173,7 @@ function UserSheet({ id, onClose, onChanged }: { id: number | null; onClose: () 
 
   return (
     <Sheet open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-xl">
+      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-2xl">
         {!u ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -185,7 +185,7 @@ function UserSheet({ id, onClose, onChanged }: { id: number | null; onClose: () 
                 <OrgAvatar name={u.name} className="size-14" />
                 <div className="min-w-0">
                   <SheetTitle className="truncate text-2xl font-medium">{u.name}</SheetTitle>
-                  <p className="truncate text-[15px] text-muted-foreground">
+                  <p className="truncate text-[0.9375rem] text-muted-foreground">
                     @{u.username} · joined {fmtDay(u.date_joined)}
                   </p>
                 </div>
@@ -205,7 +205,7 @@ function UserSheet({ id, onClose, onChanged }: { id: number | null; onClose: () 
             </div>
 
             {(u.student || u.memberships.length > 0 || u.university_staff) && (
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-2xl bg-secondary p-4 text-[15px]">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-2xl bg-secondary p-4 text-[0.9375rem]">
                 {u.student && (
                   <>
                     <dt className="text-muted-foreground">University</dt>
@@ -235,9 +235,9 @@ function UserSheet({ id, onClose, onChanged }: { id: number | null; onClose: () 
               </dl>
             )}
 
-            {locked && <p className="rounded-2xl bg-secondary p-4 text-[15px] text-muted-foreground">This is a superuser. Only another superuser can change it.</p>}
+            {locked && <p className="rounded-2xl bg-secondary p-4 text-[0.9375rem] text-muted-foreground">This is a superuser. Only another superuser can change it.</p>}
 
-            <section className="space-y-4 rounded-[24px] border border-(--hairline) p-5">
+            <section className="space-y-4 rounded-[1.5rem] border border-(--hairline) p-5">
               <h3 className="text-lg font-medium">Details</h3>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="First name">
@@ -274,7 +274,7 @@ function UserSheet({ id, onClose, onChanged }: { id: number | null; onClose: () 
               </Button>
             </section>
 
-            <section className="space-y-4 rounded-[24px] border border-(--hairline) p-5">
+            <section className="space-y-4 rounded-[1.5rem] border border-(--hairline) p-5">
               <h3 className="text-lg font-medium">New password</h3>
               <Field label="Password" hint="At least 8 characters, not too common. Tell them; they can change it after signing in.">
                 <Input type="text" autoComplete="off" value={password} disabled={locked} onChange={(e) => setPassword(e.target.value)} placeholder="e.g. Welcome@2026" />
@@ -285,9 +285,9 @@ function UserSheet({ id, onClose, onChanged }: { id: number | null; onClose: () 
             </section>
 
             {!u.is_you && !locked && (
-              <section className="space-y-3 rounded-[24px] border border-(--hairline) p-5">
+              <section className="space-y-3 rounded-[1.5rem] border border-(--hairline) p-5">
                 <h3 className="text-lg font-medium">{u.is_active ? "Deactivate account" : "Reactivate account"}</h3>
-                <p className="text-[15px] text-muted-foreground">
+                <p className="text-[0.9375rem] text-muted-foreground">
                   {u.is_active
                     ? "They won't be able to sign in. Nothing is deleted: their profile, applications and history stay, and you can reactivate them any time."
                     : "They'll be able to sign in again, with everything as they left it."}

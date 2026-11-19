@@ -116,6 +116,7 @@
   --blue-bg:   oklch(0.958 0.02 262);  --blue-fg:   oklch(0.4 0.12 265);   /* sky   */
   --violet-bg: oklch(0.953 0.028 288);  --violet-fg: oklch(0.4 0.15 285);   /* violet*/
   --mint-bg:   oklch(0.96 0.024 178);  --mint-fg:   oklch(0.38 0.08 180);      /* mint  */
+  --verify: oklch(0.6 0.115 200); --verify-soft: oklch(0.955 0.03 200); --verify-ink: white; /* blue-green verified seal */
   --peach-bg:  oklch(0.972 0.03 90);   --peach-fg:  oklch(0.42 0.08 75);     /* butter*/
   --pink-bg:   oklch(0.963 0.02 25);   --pink-fg:   oklch(0.46 0.13 28);     /* coral */
   --amber-bg:  oklch(0.972 0.03 90);   --amber-fg:  oklch(0.42 0.08 75);
@@ -178,6 +179,7 @@
   --blue-bg:   oklch(0.32 0.065 258);  --blue-fg:   oklch(0.84 0.1 250);
   --violet-bg: oklch(0.32 0.08 288);   --violet-fg: oklch(0.84 0.11 292);
   --mint-bg:   oklch(0.32 0.06 172);   --mint-fg:   oklch(0.85 0.12 170);
+  --verify: oklch(0.74 0.12 195); --verify-soft: oklch(0.3 0.05 200); --verify-ink: oklch(0.2 0.03 205);
   --peach-bg:  oklch(0.34 0.06 80);    --peach-fg:  oklch(0.88 0.12 85);
   --pink-bg:   oklch(0.33 0.07 22);    --pink-fg:   oklch(0.84 0.1 22);
   --amber-bg:  oklch(0.34 0.06 80);    --amber-fg:  oklch(0.88 0.12 85);
@@ -383,6 +385,15 @@
 
 ::selection { background: var(--lime); color: var(--on-lime); }
 html { scroll-behavior: smooth; scrollbar-gutter: stable; }
+
+/* App density. Every size in the app is in rem, so the root size scales the whole signed-in app at once: 14px on
+   phones, ~14.4px on a 1280 laptop, ~14.7px at 1440, 15.5px at 1920, capped at 16px. The landing page (no marker)
+   keeps the browser's 16px. Breakpoints are unaffected: media queries resolve rem against the initial 16px. */
+html:has([data-density="compact"]) { font-size: clamp(14px, calc(12.25px + 0.17vw), 16px); }
+/* iOS zooms the page when a focused field is under 16px: keep form text at 16px on touch screens. */
+@media (pointer: coarse) {
+  html:has([data-density="compact"]) :is(input, textarea, select, [contenteditable="true"]) { font-size: max(16px, 1em); }
+}
 @keyframes page-in {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -641,6 +652,19 @@ a:hover > .roll > .roll-track, a:hover .roll .roll-track, .group\/roll:hover .ro
 @keyframes halo-turn { to { transform: rotate(360deg); } }
 .halo-turn { animation: halo-turn 40s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .halo-turn { animation: none; } }
+
+/* Scrollbars: a hairline that stays invisible until the pointer is over the scroll area, and is still draggable.
+   Chromium/Safari use the ::-webkit-scrollbar pseudos (they are skipped if scrollbar-width/-color is set, so
+   don't set those on scroll areas); Firefox gets the standard properties. */
+::-webkit-scrollbar { width: 7px; height: 7px; background: transparent; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb { border: 2px solid transparent; border-radius: 999px; background-clip: padding-box; background-color: transparent; }
+:hover::-webkit-scrollbar-thumb { background-color: color-mix(in oklab, var(--foreground) 18%, transparent); }
+::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb:active { border-width: 1.5px; background-color: color-mix(in oklab, var(--foreground) 38%, transparent); }
+@supports not selector(::-webkit-scrollbar) {
+  * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+  *:hover { scrollbar-color: color-mix(in oklab, var(--foreground) 22%, transparent) transparent; }
+}
 
 .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }

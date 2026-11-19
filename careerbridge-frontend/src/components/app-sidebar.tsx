@@ -96,10 +96,10 @@ function CompanyData({ children }: { children: React.ReactNode }) {
 }
 
 /* ── Styles ──────────────────────────────────────────────────────────────── */
-const LABEL = "px-3 pt-6 pb-2.5 text-[12.5px] font-medium tracking-[0.09em] text-muted-foreground uppercase group-data-[collapsible=icon]:invisible"
+const LABEL = "px-3 pt-6 pb-2.5 text-[0.7813rem] font-medium tracking-[0.09em] text-muted-foreground uppercase group-data-[collapsible=icon]:invisible"
 const ROW =
-  "group/row relative flex h-[3.25rem] w-full shrink-0 items-center gap-3.5 rounded-[20px] border border-transparent pr-3 pl-4 text-[15.5px] text-muted-foreground outline-none transition-[background-color,color,transform] duration-200 hover:bg-secondary/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.985] group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-[20px] group-data-[collapsible=icon]:p-0"
-const TILE = "flex size-6 shrink-0 items-center justify-center transition-colors duration-200 [&_svg]:size-[22px]"
+  "group/row relative flex h-[3.25rem] w-full shrink-0 items-center gap-3.5 rounded-[1.25rem] border border-transparent pr-3 pl-4 text-[0.9688rem] text-muted-foreground outline-none transition-[background-color,color,transform] duration-200 hover:bg-secondary/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.985] group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-[1.25rem] group-data-[collapsible=icon]:p-0"
+const TILE = "flex size-6 shrink-0 items-center justify-center transition-colors duration-200 [&_svg]:size-[1.375rem]"
 const TILE_OFF = "text-muted-foreground group-hover/row:text-foreground"
 const TILE_ON = "text-foreground"
 const ROW_ACTIVE = "tone-lime tint dbl border border-transparent text-foreground [--r:20px] hover:bg-transparent"
@@ -118,7 +118,7 @@ function Meta({ children, tone }: { children: React.ReactNode; tone?: "alert" })
   return (
     <span
       className={cn(
-        "ml-auto rounded-full px-2.5 py-1 text-[11.5px] leading-none font-medium tabular-nums group-data-[collapsible=icon]:hidden",
+        "ml-auto rounded-full px-2.5 py-1 text-[0.7188rem] leading-none font-medium tabular-nums group-data-[collapsible=icon]:hidden",
         tone === "alert" ? "bg-(--pink-bg) text-(--pink-fg)" : "bg-secondary text-muted-foreground"
       )}
     >
@@ -155,8 +155,8 @@ function SidebarView() {
           <Link href="/" className="flex items-center gap-3.5 rounded-2xl transition-transform duration-150 active:scale-[0.97] group-data-[collapsible=icon]:justify-center">
             <BrandMark />
             <span className="leading-tight group-data-[collapsible=icon]:hidden">
-              <span className="block text-[18px] font-semibold tracking-tight">CareerBridge</span>
-              <span className="block text-[13px] text-muted-foreground">Placement portal</span>
+              <span className="block text-[1.125rem] font-semibold tracking-tight">CareerBridge</span>
+              <span className="block text-[0.8125rem] text-muted-foreground">Placement portal</span>
             </span>
           </Link>
           {!isMobile && (
@@ -175,13 +175,13 @@ function SidebarView() {
           <button
             type="button"
             onClick={() => setCmdOpen(true)}
-            className="flex h-12 w-full shrink-0 items-center gap-3 rounded-[20px] border border-(--hairline) bg-card px-4 text-[15px] text-muted-foreground transition-[background-color,transform] duration-150 hover:bg-secondary active:scale-[0.985] group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-[20px] group-data-[collapsible=icon]:px-0"
+            className="flex h-12 w-full shrink-0 items-center gap-3 rounded-[1.25rem] border border-(--hairline) bg-card px-4 text-[0.9375rem] text-muted-foreground transition-[background-color,transform] duration-150 hover:bg-secondary active:scale-[0.985] group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-[1.25rem] group-data-[collapsible=icon]:px-0"
           >
             <SearchIcon className="size-5 shrink-0" />
             <span className={cn(TEXT, "flex-1 text-left")}>Search</span>
             <span className="flex gap-1 group-data-[collapsible=icon]:hidden">
-              <kbd className="grid h-6 min-w-6 place-items-center rounded-md border border-(--hairline) bg-secondary px-1 text-[11px] font-medium">⌘</kbd>
-              <kbd className="grid h-6 min-w-6 place-items-center rounded-md border border-(--hairline) bg-secondary px-1 text-[11px] font-medium">K</kbd>
+              <kbd className="grid h-6 min-w-6 place-items-center rounded-md border border-(--hairline) bg-secondary px-1 text-[0.6875rem] font-medium">⌘</kbd>
+              <kbd className="grid h-6 min-w-6 place-items-center rounded-md border border-(--hairline) bg-secondary px-1 text-[0.6875rem] font-medium">K</kbd>
             </span>
           </button>
 
@@ -270,7 +270,7 @@ function NavRow({ link, pathname, collapsed, meta }: { link: NavLink; pathname: 
                     href={c.href}
                     tabIndex={open ? 0 : -1}
                     className={cn(
-                      "flex h-10 items-center gap-2.5 rounded-xl px-3 text-[14px] transition-colors duration-150 hover:bg-secondary/60 hover:text-foreground",
+                      "flex h-10 items-center gap-2.5 rounded-xl px-3 text-[0.875rem] transition-colors duration-150 hover:bg-secondary/60 hover:text-foreground",
                       on ? "font-medium text-foreground" : "text-muted-foreground"
                     )}
                   >
@@ -301,16 +301,16 @@ function RecentList({ collapsed }: { collapsed: boolean }) {
         </Link>
       </div>
       <ul className="flex flex-col gap-1">
-        {recent.map((p) => (
-          <li key={p.name}>
+        {recent.map((p, i) => (
+          <li key={`${p.name}-${i}`}>
             <Link href={recentTo} title={collapsed ? p.name : undefined} className={cn(ROW, "h-[3.5rem]")}>
               <span className="relative shrink-0">
                 <OrgAvatar name={p.name} className="size-10" />
                 <span className={cn("absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-sidebar", STATUS_DOT[p.status] ?? "bg-muted-foreground")} />
               </span>
               <span className={cn(TEXT, "flex-1 text-left leading-tight")}>
-                <span className="block truncate text-[16px] text-foreground">{p.name}</span>
-                <span className="mt-0.5 block truncate text-[13.5px] text-muted-foreground">{p.sub}</span>
+                <span className="block truncate text-[1rem] text-foreground">{p.name}</span>
+                <span className="mt-0.5 block truncate text-[0.8438rem] text-muted-foreground">{p.sub}</span>
               </span>
             </Link>
           </li>
@@ -322,7 +322,7 @@ function RecentList({ collapsed }: { collapsed: boolean }) {
 
 /* ── User card: avatar + name open your profile; the chevron opens the menu ── */
 const MENU_ROW =
-  "h-10 rounded-[10px] px-3 py-0 text-[14px] text-foreground/85 transition-[background-color,color] duration-200 ease-out focus:bg-foreground/[0.05] focus:text-foreground dark:focus:bg-foreground/[0.07] [&_svg]:text-muted-foreground [&_svg]:transition-colors [&_svg]:duration-200 focus:[&_svg]:text-foreground"
+  "h-10 rounded-[0.625rem] px-3 py-0 text-[0.875rem] text-foreground/85 transition-[background-color,color] duration-200 ease-out focus:bg-foreground/[0.05] focus:text-foreground dark:focus:bg-foreground/[0.07] [&_svg]:text-muted-foreground [&_svg]:transition-colors [&_svg]:duration-200 focus:[&_svg]:text-foreground"
 const ROLE_CHIP: Record<string, { label: string; tone: string }> = {
   student: { label: "Student", tone: "tone-violet" },
   company: { label: "Recruiter", tone: "tone-blue" },
@@ -354,11 +354,11 @@ function ThemeSwitch() {
   }, [themeIndex])
 
   return (
-    <div role="radiogroup" aria-label="Theme" className="dbl relative grid grid-cols-3 gap-1 rounded-[14px] bg-secondary p-1 [--r:14px]">
+    <div role="radiogroup" aria-label="Theme" className="dbl relative grid grid-cols-3 gap-1 rounded-[0.875rem] bg-secondary p-1 [--r:14px]">
       <span
         ref={thumb}
         aria-hidden
-        className="absolute top-1 bottom-1 left-1 w-[calc((100%-1rem)/3)] rounded-[10px] bg-card shadow-[0_1px_2px_oklch(0_0_0/0.08),0_2px_8px_-2px_oklch(0_0_0/0.1),0_0_0_1px_var(--hairline)]"
+        className="absolute top-1 bottom-1 left-1 w-[calc((100%-1rem)/3)] rounded-[0.625rem] bg-card shadow-[0_1px_2px_oklch(0_0_0/0.08),0_2px_8px_-2px_oklch(0_0_0/0.1),0_0_0_1px_var(--hairline)]"
         style={{ transform: thumbAt(themeIndex), opacity: themeIndex < 0 ? 0 : 1 }}
       />
       {themes.map(({ v, label, Icon }) => {
@@ -371,7 +371,7 @@ function ThemeSwitch() {
             aria-checked={on}
             onClick={() => setTheme(v)}
             className={cn(
-              "relative z-10 flex h-9 items-center justify-center gap-1.5 rounded-[10px] text-[13px] font-medium outline-none transition-[color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96]",
+              "relative z-10 flex h-9 items-center justify-center gap-1.5 rounded-[0.625rem] text-[0.8125rem] font-medium outline-none transition-[color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96]",
               on ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -395,19 +395,19 @@ function UserCard({ collapsed }: { collapsed: boolean }) {
   const profileHref = user.role === "student" ? "/dashboard/student/profile" : "/dashboard/account"
 
   return (
-    <div className="flex items-center gap-1 rounded-[26px] border border-(--hairline) bg-card p-2 group-data-[collapsible=icon]:relative group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-full">
+    <div className="flex items-center gap-1 rounded-[1.625rem] border border-(--hairline) bg-card p-2 group-data-[collapsible=icon]:relative group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-full">
       <Link
         href={profileHref}
         title="Open profile"
-        className="flex min-w-0 flex-1 items-center gap-3 rounded-[20px] p-1 text-left outline-none transition-[background-color,transform] duration-150 hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:pointer-events-none"
+        className="flex min-w-0 flex-1 items-center gap-3 rounded-[1.25rem] p-1 text-left outline-none transition-[background-color,transform] duration-150 hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:pointer-events-none"
       >
         <Avatar className="size-11 shrink-0 rounded-2xl after:rounded-2xl">
           <AvatarImage src={user.profile_photo ?? ""} alt={name} className="rounded-2xl" />
           <AvatarFallback className="tone-lime rounded-2xl bg-(--t-bg) text-sm font-semibold text-(--t-fg)">{initials}</AvatarFallback>
         </Avatar>
         <span className="grid min-w-0 flex-1 leading-tight group-data-[collapsible=icon]:hidden">
-          <span className="truncate text-[14.5px] font-semibold">{name}</span>
-          <span className="truncate text-[10.5px] font-medium tracking-[0.08em] text-muted-foreground uppercase">{user.role}</span>
+          <span className="truncate text-[0.9063rem] font-semibold">{name}</span>
+          <span className="truncate text-[0.6563rem] font-medium tracking-[0.08em] text-muted-foreground uppercase">{user.role}</span>
         </span>
       </Link>
 
@@ -419,7 +419,7 @@ function UserCard({ collapsed }: { collapsed: boolean }) {
           <ChevronDownIcon className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="dbl w-[min(20rem,calc(100vw-2rem))] rounded-[24px] p-2.5 [--r:24px]"
+          className="dbl w-[min(20rem,calc(100vw-2rem))] rounded-[1.5rem] p-2.5 [--r:24px]"
           side={isMobile || !collapsed ? "top" : "right"}
           align={collapsed && !isMobile ? "end" : "start"}
           sideOffset={12}
@@ -427,18 +427,18 @@ function UserCard({ collapsed }: { collapsed: boolean }) {
           {/* who you are */}
           <DropdownMenuGroup>
             <DropdownMenuLabel className="flex items-center gap-3 px-2 pt-1.5 pb-2.5 font-normal text-foreground">
-              <Avatar className="size-10 shrink-0 rounded-[14px] after:rounded-[14px]">
-                <AvatarImage src={user.profile_photo ?? ""} alt="" className="rounded-[14px]" />
-                <AvatarFallback className="tone-lime rounded-[14px] bg-(--t-bg) text-[13px] font-semibold text-(--t-fg)">{initials}</AvatarFallback>
+              <Avatar className="size-10 shrink-0 rounded-[0.875rem] after:rounded-[0.875rem]">
+                <AvatarImage src={user.profile_photo ?? ""} alt="" className="rounded-[0.875rem]" />
+                <AvatarFallback className="tone-lime rounded-[0.875rem] bg-(--t-bg) text-[0.8125rem] font-semibold text-(--t-fg)">{initials}</AvatarFallback>
               </Avatar>
               <span className="grid min-w-0 flex-1 leading-tight">
-                <span className="truncate text-[14.5px] font-semibold">{name}</span>
-                <span className="mt-0.5 truncate text-[12.5px] text-muted-foreground">{user.email}</span>
+                <span className="truncate text-[0.9063rem] font-semibold">{name}</span>
+                <span className="mt-0.5 truncate text-[0.7813rem] text-muted-foreground">{user.email}</span>
               </span>
               <span
                 className={cn(
                   ROLE_CHIP[user.role]?.tone ?? "tone-mist",
-                  "mt-px shrink-0 self-start rounded-full border border-[color-mix(in_oklab,var(--t-fg)_14%,transparent)] bg-(--t-bg) px-2.5 py-[3px] text-[11px] font-semibold tracking-[0.01em] text-(--t-fg) shadow-[inset_0_0_0_1.5px_var(--t-bg),inset_0_0_0_2.5px_var(--keyline-tint)]"
+                  "mt-px shrink-0 self-start rounded-full border border-[color-mix(in_oklab,var(--t-fg)_14%,transparent)] bg-(--t-bg) px-2.5 py-[3px] text-[0.6875rem] font-semibold tracking-[0.01em] text-(--t-fg) shadow-[inset_0_0_0_1.5px_var(--t-bg),inset_0_0_0_2.5px_var(--keyline-tint)]"
                 )}
               >
                 {ROLE_CHIP[user.role]?.label ?? user.role}
@@ -446,7 +446,7 @@ function UserCard({ collapsed }: { collapsed: boolean }) {
             </DropdownMenuLabel>
           </DropdownMenuGroup>
 
-          <div className="dbl rounded-[16px] border border-(--hairline) bg-card p-1.5 [--r:16px]">
+          <div className="dbl rounded-[1rem] border border-(--hairline) bg-card p-1.5 [--r:16px]">
             <DropdownMenuItem render={<Link href={profileHref} />} className={MENU_ROW}>
               <ProfileIcon /> {user.role === "student" ? "My profile" : "Account"}
             </DropdownMenuItem>
@@ -461,7 +461,7 @@ function UserCard({ collapsed }: { collapsed: boolean }) {
 
           {/* appearance: one segmented control instead of three rows */}
           <div className="mt-2.5 px-1">
-            <p className="px-1 pb-1.5 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">Appearance</p>
+            <p className="px-1 pb-1.5 text-[0.6875rem] font-medium tracking-[0.08em] text-muted-foreground uppercase">Appearance</p>
             <ThemeSwitch />
           </div>
 

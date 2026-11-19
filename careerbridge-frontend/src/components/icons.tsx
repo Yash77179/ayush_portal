@@ -76,3 +76,22 @@ export {
   VolumeLoudIcon as MegaphoneIcon,
 } from "@solar-icons/react/linear"
 export { StarIcon as StarSolidIcon } from "@solar-icons/react/bold"
+// announcements: audiences, message types, send
+export {
+  AlarmIcon as ReminderIcon,
+  CalendarMarkIcon,
+  DangerTriangleIcon as UrgentIcon,
+  FlagIcon,
+  ForwardIcon as SendIcon,
+  PinIcon,
+  UserCheckRoundedIcon as UserCheckIcon,
+  UserCrossRoundedIcon as UserCrossIcon,
+  UsersGroupTwoRoundedIcon as CohortIcon,
+  Paperclip2Icon as AttachIcon,
+  HourglassIcon,
+  MenuDotsIcon,
+  FileTextIcon,
+  GalleryIcon,
+  CheckReadIcon,
+  EyeIcon,
+} from "@solar-icons/react/linear"

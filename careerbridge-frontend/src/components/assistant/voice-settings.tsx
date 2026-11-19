@@ -105,8 +105,8 @@ function Header({ title, sub, onBack, end }: { title: string; sub?: string; onBa
         </button>
       )}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[15.5px] leading-tight font-semibold tracking-[-0.015em]">{title}</p>
-        {sub && <p className="mt-0.5 truncate text-[12.5px] text-muted-foreground">{sub}</p>}
+        <p className="truncate text-[0.9688rem] leading-tight font-semibold tracking-[-0.015em]">{title}</p>
+        {sub && <p className="mt-0.5 truncate text-[0.7813rem] text-muted-foreground">{sub}</p>}
       </div>
       {end}
     </div>
@@ -122,16 +122,16 @@ function Home({ prefs, onClose, onLanguage, onVoice }: { prefs: Prefs; onClose: 
         title="Voice & language"
         end={
           <button type="button" onClick={onClose} aria-label="Close" className={ICON_BTN}>
-            <CloseCircleIcon className="size-[18px]" />
+            <CloseCircleIcon className="size-[1.125rem]" />
           </button>
         }
       />
       <div className="px-3 pb-3">
-        <div className="dbl overflow-hidden rounded-[18px] border border-(--hairline) bg-foreground/[0.02] [--r:18px]">
-          <Row icon={<GlobalIcon className="size-[18px]" />} label="Language" value={language.native} onClick={onLanguage} />
+        <div className="dbl overflow-hidden rounded-[1.125rem] border border-(--hairline) bg-foreground/[0.02] [--r:18px]">
+          <Row icon={<GlobalIcon className="size-[1.125rem]" />} label="Language" value={language.native} onClick={onLanguage} />
           <div className="mx-4 h-px bg-(--hairline)" />
           <Row
-            icon={<MicrophoneIcon className="size-[18px]" />}
+            icon={<MicrophoneIcon className="size-[1.125rem]" />}
             label="Voice"
             value={ai ? (voice?.name ?? "—") : "Device voice"}
             onClick={onVoice}
@@ -139,10 +139,10 @@ function Home({ prefs, onClose, onLanguage, onVoice }: { prefs: Prefs; onClose: 
           />
         </div>
 
-        <div className="mt-2 flex items-center justify-between gap-4 rounded-[18px] px-4 py-3">
+        <div className="mt-2 flex items-center justify-between gap-4 rounded-[1.125rem] px-4 py-3">
           <div className="min-w-0">
-            <p className="text-[14px] font-medium">Natural voice</p>
-            <p className="text-[12px] leading-snug text-muted-foreground">{ai ? "A human-sounding AI voice" : "Using this device's built-in voice"}</p>
+            <p className="text-[0.875rem] font-medium">Natural voice</p>
+            <p className="text-[0.75rem] leading-snug text-muted-foreground">{ai ? "A human-sounding AI voice" : "Using this device's built-in voice"}</p>
           </div>
           <button
             type="button"
@@ -152,7 +152,7 @@ function Home({ prefs, onClose, onLanguage, onVoice }: { prefs: Prefs; onClose: 
             onClick={() => set({ ai: !ai })}
             className={cn("relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200", ai ? "bg-[oklch(0.5_0.18_285)]" : "bg-foreground/20")}
           >
-            <span className={cn("absolute top-0.5 size-5 rounded-full bg-white shadow-sm transition-[left] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]", ai ? "left-[18px]" : "left-0.5")} />
+            <span className={cn("absolute top-0.5 size-5 rounded-full bg-white shadow-sm transition-[left] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]", ai ? "left-[1.125rem]" : "left-0.5")} />
           </button>
         </div>
       </div>
@@ -169,8 +169,8 @@ function Row({ icon, label, value, onClick, disabled }: { icon: React.ReactNode;
       className="flex w-full items-center gap-3 px-4 py-3.5 text-left outline-none transition-colors hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.05] disabled:pointer-events-none disabled:opacity-50"
     >
       <span className="text-foreground/60">{icon}</span>
-      <span className="flex-1 text-[14px] font-medium">{label}</span>
-      <span className="max-w-[9rem] truncate text-[14px] text-muted-foreground">{value}</span>
+      <span className="flex-1 text-[0.875rem] font-medium">{label}</span>
+      <span className="max-w-[9rem] truncate text-[0.875rem] text-muted-foreground">{value}</span>
       <AltArrowRightIcon className="size-4 shrink-0 text-muted-foreground/70" />
     </button>
   )
@@ -201,11 +201,11 @@ function LanguageList({ prefs, onBack, onPick }: { prefs: Prefs; onBack: () => v
             onChange={(e) => setQuery(e.target.value)}
             placeholder={languages.length ? `Search ${languages.length} languages` : "Loading languages…"}
             aria-label="Search languages"
-            className="min-w-0 flex-1 bg-transparent text-[14px] outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+            className="min-w-0 flex-1 bg-transparent text-[0.875rem] outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
           />
         </label>
       </div>
-      <div ref={list} role="listbox" aria-label="Languages" className="h-[min(20rem,calc(100svh-16rem))] overflow-y-auto px-2 pb-2 [scrollbar-width:thin]">
+      <div ref={list} role="listbox" aria-label="Languages" className="h-[min(20rem,calc(100svh-16rem))] overflow-y-auto px-2 pb-2">
         {shown.map((l) => {
           const selected = l.code === lang
           return (
@@ -216,17 +216,17 @@ function LanguageList({ prefs, onBack, onPick }: { prefs: Prefs; onBack: () => v
               aria-selected={selected}
               onClick={() => onPick(l.code)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-left outline-none transition-colors focus-visible:bg-foreground/[0.05]",
+                "flex w-full items-center gap-3 rounded-[0.75rem] px-3 py-2.5 text-left outline-none transition-colors focus-visible:bg-foreground/[0.05]",
                 selected ? "bg-[oklch(0.56_0.15_280/0.09)]" : "hover:bg-foreground/[0.04]"
               )}
             >
-              <span className={cn("flex-1 truncate text-[14.5px]", selected ? "font-semibold" : "font-medium")}>{l.native}</span>
-              <span className="truncate text-[12.5px] text-muted-foreground">{l.label}</span>
+              <span className={cn("flex-1 truncate text-[0.9063rem]", selected ? "font-semibold" : "font-medium")}>{l.native}</span>
+              <span className="truncate text-[0.7813rem] text-muted-foreground">{l.label}</span>
               <span className="grid w-4 shrink-0 place-items-center">{selected && <CheckCircleIcon className="size-4 text-[oklch(0.5_0.18_285)]" />}</span>
             </button>
           )
         })}
-        {languages.length > 0 && shown.length === 0 && <p className="px-3 py-6 text-center text-[13px] text-muted-foreground">No language matches “{query}”.</p>}
+        {languages.length > 0 && shown.length === 0 && <p className="px-3 py-6 text-center text-[0.8125rem] text-muted-foreground">No language matches “{query}”.</p>}
       </div>
     </>
   )
@@ -278,7 +278,7 @@ function VoiceList({ prefs, fromLanguage, onBack, onDone }: { prefs: Prefs; from
         onBack={onBack}
         end={
           fromLanguage && (
-            <button type="button" onClick={onDone} className="rounded-full px-2.5 py-1 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground">
+            <button type="button" onClick={onDone} className="rounded-full px-2.5 py-1 text-[0.8125rem] font-medium text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground">
               Skip
             </button>
           )
@@ -295,7 +295,7 @@ function VoiceList({ prefs, fromLanguage, onBack, onDone }: { prefs: Prefs; from
               aria-pressed={gender === g}
               disabled={!count(g)}
               className={cn(
-                "rounded-full py-1.5 text-[12.5px] font-medium capitalize transition-[background-color,color,box-shadow] duration-200 disabled:opacity-40",
+                "rounded-full py-1.5 text-[0.7813rem] font-medium capitalize transition-[background-color,color,box-shadow] duration-200 disabled:opacity-40",
                 gender === g ? "bg-card text-foreground shadow-[0_1px_2px_oklch(0.2_0.03_280/0.08),inset_0_0_0_1px_var(--hairline)]" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -304,24 +304,24 @@ function VoiceList({ prefs, fromLanguage, onBack, onDone }: { prefs: Prefs; from
           ))}
         </div>
       </div>
-      <ul className="h-[min(20rem,calc(100svh-16rem))] overflow-y-auto px-2 pb-2 [scrollbar-width:thin]">
+      <ul className="h-[min(20rem,calc(100svh-16rem))] overflow-y-auto px-2 pb-2">
         {shown.map((v) => {
           const chosen = (picked ?? voice?.id) === v.id
           return (
-            <li key={v.id} className={cn("group flex items-center gap-3 rounded-[14px] px-2 py-1.5 transition-colors", chosen ? "bg-[oklch(0.56_0.15_280/0.09)]" : "hover:bg-foreground/[0.04]")}>
-              <button type="button" onClick={() => pick(v)} aria-pressed={chosen} className="flex min-w-0 flex-1 items-center gap-3 rounded-[10px] py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <li key={v.id} className={cn("group flex items-center gap-3 rounded-[0.875rem] px-2 py-1.5 transition-colors", chosen ? "bg-[oklch(0.56_0.15_280/0.09)]" : "hover:bg-foreground/[0.04]")}>
+              <button type="button" onClick={() => pick(v)} aria-pressed={chosen} className="flex min-w-0 flex-1 items-center gap-3 rounded-[0.625rem] py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <span
                   aria-hidden
                   className={cn(
-                    "dbl grid size-9 shrink-0 place-items-center rounded-full border border-(--hairline) text-[13px] font-semibold [--r:18px]",
+                    "dbl grid size-9 shrink-0 place-items-center rounded-full border border-(--hairline) text-[0.8125rem] font-semibold [--r:18px]",
                     v.gender === "female" ? "bg-(--violet-bg) text-(--violet-fg)" : "bg-(--blue-bg) text-(--blue-fg)"
                   )}
                 >
                   {v.name.charAt(0)}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className={cn("block truncate text-[14px]", chosen ? "font-semibold" : "font-medium")}>{v.name}</span>
-                  <span className="block truncate text-[12px] text-muted-foreground capitalize">{[v.gender, ...v.tags].join(" · ")}</span>
+                  <span className={cn("block truncate text-[0.875rem]", chosen ? "font-semibold" : "font-medium")}>{v.name}</span>
+                  <span className="block truncate text-[0.75rem] text-muted-foreground capitalize">{[v.gender, ...v.tags].join(" · ")}</span>
                 </span>
                 {chosen && <CheckCircleIcon className="size-4 shrink-0 text-[oklch(0.5_0.18_285)]" />}
               </button>

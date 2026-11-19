@@ -257,14 +257,14 @@ export function LiveStage({ bridge, onMinimize, onEnd }: { bridge: Bridge; onMin
       <style>{KEYFRAMES}</style>
       {/* ambient light that follows the conversation, far behind everything */}
       <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 size-[min(64rem,150vw)] -translate-x-1/2 -translate-y-[58%] opacity-[0.12] dark:opacity-[0.2]">
-        <Bloom state={state} className="inset-0" blur="blur-[90px]" />
+        <Bloom state={state} className="inset-0" blur="blur-[5.625rem]" />
       </div>
 
       {/* top bar: who you're with, how long, and minimise */}
       <header className="relative z-10 flex w-full items-center justify-between px-5 pt-5 sm:px-8 sm:pt-7">
         <div className="text-left">
-          <p className="text-[17px] leading-tight font-semibold tracking-[-0.02em]">Live with Bridge</p>
-          <p className="mt-1 flex items-center gap-2 text-[13px] text-muted-foreground tabular-nums">
+          <p className="text-[1.0625rem] leading-tight font-semibold tracking-[-0.02em]">Live with Bridge</p>
+          <p className="mt-1 flex items-center gap-2 text-[0.8125rem] text-muted-foreground tabular-nums">
             <span className="size-2 animate-pulse rounded-full bg-[#e5484d]" />
             {time}
           </p>
@@ -277,9 +277,9 @@ export function LiveStage({ bridge, onMinimize, onEnd }: { bridge: Bridge; onMin
           aria-label="Voice and language"
           title="Voice & language"
           {...VOICE_TRIGGER}
-          className={cn(ROUND_BTN, "inline-flex! h-11 items-center gap-2 rounded-full bg-card px-4 text-[13.5px] font-medium text-foreground/85 [--r:22px] hover:bg-secondary hover:text-foreground sm:pr-4.5")}
+          className={cn(ROUND_BTN, "inline-flex! h-11 items-center gap-2 rounded-full bg-card px-4 text-[0.8438rem] font-medium text-foreground/85 [--r:22px] hover:bg-secondary hover:text-foreground sm:pr-4.5")}
         >
-          <GlobalIcon className="size-[18px] shrink-0 text-foreground/60" />
+          <GlobalIcon className="size-[1.125rem] shrink-0 text-foreground/60" />
           <span className="hidden sm:inline">{language.native}</span>
           <span aria-hidden className="hidden h-3.5 w-px bg-(--hairline) sm:block" />
           <span className="hidden text-muted-foreground sm:inline">{prefs.ai && prefs.voice ? prefs.voice.name : "Device voice"}</span>
@@ -318,11 +318,11 @@ export function LiveStage({ bridge, onMinimize, onEnd }: { bridge: Bridge; onMin
         <p key={state} className="mt-8 animate-in text-[clamp(1.6rem,3.4vw,2.2rem)] leading-tight font-medium tracking-[-0.03em] duration-300 fade-in-0 slide-in-from-bottom-1" aria-live="polite">
           {status.title}
         </p>
-        <p className="mt-2 text-[15px] text-muted-foreground">{status.hint}</p>
+        <p className="mt-2 text-[0.9375rem] text-muted-foreground">{status.hint}</p>
 
         {/* captions */}
         <div className="mt-8 flex min-h-[7.5rem] w-full max-w-xl flex-col justify-end gap-3">
-          {heard && <p className="text-[15px] leading-snug text-muted-foreground italic">“{heard}”</p>}
+          {heard && <p className="text-[0.9375rem] leading-snug text-muted-foreground italic">“{heard}”</p>}
           {!failed && <ReadAlong bridge={bridge} className="text-[clamp(1.2rem,2vw,1.5rem)] leading-[1.55] font-normal tracking-[-0.012em]" />}
         </div>
       </div>
@@ -342,9 +342,9 @@ export function LiveStage({ bridge, onMinimize, onEnd }: { bridge: Bridge; onMin
           type="button"
           onClick={onEnd}
           aria-label="End the call"
-          className="dbl inline-flex h-16 items-center gap-2.5 rounded-full border border-[#c9363b] bg-[#e5484d] pr-8 pl-7 text-[16px] font-semibold tracking-[-0.01em] text-white shadow-[0_12px_28px_-16px_rgba(229,72,77,0.9)] outline-none transition-[background-color,transform] duration-150 [--keyline-card:oklch(1_0_0/0.32)] [--r:32px] hover:bg-[#dc3e43] focus-visible:ring-2 focus-visible:ring-red-400/60 active:scale-[0.95]"
+          className="dbl inline-flex h-16 items-center gap-2.5 rounded-full border border-[#c9363b] bg-[#e5484d] pr-8 pl-7 text-[1rem] font-semibold tracking-[-0.01em] text-white shadow-[0_12px_28px_-16px_rgba(229,72,77,0.9)] outline-none transition-[background-color,transform] duration-150 [--keyline-card:oklch(1_0_0/0.32)] [--r:32px] hover:bg-[#dc3e43] focus-visible:ring-2 focus-visible:ring-red-400/60 active:scale-[0.95]"
         >
-          <PhoneRoundedIcon className="size-[22px] rotate-[135deg]" />
+          <PhoneRoundedIcon className="size-[1.375rem] rotate-[135deg]" />
           End call
         </button>
       </div>
@@ -375,22 +375,22 @@ export function LivePill({ bridge, onExpand, onEnd }: { bridge: Bridge; onExpand
       <style>{KEYFRAMES}</style>
       <button type="button" onClick={onExpand} aria-label="Open the live screen" className="flex min-w-0 flex-1 items-center gap-3 rounded-full text-left outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <span className="relative grid size-12 shrink-0 place-items-center">
-          <Bloom state={state} className="inset-[-14%] opacity-80" blur="blur-[8px]" />
+          <Bloom state={state} className="inset-[-14%] opacity-80" blur="blur-[0.5rem]" />
           <AssistantOrb mood={state === "paused" || state === "muted" ? "idle" : mood} className="relative w-12" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-2 text-[12px] text-muted-foreground tabular-nums">
+          <span className="flex items-center gap-2 text-[0.75rem] text-muted-foreground tabular-nums">
             <span className="size-1.5 animate-pulse rounded-full bg-[#e5484d]" />
             Live · {time}
           </span>
           {reading && (state === "speaking" || state === "idle") ? (
             // Bridge talking: the line glides along with the voice, word by word
-            <ReadAlongLine words={reading.text.split(/\s+/)} word={reading.word} className="text-[14.5px]" />
+            <ReadAlongLine words={reading.text.split(/\s+/)} word={reading.word} className="text-[0.9063rem]" />
           ) : state === "listening" && heard ? (
             // you talking: your words, newest in view
-            <ReadAlongLine words={heard.split(/\s+/)} word={heard.split(/\s+/).length} className="text-[14.5px]" />
+            <ReadAlongLine words={heard.split(/\s+/)} word={heard.split(/\s+/).length} className="text-[0.9063rem]" />
           ) : (
-            <span key={state} className="block animate-in truncate text-[14.5px] font-medium duration-300 fade-in-0">
+            <span key={state} className="block animate-in truncate text-[0.9063rem] font-medium duration-300 fade-in-0">
               {STATUS[state].title}
             </span>
           )}
@@ -403,10 +403,10 @@ export function LivePill({ bridge, onExpand, onEnd }: { bridge: Bridge; onExpand
         aria-label={live.muted ? "Unmute microphone" : "Mute microphone"}
         className={cn(ROUND_BTN, "size-10 rounded-full [--r:999px]", live.muted ? "bg-foreground text-background" : "bg-card text-foreground/75 hover:bg-secondary")}
       >
-        <MuteGlyph muted={live.muted} className="size-[18px]" />
+        <MuteGlyph muted={live.muted} className="size-[1.125rem]" />
       </button>
       <button type="button" onClick={onExpand} aria-label="Expand" className={cn(ROUND_BTN, "size-10 rounded-full bg-card text-foreground/75 [--r:999px] hover:bg-secondary")}>
-        <MaximizeSquareIcon className="size-[18px]" />
+        <MaximizeSquareIcon className="size-[1.125rem]" />
       </button>
       <button
         type="button"
@@ -414,7 +414,7 @@ export function LivePill({ bridge, onExpand, onEnd }: { bridge: Bridge; onExpand
         aria-label="End the conversation"
         className="grid size-10 shrink-0 place-items-center rounded-full bg-[#e5484d] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)] outline-none transition-[background-color,transform] duration-150 hover:bg-[#dc3e43] focus-visible:ring-2 focus-visible:ring-red-400/60 active:scale-[0.92]"
       >
-        <PhoneRoundedIcon className="size-[18px] rotate-[135deg]" />
+        <PhoneRoundedIcon className="size-[1.125rem] rotate-[135deg]" />
       </button>
     </div>
   )

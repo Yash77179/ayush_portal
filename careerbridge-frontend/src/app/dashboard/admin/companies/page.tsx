@@ -51,8 +51,8 @@ export default function AdminCompaniesPage() {
       <PageHeader title="Companies" subtitle="Verify companies so students can trust them, and keep their details right." />
 
       <div className="grid gap-5 sm:grid-cols-3">
-        <StatTile index={1} tone="amber" icon={<BuildingsIcon />} title="Waiting to verify" value={data.unverified} caption={data.unverified ? "Check and verify them" : "All caught up"} />
-        <StatTile index={2} tone="mint" icon={<VerifiedIcon />} title="Verified" value={data.verified} caption="Shown with the badge" />
+        <StatTile index={1} tone="amber" icon={<BuildingsIcon />} title="Waiting to verify" value={data.unverified} meter={{ value: data.unverified, max: data.unverified + data.verified }} caption={data.unverified ? "Check and verify them" : "All caught up"} />
+        <StatTile index={2} tone="mint" icon={<VerifiedIcon />} title="Verified" value={data.verified} meter={{ value: data.verified, max: data.unverified + data.verified }} caption="Shown with the badge" />
         <StatTile index={3} tone="violet" icon={<InternshipsIcon />} title="Live openings" value={live} caption="Across these companies" />
       </div>
 
@@ -66,7 +66,7 @@ export default function AdminCompaniesPage() {
         </div>
 
         {data.results.length === 0 ? (
-          <p className="py-12 text-center text-[15px] text-muted-foreground">No companies match those filters.</p>
+          <p className="py-12 text-center text-[0.9375rem] text-muted-foreground">No companies match those filters.</p>
         ) : (
           <Table containerClassName="max-h-[min(44rem,70svh)]">
             <TableHeader>
@@ -117,8 +117,8 @@ function CompanyRow({ c, onOpen }: { c: AdminCompany; onOpen: () => void }) {
         <div className="flex items-center gap-3">
           <Logo c={c} />
           <div className="min-w-0">
-            <p className="truncate text-[16px] font-medium">{c.name}</p>
-            <p className="truncate text-[13.5px] text-muted-foreground">Joined {fmtDay(c.created_at)}</p>
+            <p className="truncate text-[1rem] font-medium">{c.name}</p>
+            <p className="truncate text-[0.8438rem] text-muted-foreground">Joined {fmtDay(c.created_at)}</p>
           </div>
         </div>
       </TableCell>
@@ -183,7 +183,7 @@ function CompanySheet({ id, onClose, onChanged }: { id: number | null; onClose: 
 
   return (
     <Sheet open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-xl">
+      <SheetContent className="w-full overflow-y-auto p-0 sm:max-w-2xl">
         {!c || !form ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -195,20 +195,20 @@ function CompanySheet({ id, onClose, onChanged }: { id: number | null; onClose: 
                 <Logo c={c} className="size-14" />
                 <div className="min-w-0">
                   <SheetTitle className="truncate text-2xl font-medium">{c.name}</SheetTitle>
-                  <p className="truncate text-[15px] text-muted-foreground">
+                  <p className="truncate text-[0.9375rem] text-muted-foreground">
                     {[c.industry, c.location].filter(Boolean).join(" · ") || "No details yet"} · joined {fmtDay(c.created_at)}
                   </p>
                 </div>
               </div>
             </SheetHeader>
 
-            <section className="flex flex-wrap items-center gap-3 rounded-[24px] border border-(--hairline) p-5">
+            <section className="flex flex-wrap items-center gap-3 rounded-[1.5rem] border border-(--hairline) p-5">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-medium">Verification</h3>
                   <VerifiedBadge on={c.is_verified} />
                 </div>
-                <p className="mt-1 text-[14.5px] text-muted-foreground">
+                <p className="mt-1 text-[0.9063rem] text-muted-foreground">
                   {c.is_verified ? "Students see the verified badge on this company and its openings." : "Check it's a real company, then verify it. Its team is told straight away."}
                 </p>
               </div>
@@ -223,10 +223,10 @@ function CompanySheet({ id, onClose, onChanged }: { id: number | null; onClose: 
               )}
             </section>
 
-            <section className="space-y-4 rounded-[24px] border border-(--hairline) p-5">
+            <section className="space-y-4 rounded-[1.5rem] border border-(--hairline) p-5">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-lg font-medium">Details</h3>
-                <Link href={`/companies/${c.id}`} target="_blank" className="inline-flex items-center gap-1 text-[14px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+                <Link href={`/companies/${c.id}`} target="_blank" className="inline-flex items-center gap-1 text-[0.875rem] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
                   Public page <ArrowRightUpIcon className="size-3.5" />
                 </Link>
               </div>
@@ -286,13 +286,13 @@ function CompanySheet({ id, onClose, onChanged }: { id: number | null; onClose: 
 
             <section className="space-y-3">
               <h3 className="text-lg font-medium">Team · {c.team.length}</h3>
-              {c.team.length === 0 && <p className="text-[15px] text-muted-foreground">No one has joined yet.</p>}
+              {c.team.length === 0 && <p className="text-[0.9375rem] text-muted-foreground">No one has joined yet.</p>}
               {c.team.map((m) => (
                 <div key={m.user_id} className="flex items-center gap-3 rounded-2xl bg-secondary/60 p-3">
                   <OrgAvatar name={m.name} className="size-9" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[15px] font-medium">{m.name}</p>
-                    <p className="truncate text-[13.5px] text-muted-foreground">{m.email}</p>
+                    <p className="truncate text-[0.9375rem] font-medium">{m.name}</p>
+                    <p className="truncate text-[0.8438rem] text-muted-foreground">{m.email}</p>
                   </div>
                   <Badge variant={m.role === "admin" ? "violet" : "default"} className="capitalize">
                     {m.role}
@@ -304,12 +304,12 @@ function CompanySheet({ id, onClose, onChanged }: { id: number | null; onClose: 
 
             <section className="space-y-3">
               <h3 className="text-lg font-medium">Openings · {c.openings.length}</h3>
-              {c.openings.length === 0 && <p className="text-[15px] text-muted-foreground">No openings posted yet.</p>}
+              {c.openings.length === 0 && <p className="text-[0.9375rem] text-muted-foreground">No openings posted yet.</p>}
               {c.openings.map((o) => (
                 <Link key={o.id} href={`/internships/${o.id}`} target="_blank" className="flex items-center gap-3 rounded-2xl bg-secondary/60 p-3 transition-colors hover:bg-secondary">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[15px] font-medium">{o.title}</p>
-                    <p className="truncate text-[13.5px] text-muted-foreground">
+                    <p className="truncate text-[0.9375rem] font-medium">{o.title}</p>
+                    <p className="truncate text-[0.8438rem] text-muted-foreground">
                       {o.applicants} applicant{o.applicants === 1 ? "" : "s"} · posted {fmtDay(o.created_at)}
                     </p>
                   </div>
